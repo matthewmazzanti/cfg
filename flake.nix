@@ -5,7 +5,7 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
 
-    nvim.url = "git+file:./pkgs/nvim";
+    nvim.url = "git+file:.?dir=pkgs/nvim";
     nvim.inputs.flake-utils.follows = "flake-utils";
     nvim.inputs.nixpkgsl.follows = "nixpkgs";
   };

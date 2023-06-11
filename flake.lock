@@ -79,14 +79,16 @@
         "vim-easyclip-src": "vim-easyclip-src"
       },
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-atnnKJq5UukFJu4Y3kUv4hXGIwPMq0Fdd6sPsMiITHM=",
-        "path": "./pkgs/nvim",
-        "type": "path"
+        "dir": "pkgs/nvim",
+        "lastModified": 1686446681,
+        "narHash": "sha256-TFKDmuv7szBWTp2AVl8CMaJo+xHCgvPwRfu7smreX84=",
+        "type": "git",
+        "url": "file:.?dir=pkgs/nvim"
       },
       "original": {
-        "path": "./pkgs/nvim",
-        "type": "path"
+        "dir": "pkgs/nvim",
+        "type": "git",
+        "url": "file:.?dir=pkgs/nvim"
       }
     },
     "root": {
