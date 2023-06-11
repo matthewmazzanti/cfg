@@ -36,6 +36,7 @@
       in {
         packages.nvim = pkgs.writeShellScriptBin "testing" ''
           echo "hello world"
+          echo "goodbye world"
         '';
       }
     );

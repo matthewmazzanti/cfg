@@ -7,7 +7,7 @@
 
     nvim.url = "./pkgs/nvim";
     nvim.inputs.flake-utils.follows = "flake-utils";
-    nvim.inputs.nixpkgsl.follows = "nixpkgs";
+    nvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, flake-utils, darwin, nixpkgs, ... }: (
