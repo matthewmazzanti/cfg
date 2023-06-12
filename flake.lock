@@ -67,8 +67,11 @@
       },
       "locked": {
         "dir": "pkgs/nvim",
-        "lastModified": 1686570511,
-        "narHash": "sha256-yPuwHuTWoyQbTAPkoGBaQgLZHvNTSIvESqL2FOPK3Yc=",
+        "lastModified": 1686570527,
+        "narHash": "sha256-b0ApCLgaFeft7CvDiJz8K8Yx4Ebe+TV6/e7GrSpzyRQ=",
+        "ref": "refs/heads/dev",
+        "rev": "a35bbf7a602dac5772531ff7438e5022c091846b",
+        "revCount": 7,
         "type": "git",
         "url": "file:.?dir=pkgs/nvim"
       },
