@@ -1,10 +1,10 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
-    # Neovim
-    vim-easyclip-src = {
+    # Plugins
+    vim-easyclip = {
       url = "github:svermeulen/vim-easyclip/master";
       flake = false;
     };
@@ -25,19 +25,18 @@
             vimPlugins = super.vimPlugins // {
               vim-easyclip = buildPlugin {
                 pname = "vim-easyclip";
-                version = versionOf inputs.vim-easyclip-src;
-                src = inputs.vim-easyclip-src;
+                version = versionOf inputs.vim-easyclip;
+                src = inputs.vim-easyclip;
                 dependencies = with super.vimPlugins; [ vim-repeat ];
               };
             };
           };
 
         pkgs = nixpkgs.legacyPackages.${system}.extend nvimOverlay;
-      in {
-        packages.nvim = pkgs.writeShellScriptBin "testing" ''
-          echo "hello world"
-          echo "goodbye world"
-        '';
+      in
+      {
+        packages.root = pkgs.callPackage ./root.nix { };
+        packages.dev = pkgs.callPackage ./dev.nix { };
       }
     );
 }
