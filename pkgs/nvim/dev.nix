@@ -109,6 +109,7 @@ let
     dofile("${./config/cmp.lua}")
     dofile("${./config/hop.lua}")
     dofile("${./config/treesj.lua}")
+    dofile("${./config/easyclip.lua}")
   '';
 in
 wrapNeovimUnstable neovim-unwrapped {
