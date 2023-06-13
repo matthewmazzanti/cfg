@@ -8,9 +8,13 @@
     nvim.url = "git+file:.?dir=pkgs/nvim";
     nvim.inputs.flake-utils.follows = "flake-utils";
     nvim.inputs.nixpkgs.follows = "nixpkgs";
+
+    zsh.url = "git+file:.?dir=pkgs/zsh";
+    zsh.inputs.flake-utils.follows = "flake-utils";
+    zsh.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, flake-utils, darwin, nixpkgs, nvim, ... }: (
+  outputs = { self, flake-utils, darwin, nixpkgs, nvim, zsh, ... }: (
     (flake-utils.lib.eachSystem flake-utils.lib.defaultSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
@@ -27,7 +31,8 @@
           ./configuration.nix
           {
             environment.systemPackages = [
-              nvim.packages.aarch64-darwin.nvim
+              nvim.packages.aarch64-darwin.dev
+              zsh.packages.aarch64-darwin.dev
             ];
           }
         ];

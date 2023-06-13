@@ -10,9 +10,11 @@ in {
   environment.systemPackages = with pkgs; [
     updateScript
     # Terminal utilities
-    vim neovim less ripgrep fd bat curl wget git tree httpie
+    bat curl direnv fd fzf git httpie less ripgrep tree vim wget
     # Languages
     cargo go ruby python3
+    # MacOS
+    coreutils time gnused
   ];
 
   homebrew = {
