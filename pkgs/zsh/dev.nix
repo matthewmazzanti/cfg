@@ -43,6 +43,12 @@ let
     autoload -Uz compinit && compinit
     autoload -Uz bashcompinit && bashcompinit
 
+    # Zsh completion has this dumb thing where it will SSH into remote servers
+    # to suggest file paths. With autosuggestions, this causes an SSH
+    # connection to occur for each keypress, easily overloading the remote
+    # server and causing you to get timed out. Disable this, I don't want it.
+    zstyle ':completion:*' remote-access no
+
     # Source before highlighting for correct updates
     source ${./config/copy.zsh}
 
