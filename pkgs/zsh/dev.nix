@@ -63,9 +63,8 @@ let
     source ${./config/vim.zsh}
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}
-    # source ${./config/ls.zsh}
+    source ${./config/ls.zsh}
     source ${./config/tar.zsh}
-    # zprof
   '';
 in
 wrapZsh {
