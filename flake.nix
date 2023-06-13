@@ -27,14 +27,12 @@
     })) // {
       darwinConfigurations.beta = darwin.lib.darwinSystem {
         system = "aarch64-darwin";
+        specialArgs.custom = {
+          nvim = nvim.packages.aarch64-darwin.dev;
+          zsh = zsh.packages.aarch64-darwin.dev;
+        };
         modules = [
           ./configuration.nix
-          {
-            environment.systemPackages = [
-              nvim.packages.aarch64-darwin.dev
-              zsh.packages.aarch64-darwin.dev
-            ];
-          }
         ];
       };
     }

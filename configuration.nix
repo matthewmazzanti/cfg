@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, custom, ... }:
 
 let
   updateScript = pkgs.writeShellScriptBin "update" ''
@@ -16,6 +16,8 @@ in {
     # MacOS
     coreutils time gnused
   ];
+
+  users.users.mmazzanti.packages = [ pkgs.hello custom.zsh custom.nvim ];
 
   homebrew = {
     enable = true;
@@ -73,9 +75,10 @@ in {
     experimental-features = nix-command flakes
   '';
 
-  # Create /etc/bashrc that loads the nix-darwin environment.
-  programs.zsh.enable = true;  # default shell on catalina
-  # programs.fish.enable = true;
+  programs.zsh.enable = true;
+  programs.zsh.promptInit = "";
+  programs.zsh.enableCompletion = false;
+  programs.zsh.enableBashCompletion = false;
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
