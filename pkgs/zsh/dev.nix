@@ -23,11 +23,25 @@ let
   };
 
   zshrc = ''
-    # No Plugins: 0.011s
-    # zmodload zsh/zprof
+    function () {
+      local count=1
+      local before="/usr/local/bin"
+      local brew_prefix="/opt/homebrew"
 
-    autoload -U compinit && compinit
-    autoload -U bashcompinit && bashcompinit
+      # Add brew prefix before system, after nix
+      for seg in "''${path[@]}"; do
+        if [ "$seg" = "$before" ]; then
+          path[$count]=("$brew_prefix/bin" "$before")
+          break
+        fi
+        ((count++))
+      done
+
+      fpath+=("$brew_prefix/share/zsh/site-functions")
+    }
+
+    autoload -Uz compinit && compinit
+    autoload -Uz bashcompinit && bashcompinit
 
     # Source before highlighting for correct updates
     source ${./config/copy.zsh}
@@ -49,7 +63,7 @@ let
     source ${./config/vim.zsh}
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}
-    source ${./config/ls.zsh}
+    # source ${./config/ls.zsh}
     source ${./config/tar.zsh}
     # zprof
   '';

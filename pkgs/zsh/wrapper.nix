@@ -39,7 +39,6 @@ let
         mv "$out/bin/zsh" "$out/bin/zsh-unwrapped"
         makeWrapper \
           "$out/bin/zsh-unwrapped" "$out/bin/zsh" \
-          --set NOSYSZSHRC "1" \
           --set ZDOTDIR "${zdotdir}"
       '';
     };
