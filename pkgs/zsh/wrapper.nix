@@ -32,7 +32,7 @@ let
       };
     in
     symlinkJoin {
-      name = "zsh-flake";
+      name = "zsh";
       paths = [ zsh ];
       buildInputs = [ makeWrapper ];
       postBuild = ''

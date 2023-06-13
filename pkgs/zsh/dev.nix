@@ -38,6 +38,9 @@ let
     autoload -U compinit && compinit
     autoload -U bashcompinit && bashcompinit
 
+    # Source before highlighting for correct updates
+    source ${./config/copy.zsh}
+
     # Fast Syntax Highlighting
     FAST_WORK_DIR="${fshTheme}"
     source "${fshPlugin}"
@@ -52,12 +55,11 @@ let
 
     eval "$(direnv hook zsh)"
     source "$(fzf-share)/key-bindings.zsh"
-    source ${./config/copy.zsh}
     source ${./config/vim.zsh}
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}
     source ${./config/ls.zsh}
-    source ${./config/tar.zsh}
+    # source ${./config/tar.zsh}
   '';
 in
 wrapZsh {
