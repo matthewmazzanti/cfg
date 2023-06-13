@@ -23,17 +23,8 @@ let
   };
 
   zshrc = ''
-    HELPDIR="${zsh}/share/zsh/$ZSH_VERSION/help"
-
-    # Tell zsh how to find installed completions.
-    for p in ''${(z)NIX_PROFILES}; do
-      fpath=(
-        $p/share/zsh/site-functions
-        $p/share/zsh/$ZSH_VERSION/functions
-        $p/share/zsh/vendor-completions
-        $fpath
-      )
-    done
+    # No Plugins: 0.011s
+    # zmodload zsh/zprof
 
     autoload -U compinit && compinit
     autoload -U bashcompinit && bashcompinit
@@ -59,7 +50,8 @@ let
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}
     source ${./config/ls.zsh}
-    # source ${./config/tar.zsh}
+    source ${./config/tar.zsh}
+    # zprof
   '';
 in
 wrapZsh {
