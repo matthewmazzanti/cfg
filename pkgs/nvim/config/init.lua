@@ -73,6 +73,11 @@ vim.opt.shortmess:append("c")
 -- Set leader key for other commands
 vim.g.mapleader = ";"
 
+-- Reset search highlighing
+vim.keymap.set("n", "<leader>n", function()
+    vim.cmd("nohlsearch")
+end)
+
 -- Copy to system clipboard where available
 vim.opt.clipboard = "unnamedplus"
 

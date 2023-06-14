@@ -25,7 +25,7 @@ set("t", function()
     hop.hint_char1({
         direction = dir.AFTER_CURSOR,
         current_line_only = true,
-        hint_offset = -2,
+        hint_offset = -1,
     })
 end)
 
