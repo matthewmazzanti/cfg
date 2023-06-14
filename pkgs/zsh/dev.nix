@@ -52,7 +52,8 @@ let
     # - Repeatedly popping up an SSH passphrase prompt and forcing you to lose
     # focus on your terminal if a GUI askpass is setup
     #
-    # All of this is dumb, and honestly a terrible idea
+    # All of this is dumb, and honestly a terrible idea. Disable remote-access
+    # to fix
     zstyle ':completion:*' remote-access no
 
     # Source before highlighting for correct updates
