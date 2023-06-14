@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+pushd $ROOT
+
+pushd "$ROOT/pkgs/nvim"
+nix flake update
+popd
+
+pushd "$ROOT/pkgs/zsh";
+nix flake update
+popd
+
+nix flake update
+popd

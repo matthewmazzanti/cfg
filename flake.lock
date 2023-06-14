@@ -67,8 +67,8 @@
       },
       "locked": {
         "dir": "pkgs/nvim",
-        "lastModified": 1686715289,
-        "narHash": "sha256-GYb1Dyy6ydrQ32q20YAIVywXTSgjXkOhyoTko62G/Dw=",
+        "lastModified": 1686717952,
+        "narHash": "sha256-X2IBVc0aOYnHko5QzNo7ll5/qIIsoBS4108C65z+pXA=",
         "type": "git",
         "url": "file:.?dir=pkgs/nvim"
       },
@@ -130,8 +130,8 @@
       },
       "locked": {
         "dir": "pkgs/zsh",
-        "lastModified": 1686715289,
-        "narHash": "sha256-GYb1Dyy6ydrQ32q20YAIVywXTSgjXkOhyoTko62G/Dw=",
+        "lastModified": 1686717952,
+        "narHash": "sha256-X2IBVc0aOYnHko5QzNo7ll5/qIIsoBS4108C65z+pXA=",
         "type": "git",
         "url": "file:.?dir=pkgs/zsh"
       },
