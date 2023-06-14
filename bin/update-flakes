@@ -4,11 +4,21 @@ pushd $ROOT
 
 pushd "$ROOT/pkgs/nvim"
 nix flake update
+if git diff --exit-code flake.lock; then
+    git add flake.lock
+fi
 popd
 
 pushd "$ROOT/pkgs/zsh";
 nix flake update
+if git diff --exit-code flake.lock; then
+    git add flake.lock
+fi
 popd
 
-nix flake update
+if git diff --staged --exit-code; then
+    git commit -m "Update pkgs/*/flake.lock"
+fi
+
+nix flake update --commit-lock-file
 popd
