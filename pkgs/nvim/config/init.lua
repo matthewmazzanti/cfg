@@ -76,18 +76,13 @@ vim.g.mapleader = ";"
 -- Copy to system clipboard where available
 vim.opt.clipboard = "unnamedplus"
 
-vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
-    pattern = ".envrc",
-    callback = function()
-        vim.bo.filetype = "bash"
-    end,
-})
-
-vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
-    pattern = "*.conf",
-    callback = function()
-        vim.bo.filetype = "conf"
-    end,
+vim.filetype.add({
+    filename = {
+        [".envrc"] = "sh",
+    },
+    pattern = {
+        ["*.conf"] = "conf",
+    },
 })
 
 vim.cmd("clearjumps")
