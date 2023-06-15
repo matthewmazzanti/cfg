@@ -13,7 +13,6 @@ require("gruvbox").setup({
         operators = false,
         folds = false,
     },
-    transparent_mode = true
 })
 
 vim.opt.background = "dark"

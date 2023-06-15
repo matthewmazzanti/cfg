@@ -1,7 +1,7 @@
 def qwer():
     return
 
-def foobar(a, world):
+def foobar(qwer, world):
     print(a, world)
     print()
     "a line with multiple is"

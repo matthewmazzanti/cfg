@@ -36,10 +36,8 @@ let
   plugins = with vimPlugins; [
     # Custom ftplugin stuff
     ftplugin
-    # Better python indent handling
-    vim-python-pep8-indent
-    # Basic nix stuff
-    vim-nix
+    vim-python-pep8-indent # Better python indent handling
+    vim-nix # Basic nix stuff
 
     # Visual enhancements
     gruvbox-nvim
@@ -86,12 +84,9 @@ let
       typescript
       yaml
     ]))
-    # Treesitter powered textobjects
-    nvim-treesitter-textobjects
-    # Auto XML/HTML tag closing
-    nvim-ts-autotag
-    # Split/Join list structures
-    treesj
+    nvim-treesitter-textobjects # Treesitter powered textobjects
+    nvim-ts-autotag # Auto XML/HTML tag closing
+    treesj # Split/Join list structures
   ];
 
   init = writeText "init.lua" ''
