@@ -2,32 +2,30 @@
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
 local lspconfig = require("lspconfig")
 
-local function on_attach(_, bufnr)
-    local function set(mode, keys, fn)
-        vim.keymap.set(mode, keys, fn, { buffer = bufnr, silent = true })
-    end
-
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    set("n", "gD", vim.lsp.buf.declaration)
-    local ok, telescope = pcall(require, "telescope.builtins")
-    if ok then
-        set("n", "gd", telescope.lsp_definitions)
-        set("n", "gi", telescope.lsp_implementations)
-        set("n", "gr", telescope.lsp_references)
-        set("n", "gt", telescope.lsp_type_definitions)
-    end
-
-    -- TODO: Reconsider this for opening help files. Possibly make function
-    -- for if in comments?
-    set("n", "K", vim.lsp.buf.hover)
-    set("n", "<C-k>", vim.lsp.buf.signature_help)
-    set("n", "<leader>a", vim.lsp.buf.code_action)
-    set("n", "<leader>r", vim.lsp.buf.rename)
-end
-
 local defaults = {
-    on_attach = on_attach,
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    on_attach = function(_, bufnr)
+        local function set(mode, keys, fn)
+            vim.keymap.set(mode, keys, fn, { buffer = bufnr, silent = true })
+        end
+
+        -- See `:help vim.lsp.*` for documentation on any of the below functions
+        set("n", "gD", vim.lsp.buf.declaration)
+        local ok, telescope = pcall(require, "telescope.builtins")
+        if ok then
+            set("n", "gd", telescope.lsp_definitions)
+            set("n", "gi", telescope.lsp_implementations)
+            set("n", "gr", telescope.lsp_references)
+            set("n", "gt", telescope.lsp_type_definitions)
+        end
+
+        -- TODO: Reconsider this for opening help files. Possibly make function
+        -- for if in comments?
+        set("n", "K", vim.lsp.buf.hover)
+        set("n", "<C-k>", vim.lsp.buf.signature_help)
+        set("n", "<leader>a", vim.lsp.buf.code_action)
+        set("n", "<leader>r", vim.lsp.buf.rename)
+    end,
 }
 
 -- Check that server binary exists
@@ -40,13 +38,13 @@ end
 
 -- Load servers
 local servers = {
-      "bashls",
-      "ccls",
-      "gopls",
-      "pyright",
-      "rnix",
-      "rust_analyzer",
-      "tsserver",
+    "bashls",
+    "ccls",
+    "gopls",
+    "pyright",
+    "nil_ls",
+    "rust_analyzer",
+    "tsserver",
 }
 
 for _, server in ipairs(servers) do
@@ -56,9 +54,7 @@ for _, server in ipairs(servers) do
 end
 
 if find_ls("lua_ls") then
-    lspconfig.lua_ls.setup({
-        on_attach = on_attach,
-        capabilities = capabilities,
+    local settings = vim.tbl_extend("force", defaults, {
         settings = {
             Lua = {
                 runtime = {
@@ -77,18 +73,30 @@ if find_ls("lua_ls") then
             },
         },
     })
+    lspconfig.lua_ls.setup(settings)
 end
-
-require("lsp_lines").setup()
-vim.diagnostic.config({
-    virtual_text = false,
-    virtual_lines = {
-        only_current_line = true,
-    },
-})
 
 local signs = { Error = "e", Warn = "w", Hint = "h", Info = "i" }
 for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl })
 end
+
+require("lsp_lines").setup()
+
+vim.diagnostic.config({
+    virtual_text = true,
+    virtual_lines = false,
+})
+
+vim.keymap.set(
+    "",
+    "<Leader>d",
+    function()
+        local diagnostic = vim.diagnostic.config()
+        vim.diagnostic.config({
+            virtual_text = not diagnostic.virtual_text,
+            virtual_lines = not diagnostic.virtual_lines,
+        })
+    end
+)

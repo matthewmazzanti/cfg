@@ -2,7 +2,6 @@
   # Nixpkgs functions
   callPackage
 , writeText
-, symlinkJoin
 , buildEnv
   # Vim stuff
 , wrapNeovimUnstable
@@ -13,15 +12,11 @@
 , gopls
 , lua-language-server
 , nodePackages
-, rnix-lsp
 , rust-analyzer
-  # Options
-, withLanguageServers ? true
+, nil
 , ...
 }:
 let
-  inherit (builtins) readFile;
-
   path = buildEnv {
     name = "nvim-path";
     paths = [
@@ -31,7 +26,7 @@ let
       nodePackages.bash-language-server
       nodePackages.pyright
       nodePackages.typescript-language-server
-      rnix-lsp
+      nil
       rust-analyzer
     ];
   };
