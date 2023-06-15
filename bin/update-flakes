@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
+set -x
 
 pushd $ROOT
 
 pushd "$ROOT/pkgs/nvim"
 nix flake update
-if git diff --exit-code flake.lock; then
+if ! git diff --exit-code flake.lock >/dev/null; then
     git add flake.lock
 fi
 popd
 
 pushd "$ROOT/pkgs/zsh";
 nix flake update
-if git diff --exit-code flake.lock; then
+if ! git diff --exit-code flake.lock >/dev/null; then
     git add flake.lock
 fi
 popd
 
-if git diff --staged --exit-code; then
+if ! git diff --exit-code --staged >/dev/null; then
     git commit -m "Update pkgs/*/flake.lock"
 fi
 
