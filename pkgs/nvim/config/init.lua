@@ -10,7 +10,7 @@ vim.opt.relativenumber = true
 vim.opt.mouse = "a"
 -- Increase speed of mouse scrolling
 vim.keymap.set({"n", "v", "i"}, "<ScrollWheelUp>", "5<C-Y>", { silent = true })
-vim.keymap.set({"n", "v", "i"}, "<ScrollWheelDown>", "5<C-E>", { silent = true })
+vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelDown>", "5<C-E>", { silent = true })
 -- Remember cursor position during buffer switch
 vim.opt.startofline = false
 -- TODO: This still needed?
@@ -22,12 +22,12 @@ vim.opt.colorcolumn = "81"
 vim.opt.textwidth = 80
 -- May be more options to explore here
 vim.opt.formatoptions = table.concat({
-  "c", -- Auto wrap comments
-  "r", -- Add comment leader on <CR> in insert mode
-  "o", -- Add comment leader when hitting "O" or "o"
-  "j", -- Remove comment leader when joining lines
-  "q", -- Format comments with gq
-  "l", -- Don't format long lines by default
+    "c", -- Auto wrap comments
+    "r", -- Add comment leader on <CR> in insert mode
+    "o", -- Add comment leader when hitting "O" or "o"
+    "j", -- Remove comment leader when joining lines
+    "q", -- Format comments with gq
+    "l", -- Don't format long lines by default
 }, "")
 vim.opt.linebreak = true
 vim.opt.wrap = false

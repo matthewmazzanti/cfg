@@ -78,3 +78,17 @@ if find_ls("lua_ls") then
         },
     })
 end
+
+require("lsp_lines").setup()
+vim.diagnostic.config({
+    virtual_text = false,
+    virtual_lines = {
+        only_current_line = true,
+    },
+})
+
+local signs = { Error = "e", Warn = "w", Hint = "h", Info = "i" }
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl })
+end

@@ -4,15 +4,16 @@
 -- TODO: develop own nix script for color injection?
 
 require("gruvbox").setup({
-  undercurl = true,
-  underline = true,
-  bold = false,
-  italic = {
-    strings = false,
-    comments = false,
-    operators = false,
-    folds = false,
-  },
+    undercurl = true,
+    underline = true,
+    bold = false,
+    italic = {
+        strings = false,
+        comments = false,
+        operators = false,
+        folds = false,
+    },
+    transparent_mode = true
 })
 
 vim.opt.background = "dark"
