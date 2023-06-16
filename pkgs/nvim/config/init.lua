@@ -10,7 +10,18 @@ vim.opt.relativenumber = true
 vim.opt.mouse = "a"
 -- Increase speed of mouse scrolling
 vim.keymap.set({"n", "v", "i"}, "<ScrollWheelUp>", "5<C-Y>", { silent = true })
-vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelDown>", "5<C-E>", { silent = true })
+vim.keymap.set(
+    {
+        "n",
+        "v",
+        "i",
+    },
+    "<ScrollWheelDown>",
+    "5<C-E>",
+    {
+        silent = true,
+    }
+)
 -- Remember cursor position during buffer switch
 vim.opt.startofline = false
 -- TODO: This still needed?
@@ -47,6 +58,10 @@ vim.opt.smartindent = true
 vim.opt.incsearch = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
+
+-- Set speeling
+vim.opt.spelllang = "en_us"
+vim.opt.spellfile = vim.fn.expand("~/.local/share/nvim/spell/en.utf-8.add")
 
 -- Nice visualization of trailing space/tabs
 vim.opt.list = true

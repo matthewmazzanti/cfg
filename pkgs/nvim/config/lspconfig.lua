@@ -87,6 +87,7 @@ require("lsp_lines").setup()
 vim.diagnostic.config({
     virtual_text = true,
     virtual_lines = false,
+    severity_sort = true,
 })
 
 vim.keymap.set(
