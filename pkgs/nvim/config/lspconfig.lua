@@ -19,8 +19,7 @@ local defaults = {
             set("n", "gt", telescope.lsp_type_definitions)
         end
 
-        -- TODO: Reconsider this for opening help files. Possibly make function
-        -- for if in comments?
+        -- TODO: For lua, would be nicer to have K open the help document
         set("n", "K", vim.lsp.buf.hover)
         set("n", "<C-k>", vim.lsp.buf.signature_help)
         set("n", "<leader>a", vim.lsp.buf.code_action)

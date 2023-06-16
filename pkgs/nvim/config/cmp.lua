@@ -35,10 +35,37 @@ local kind_display = {
     TypeParameter = "typr",
 }
 
+-- cmp uses a winhighlight string to change color of suggestions. Build that
+-- from a mapping
+local function winhighlight(data)
+    local res = ""
+    for key, value in pairs(data) do
+        if res ~= "" then
+            res = res .. ","
+        end
+        res = res .. key .. ":" .. value
+    end
+    return res
+end
+
 cmp.setup({
     window = {
-        completion = cmp.config.window.bordered(),
-        documentation = cmp.config.window.bordered(),
+        completion = cmp.config.window.bordered({
+            winhighlight = winhighlight({
+                Normal = "Normal",
+                FloatBorder = "GruvboxGray",
+                CursorLine = "Visual",
+                Search = "None",
+            })
+        }),
+        documentation = cmp.config.window.bordered({
+            winhighlight = winhighlight({
+                Normal = "Normal",
+                FloatBorder = "GruvboxGray",
+                CursorLine = "Visual",
+                Search = "None",
+            })
+        }),
     },
     mapping = cmp.mapping.preset.insert({
         ["<C-d>"] = cmp.mapping.scroll_docs(4),
