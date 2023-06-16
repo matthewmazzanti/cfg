@@ -23,8 +23,8 @@ treesitter.setup({
                 -- TODO: More textobjects? These don't seem to work everywhere
                 ["af"] = "@function.outer",
                 ["if"] = "@function.inner",
-                ["ac"] = "@class.outer",
-                ["ic"] = "@class.inner",
+                ["ac"] = "@comment.outer",
+                ["ic"] = "@comment.inner",
                 ["al"] = "@loop.outer",
                 ["il"] = "@loop.inner",
             }
