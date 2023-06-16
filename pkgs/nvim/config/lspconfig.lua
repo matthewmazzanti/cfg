@@ -4,7 +4,7 @@ local lspconfig = require("lspconfig")
 
 local defaults = {
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
-    on_attach = function(_, bufnr)
+    on_attach = function(_client, bufnr)
         local function set(mode, keys, fn)
             vim.keymap.set(mode, keys, fn, { buffer = bufnr, silent = true })
         end
@@ -62,6 +62,7 @@ if find_ls("lua_ls") then
                 },
                 diagnostics = {
                     globals = { "vim" },
+                    unusedLocalExclude = { "_*" },
                 },
                 workspace = {
                     library = vim.api.nvim_get_runtime_file("", true),
@@ -78,8 +79,8 @@ end
 
 local signs = { Error = "e", Warn = "w", Hint = "h", Info = "i" }
 for type, icon in pairs(signs) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl })
+    local hl = "DiagnosticSign" .. type
+    vim.fn.sign_define(hl, { text = icon, texthl = hl })
 end
 
 require("lsp_lines").setup()

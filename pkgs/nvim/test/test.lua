@@ -2,7 +2,7 @@
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
 local lspconfig = require("lspconfig")
 
-local function on_attach(_, bufnr)
+local function on_attach(_client, bufnr)
     local function set(mode, keys, fn)
         vim.keymap.set(mode, keys, fn, { buffer = bufnr, silent = true })
     end
@@ -52,3 +52,8 @@ lspconfig.lua_ls.setup({
         },
     },
 })
+
+local function foobar(_x)
+    return "foobar"
+end
+foobar()

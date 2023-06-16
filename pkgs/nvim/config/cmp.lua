@@ -1,6 +1,5 @@
 -- Setup nvim-cmp.
 local cmp = require("cmp")
-local luasnip = require("luasnip")
 
 vim.opt.completeopt = {
     "menu",
@@ -37,14 +36,6 @@ local kind_display = {
 }
 
 cmp.setup({
-    --[[
-    snippet = {
-        -- REQUIRED - you must specify a snippet engine
-        expand = function(args)
-            luasnip.lsp_expand(args.body)
-        end,
-    },
-    ]]
     window = {
         completion = cmp.config.window.bordered(),
         documentation = cmp.config.window.bordered(),
@@ -62,11 +53,9 @@ cmp.setup({
     sources = cmp.config.sources({
         { name = "nvim_lsp" },
         { name = "buffer" },
-        -- { name = "luasnip" },
     }),
     formatting = {
-        format = function(entry, vim_item)
-            print(vim.inspect(entry))
+        format = function(_entry, vim_item)
             -- Shorten "kind" name
             vim_item.kind = kind_display[vim_item.kind]
 
