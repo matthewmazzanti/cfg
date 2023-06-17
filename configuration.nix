@@ -1,4 +1,4 @@
-{ config, pkgs, lib, custom, ... }:
+{ pkgs, custom, ... }:
 
 let
   updateScript = pkgs.writeShellScriptBin "update" ''
@@ -17,7 +17,12 @@ in {
     coreutils time gnused
   ];
 
-  users.users.mmazzanti.packages = [ pkgs.hello custom.zsh custom.nvim ];
+  users.users.mmazzanti.packages = [
+    pkgs.hello
+    custom.zsh
+    custom.nvim
+    custom.short-pwd
+  ];
 
   homebrew = {
     enable = true;
