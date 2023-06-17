@@ -1,5 +1,4 @@
-{ pkgs
-, stdenv
+{ stdenv
 , callPackage
 , zsh
 , zsh-fast-syntax-highlighting
@@ -56,7 +55,8 @@ let
     # to fix
     zstyle ':completion:*' remote-access no
 
-    # Source before highlighting for correct updates
+    # Source before highlighting for correct updates. Keybindings defined in
+    # "vim.zsh"
     source ${./config/copy.zsh}
 
     # Fast Syntax Highlighting
