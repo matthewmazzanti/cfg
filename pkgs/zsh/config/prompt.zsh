@@ -58,19 +58,19 @@ function prompt_leader() {
     local color="cyan"
 
     case "$prompt_vi_mode" in
-        "insert")
-            color="cyan"
-            ;;
-        "command")
-            color="white"
-            ;;
+        "insert")  color="cyan";;
+        "command") color="white";;
     esac
 
-    prompt_color "$color" "$prompt_hostname "
+    prompt_color "$color" "$prompt_hostname"
+}
+
+function prompt_pwd() {
+    prompt_color "yellow" "$(short-pwd "$COLUMNS")"
 }
 
 setopt PROMPT_SUBST
-PROMPT='$(prompt_leader)$(short-pwd $COLUMNS)%F{yellow}%~%f '
+PROMPT='$(prompt_leader) $(prompt_pwd) '
 RPROMPT="";
 
 # Render post-prompt items:

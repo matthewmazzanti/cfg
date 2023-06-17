@@ -11,7 +11,15 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
-        packages.default = pkgs.callPackage ./default.nix { };
+        packages.default = pkgs.buildGoPackage {
+          pname = "short-pwd";
+          version = "0.0.3";
+          goPackagePath = "github.com/matthewmazzanti/cfg/short-pwd";
+          src = ./.;
+          meta = {
+            description = "Print a path shortened to a number of columns";
+          };
+        };
       }
     );
 }

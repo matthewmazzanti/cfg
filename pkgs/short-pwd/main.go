@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -74,5 +75,5 @@ func main() {
 
 	}
 
-	print(strings.Join(segments, "/"))
+	fmt.Println(strings.Join(segments, "/"))
 }

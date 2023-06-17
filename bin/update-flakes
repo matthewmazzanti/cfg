@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function update_flake() {
-    pushd $1
+    pushd $1 >/dev/null
     nix flake update
     if ! git diff --exit-code flake.lock >/dev/null; then
         git add flake.lock
@@ -9,7 +9,13 @@ function update_flake() {
     popd
 }
 
-pushd $ROOT
+pushd $ROOT >/dev/null
+
+git update-index --refresh >/dev/null
+if ! git diff-index --quiet HEAD --; then
+    git status
+    exit 1
+fi
 
 update_flake "$ROOT/pkgs/nvim"
 update_flake "$ROOT/pkgs/zsh"
