@@ -69,26 +69,8 @@ function prompt_leader() {
     prompt_color "$color" "$prompt_hostname "
 }
 
-# Print responsive PWD based off of COLUMNS
-function prompt_pwd() {
-    local color="yellow"
-    local long="4"
-
-    if (( "$COLUMNS" < 50 )); then
-        long="1"
-    elif (( "$COLUMNS" < 100 )); then
-        long="2"
-    elif (( "$COLUMNS" < 150 )); then
-        long="3"
-    fi
-
-    prompt_color "$color" "$(short-pwd -k $long) "
-}
-
 setopt PROMPT_SUBST
-# TODO: Get the short pwd script working again
-# PROMPT='$(prompt_leader)$(prompt_pwd)';
-PROMPT='$(short-pwd $COLUMNS)%F{yellow}%~%f '
+PROMPT='$(prompt_leader)$(short-pwd $COLUMNS)%F{yellow}%~%f '
 RPROMPT="";
 
 # Render post-prompt items:
