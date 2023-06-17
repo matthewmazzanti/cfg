@@ -11,7 +11,7 @@ local defaults = {
 
         -- See `:help vim.lsp.*` for documentation on any of the below functions
         set("n", "gD", vim.lsp.buf.declaration)
-        local ok, telescope = pcall(require, "telescope.builtins")
+        local ok, telescope = pcall(require, "telescope.builtin")
         if ok then
             set("n", "gd", telescope.lsp_definitions)
             set("n", "gi", telescope.lsp_implementations)
