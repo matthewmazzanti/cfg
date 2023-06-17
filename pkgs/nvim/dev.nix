@@ -58,6 +58,8 @@ let
     nvim-cmp
     cmp-nvim-lsp
     cmp-buffer
+    luasnip
+    cmp_luasnip
 
     # Language servers
     nvim-lspconfig

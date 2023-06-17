@@ -17,3 +17,6 @@ def barbaz():
     foobar("hello", "world")
     for i in range(0, 10):
         print(i)
+
+def partial_test():
+    foobar(barbaz(), "world")

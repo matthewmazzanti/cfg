@@ -88,7 +88,7 @@ function prompt_pwd() {
 setopt PROMPT_SUBST
 # TODO: Get the short pwd script working again
 # PROMPT='$(prompt_leader)$(prompt_pwd)';
-PROMPT='$(prompt_leader)%F{yellow}%~%f '
+PROMPT='$(short-pwd $COLUMNS)%F{yellow}%~%f '
 RPROMPT="";
 
 # Render post-prompt items:

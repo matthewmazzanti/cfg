@@ -12,9 +12,13 @@
     zsh.url = "git+file:.?dir=pkgs/zsh";
     zsh.inputs.flake-utils.follows = "flake-utils";
     zsh.inputs.nixpkgs.follows = "nixpkgs";
+
+    short-pwd.url = "git+file:.?dir=pkgs/short-pwd";
+    short-pwd.inputs.flake-utils.follows = "flake-utils";
+    short-pwd.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, flake-utils, darwin, nixpkgs, nvim, zsh, ... }: (
+  outputs = { flake-utils, darwin, nixpkgs, nvim, zsh, short-pwd, ... }: (
     (flake-utils.lib.eachSystem flake-utils.lib.defaultSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
@@ -30,6 +34,7 @@
         specialArgs.custom = {
           nvim = nvim.packages.aarch64-darwin.dev;
           zsh = zsh.packages.aarch64-darwin.dev;
+          short-pwd = short-pwd.packages.aarch64-darwin.default;
         };
         modules = [
           ./configuration.nix

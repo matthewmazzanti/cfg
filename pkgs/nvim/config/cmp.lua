@@ -1,5 +1,6 @@
 -- Setup nvim-cmp.
 local cmp = require("cmp")
+local luasnip = require("luasnip")
 
 vim.opt.completeopt = {
     "menu",
@@ -49,6 +50,11 @@ local function winhighlight(data)
 end
 
 cmp.setup({
+    snippet = {
+        expand = function(args)
+            luasnip.lsp_expand(args.body)
+        end,
+    },
     window = {
         completion = cmp.config.window.bordered({
             winhighlight = winhighlight({
@@ -75,10 +81,11 @@ cmp.setup({
         -- Accept currently selected item. Set `select` to `false` to only
         -- confirm explicitly selected items.
         -- TODO: Check back in on this
-        -- ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        ["<CR>"] = cmp.mapping.confirm({ select = true }),
     }),
     sources = cmp.config.sources({
         { name = "nvim_lsp" },
+        { name = "luasnip" },
         { name = "buffer" },
     }),
     formatting = {

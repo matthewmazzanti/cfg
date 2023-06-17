@@ -87,7 +87,30 @@
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "nvim": "nvim",
+        "short-pwd": "short-pwd",
         "zsh": "zsh"
+      }
+    },
+    "short-pwd": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs/short-pwd",
+        "lastModified": 1686954109,
+        "narHash": "sha256-NgJ+J+Llt84uI4MlkrrxBV8SqsyKXeHTC9RQfqFjkSw=",
+        "type": "git",
+        "url": "file:.?dir=pkgs/short-pwd"
+      },
+      "original": {
+        "dir": "pkgs/short-pwd",
+        "type": "git",
+        "url": "file:.?dir=pkgs/short-pwd"
       }
     },
     "systems": {
