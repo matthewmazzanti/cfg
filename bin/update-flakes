@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 function update_flake() {
-    pushd $1 >/dev/null
+    pushd "$1" >/dev/null
     nix flake update --allow-dirty
     if ! git diff --exit-code flake.lock >/dev/null; then
         git add flake.lock
     fi
-    popd
+    popd >/dev/null
 }
 
 pushd $ROOT >/dev/null
@@ -26,4 +26,4 @@ if ! git diff --exit-code --staged >/dev/null; then
 fi
 
 nix flake update --commit-lock-file
-popd
+popd >/dev/null
