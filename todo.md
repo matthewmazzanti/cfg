@@ -8,3 +8,9 @@
 
 # Nix
 - Understand what https://github.com/nix-systems/nix-systems is doing
+  (dependency of flake-utils)
+
+# iTerm2
+- Figure out how to get plist property loading to work
+    - Don't overwrite existing properties, if possible
+    - Filter non-relevant properties, like update times

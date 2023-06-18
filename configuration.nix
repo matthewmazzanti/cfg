@@ -10,7 +10,7 @@ in {
   environment.systemPackages = with pkgs; [
     updateScript
     # Terminal utilities
-    bat curl direnv fd fzf git httpie less ripgrep tree vim wget
+    bat curl direnv fd fzf git httpie less ripgrep tree vim wget jq yq
     # Languages
     cargo go ruby python3
     # MacOS
