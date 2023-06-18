@@ -67,11 +67,11 @@
       },
       "locked": {
         "dir": "pkgs/nvim",
-        "lastModified": 1687019331,
-        "narHash": "sha256-Nw8nn+yVHDQf6qPST0JD4NBhGqoUUGzgYdq3+s3067E=",
+        "lastModified": 1687052146,
+        "narHash": "sha256-UewNH1epfnF+5AgEP0e9TuRFZS36pXja282KxoLmmPM=",
         "ref": "refs/heads/dev",
-        "rev": "0e4ac7fa1fe8df3de9e1450b0c5bcfa6bed54fba",
-        "revCount": 66,
+        "rev": "83999f393058b9830c140e73a83ad419c4599d52",
+        "revCount": 70,
         "type": "git",
         "url": "file:.?dir=pkgs/nvim"
       },
@@ -102,11 +102,11 @@
       },
       "locked": {
         "dir": "pkgs/short-pwd",
-        "lastModified": 1687019331,
-        "narHash": "sha256-Nw8nn+yVHDQf6qPST0JD4NBhGqoUUGzgYdq3+s3067E=",
+        "lastModified": 1687052146,
+        "narHash": "sha256-UewNH1epfnF+5AgEP0e9TuRFZS36pXja282KxoLmmPM=",
         "ref": "refs/heads/dev",
-        "rev": "0e4ac7fa1fe8df3de9e1450b0c5bcfa6bed54fba",
-        "revCount": 66,
+        "rev": "83999f393058b9830c140e73a83ad419c4599d52",
+        "revCount": 70,
         "type": "git",
         "url": "file:.?dir=pkgs/short-pwd"
       },
@@ -159,11 +159,11 @@
       },
       "locked": {
         "dir": "pkgs/zsh",
-        "lastModified": 1687019331,
-        "narHash": "sha256-Nw8nn+yVHDQf6qPST0JD4NBhGqoUUGzgYdq3+s3067E=",
+        "lastModified": 1687052146,
+        "narHash": "sha256-UewNH1epfnF+5AgEP0e9TuRFZS36pXja282KxoLmmPM=",
         "ref": "refs/heads/dev",
-        "rev": "0e4ac7fa1fe8df3de9e1450b0c5bcfa6bed54fba",
-        "revCount": 66,
+        "rev": "83999f393058b9830c140e73a83ad419c4599d52",
+        "revCount": 70,
         "type": "git",
         "url": "file:.?dir=pkgs/zsh"
       },
