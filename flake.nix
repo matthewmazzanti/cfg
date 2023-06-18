@@ -26,6 +26,8 @@
         buildInputs = with pkgs; [
           nixpkgs-fmt
           nix-tree
+          poetry
+          go
         ];
       };
     })) // {

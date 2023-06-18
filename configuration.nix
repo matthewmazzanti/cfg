@@ -19,6 +19,10 @@ in {
 
   users.users.mmazzanti.packages = [
     pkgs.hello
+    pkgs.tmux
+    # TODO: Extract terminfo from this
+    pkgs.ncurses
+    pkgs.nix-direnv
     custom.zsh
     custom.nvim
     custom.short-pwd
