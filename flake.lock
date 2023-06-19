@@ -32,8 +32,11 @@
       },
       "locked": {
         "dir": "pkgs/direnv",
-        "lastModified": 1687142565,
-        "narHash": "sha256-y4YaqSaXKoLcNcEfTsM4a7S4Min31Kt9kLx4ZNevvn4=",
+        "lastModified": 1687142825,
+        "narHash": "sha256-Mi2ZmH6y3jROcYUaX1ZzuYw+0i0vhFGXD7mHrcuTGh4=",
+        "ref": "refs/heads/dev",
+        "rev": "b83ca6302f6bcf943de26611272067dc0d6ec459",
+        "revCount": 76,
         "type": "git",
         "url": "file:.?dir=pkgs/direnv"
       },
@@ -89,11 +92,11 @@
       },
       "locked": {
         "dir": "pkgs/nvim",
-        "lastModified": 1687142564,
-        "narHash": "sha256-Z65ZchXucCNd3n0gz6WJw/tSD7IlMB2gg8hPdbAI2R0=",
+        "lastModified": 1687142825,
+        "narHash": "sha256-Mi2ZmH6y3jROcYUaX1ZzuYw+0i0vhFGXD7mHrcuTGh4=",
         "ref": "refs/heads/dev",
-        "rev": "060cd8572a4f35510cd911de3dfaf428ebb6647d",
-        "revCount": 74,
+        "rev": "b83ca6302f6bcf943de26611272067dc0d6ec459",
+        "revCount": 76,
         "type": "git",
         "url": "file:.?dir=pkgs/nvim"
       },
@@ -125,11 +128,11 @@
       },
       "locked": {
         "dir": "pkgs/short-pwd",
-        "lastModified": 1687142564,
-        "narHash": "sha256-Z65ZchXucCNd3n0gz6WJw/tSD7IlMB2gg8hPdbAI2R0=",
+        "lastModified": 1687142825,
+        "narHash": "sha256-Mi2ZmH6y3jROcYUaX1ZzuYw+0i0vhFGXD7mHrcuTGh4=",
         "ref": "refs/heads/dev",
-        "rev": "060cd8572a4f35510cd911de3dfaf428ebb6647d",
-        "revCount": 74,
+        "rev": "b83ca6302f6bcf943de26611272067dc0d6ec459",
+        "revCount": 76,
         "type": "git",
         "url": "file:.?dir=pkgs/short-pwd"
       },
@@ -182,11 +185,11 @@
       },
       "locked": {
         "dir": "pkgs/zsh",
-        "lastModified": 1687142564,
-        "narHash": "sha256-Z65ZchXucCNd3n0gz6WJw/tSD7IlMB2gg8hPdbAI2R0=",
+        "lastModified": 1687142825,
+        "narHash": "sha256-Mi2ZmH6y3jROcYUaX1ZzuYw+0i0vhFGXD7mHrcuTGh4=",
         "ref": "refs/heads/dev",
-        "rev": "060cd8572a4f35510cd911de3dfaf428ebb6647d",
-        "revCount": 74,
+        "rev": "b83ca6302f6bcf943de26611272067dc0d6ec459",
+        "revCount": 76,
         "type": "git",
         "url": "file:.?dir=pkgs/zsh"
       },
