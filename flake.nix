@@ -30,6 +30,8 @@
           go
         ];
       };
+
+      packages.default = pkgs.callPackage ./nix-direnv.nix {};
     })) // {
       darwinConfigurations.beta = darwin.lib.darwinSystem {
         system = "aarch64-darwin";

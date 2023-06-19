@@ -16,7 +16,7 @@ local defaults = {
             set("n", "gd", telescope.lsp_definitions)
             set("n", "gi", telescope.lsp_implementations)
             set("n", "gr", telescope.lsp_references)
-            set("n", "gt", telescope.lsp_type_definitions)
+            -- set("n", "gt", telescope.lsp_type_definitions)
         end
 
         -- TODO: For lua, would be nicer to have K open the help document

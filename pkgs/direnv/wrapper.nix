@@ -1,44 +1,40 @@
 { stdenv, lib, symlinkJoin, makeWrapper }:
 let
-  mkZdotdir = { zshenv, zprofile, zshrc, zlogin, zlogout }@args:
+  mkConfigDir = { direnvrc ? "" }@args:
     stdenv.mkDerivation (args // {
-      name = "zdotdir";
+      name = "direnv-config";
       passAsFile = builtins.attrNames args;
       # $passAsFile in builder seems to ignore empty strings/files
       buildCommand = ''
-        mkdir -p "$out"
+        mkdir -p "$out/direnv"
         for var in $passAsFile; do
             varPath="''${var}Path"
             varPath="''${!varPath}"
 
-            outPath="$out/.$var"
+            outPath="$out/direnv/$var"
             cp "$varPath" "$outPath"
         done
       '';
     });
 
   wrapper =
-    { zsh
-    , zshenv ? ""
-    , zprofile ? ""
-    , zshrc ? ""
-    , zlogin ? ""
-    , zlogout ? ""
+    { direnv
+    , direnvrc ? ""
     }:
     let
-      zdotdir = mkZdotdir {
-        inherit zshenv zprofile zshrc zlogin zlogout;
+      configDir = mkConfigDir {
+        inherit direnvrc;
       };
     in
     symlinkJoin {
-      name = "zsh";
-      paths = [ zsh ];
+      name = "direnv";
+      paths = [ direnv ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        mv "$out/bin/zsh" "$out/bin/zsh-unwrapped"
+        mv "$out/bin/direnv" "$out/bin/direnv-unwrapped"
         makeWrapper \
-          "$out/bin/zsh-unwrapped" "$out/bin/zsh" \
-          --set ZDOTDIR "${zdotdir}"
+          "$out/bin/direnv-unwrapped" "$out/bin/direnv" \
+          --set XDG_CONFIG_HOME "${configDir}"
       '';
     };
 in

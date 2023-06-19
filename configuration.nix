@@ -1,6 +1,8 @@
 { pkgs, custom, ... }:
 
 let
+  nix-direnv = pkgs.callPackage ./nix-direnv.nix {};
+
   updateScript = pkgs.writeShellScriptBin "update" ''
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
   '';
@@ -22,7 +24,7 @@ in {
     pkgs.tmux
     # TODO: Extract terminfo from this
     pkgs.ncurses
-    pkgs.nix-direnv
+    nix-direnv
     custom.zsh
     custom.nvim
     custom.short-pwd
