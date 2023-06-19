@@ -17,10 +17,11 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-update_flake "$ROOT/pkgs/nvim"
-update_flake "$ROOT/pkgs/zsh"
-update_flake "$ROOT/pkgs/short-pwd"
 update_flake "$ROOT/pkgs/direnv"
+update_flake "$ROOT/pkgs/nvim"
+update_flake "$ROOT/pkgs/short-pwd"
+update_flake "$ROOT/pkgs/tmux"
+update_flake "$ROOT/pkgs/zsh"
 
 if ! git diff --exit-code --staged >/dev/null; then
     git commit -m "Update pkgs/*/flake.lock"
