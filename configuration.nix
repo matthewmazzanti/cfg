@@ -22,7 +22,7 @@ in {
     pkgs.tmux
     # TODO: Extract terminfo from this
     pkgs.ncurses
-    pkgs.direnv
+    custom.direnv
     custom.zsh
     custom.nvim
     custom.short-pwd
