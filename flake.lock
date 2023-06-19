@@ -21,6 +21,28 @@
         "type": "github"
       }
     },
+    "direnv": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs/direnv",
+        "lastModified": 1687142565,
+        "narHash": "sha256-y4YaqSaXKoLcNcEfTsM4a7S4Min31Kt9kLx4ZNevvn4=",
+        "type": "git",
+        "url": "file:.?dir=pkgs/direnv"
+      },
+      "original": {
+        "dir": "pkgs/direnv",
+        "type": "git",
+        "url": "file:.?dir=pkgs/direnv"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -84,6 +106,7 @@
     "root": {
       "inputs": {
         "darwin": "darwin",
+        "direnv": "direnv",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "nvim": "nvim",

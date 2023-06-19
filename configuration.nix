@@ -1,8 +1,6 @@
 { pkgs, custom, ... }:
 
 let
-  nix-direnv = pkgs.callPackage ./nix-direnv.nix {};
-
   updateScript = pkgs.writeShellScriptBin "update" ''
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
   '';
@@ -12,7 +10,7 @@ in {
   environment.systemPackages = with pkgs; [
     updateScript
     # Terminal utilities
-    bat curl direnv fd fzf git httpie less ripgrep tree vim wget jq yq
+    bat curl fd fzf git httpie less ripgrep tree vim wget jq yq
     # Languages
     cargo go ruby python3
     # MacOS
@@ -24,7 +22,7 @@ in {
     pkgs.tmux
     # TODO: Extract terminfo from this
     pkgs.ncurses
-    nix-direnv
+    pkgs.direnv
     custom.zsh
     custom.nvim
     custom.short-pwd
