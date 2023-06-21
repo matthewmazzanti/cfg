@@ -9,18 +9,17 @@ vim.opt.relativenumber = true
 -- Allow for mouse
 vim.opt.mouse = "a"
 -- Increase speed of mouse scrolling
-vim.keymap.set({"n", "v", "i"}, "<ScrollWheelUp>", "5<C-Y>", { silent = true })
 vim.keymap.set(
-    {
-        "n",
-        "v",
-        "i",
-    },
+    {"n", "v", "i"},
+    "<ScrollWheelUp>",
+    "5<C-Y>",
+    { silent = true }
+)
+vim.keymap.set(
+    { "n", "v", "i" },
     "<ScrollWheelDown>",
     "5<C-E>",
-    {
-        silent = true,
-    }
+    { silent = true }
 )
 -- Remember cursor position during buffer switch
 vim.opt.startofline = false
