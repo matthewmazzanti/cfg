@@ -1,4 +1,4 @@
-{ stdenv
+{ stdenvNoCC
 , callPackage
 , zsh
 , zsh-fast-syntax-highlighting
@@ -8,7 +8,7 @@ let
   wrapZsh = callPackage ./wrapper.nix { };
 
   fshPlugin = ''${zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh'';
-  fshTheme = stdenv.mkDerivation {
+  fshTheme = stdenvNoCC.mkDerivation {
     name = "fsh-theme";
     nativeBuildInputs = [ zsh ];
     buildCommand = ''

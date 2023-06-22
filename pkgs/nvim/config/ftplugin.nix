@@ -1,4 +1,4 @@
-{ stdenv, ... }:
+{ stdenvNoCC, ... }:
 let
   two-space = ''
     vim.opt_local.tabstop = 2
@@ -45,7 +45,7 @@ let
     '';
   };
 in
-stdenv.mkDerivation (ftplugin // {
+stdenvNoCC.mkDerivation (ftplugin // {
   name = "ftplugin";
   passAsFile = builtins.attrNames ftplugin;
   buildCommand = ''

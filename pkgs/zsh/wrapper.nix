@@ -1,7 +1,7 @@
-{ stdenv, lib, symlinkJoin, makeWrapper }:
+{ lib, stdenvNoCC, makeWrapper, symlinkJoin }:
 let
   mkZdotdir = { zshenv, zprofile, zshrc, zlogin, zlogout }@args:
-    stdenv.mkDerivation (args // {
+    stdenvNoCC.mkDerivation (args // {
       name = "zdotdir";
       passAsFile = builtins.attrNames args;
       # $passAsFile in builder seems to ignore empty strings/files

@@ -1,7 +1,7 @@
-{ stdenv, lib, symlinkJoin, makeWrapper }:
+{ stdenvNoCC, lib, symlinkJoin, makeWrapper }:
 let
   mkConfigDir = { direnvrc ? "" }@args:
-    stdenv.mkDerivation (args // {
+    stdenvNoCC.mkDerivation (args // {
       name = "direnv-config";
       passAsFile = builtins.attrNames args;
       # $passAsFile in builder seems to ignore empty strings/files
