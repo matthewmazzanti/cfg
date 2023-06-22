@@ -39,8 +39,17 @@ let
       fpath+=("$brew_prefix/share/zsh/site-functions")
     }
 
-    autoload -Uz compinit && compinit
-    autoload -Uz bashcompinit && bashcompinit
+    function () {
+      local cachedir="$HOME/.cache/zsh"
+      local dumpfile="$cachedir/zcompdump"
+
+      if [ ! -d "$cachedir" ]; then
+        mkdir -p "$cachedir"
+      fi
+
+      autoload -Uz compinit && compinit -C -d "$dumpfile"
+      autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
+    }
 
     # Zsh completion has this dumb thing where it will SSH into remote servers
     # to suggest file paths. With autosuggestions, this causes an SSH

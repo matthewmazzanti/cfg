@@ -1,27 +1,22 @@
 { pkgs, custom, ... }:
 
 let
-  updateZshCache = pkgs.writeShellScriptBin "updateZshCache" ''
-    zsh <<EOF
-      cachedir="$HOME/.cache/zsh"
-      dumpfile="$cachedir/zcompdump"
-      mkdir -p "$cachedir"
-      if [ -e "$dumpfile" ]; then
-        rm "$dumpfile"
-      fi
-      autoload -Uz compinit && compinit -d "$dumpfile"
-      autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
-    EOF
-  '';
-
   updateScript = pkgs.writeShellScriptBin "update" ''
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
+
+    # Update zsh completion cache on next start
+    dumpfile="$HOME/.cache/zsh/zcompdump"
+    if [ -e "$dumpfile" ]; then
+      rm "$HOME/.cache/zsh/zcompdump"
+    fi
   '';
 in {
   # environment.systemPackages = [];
   users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
     bat curl fd fzf git httpie ripgrep tree vim wget jq yq
+    # Networking
+    nmap
     # Languages
     cargo go ruby python3
     # MacOS replacement tools
@@ -29,7 +24,6 @@ in {
 
   ]) ++ (with custom; [
     updateScript
-    updateZshCache
 
     # Customized tools
     direnv less nvim short-pwd zsh
@@ -40,14 +34,11 @@ in {
     brews = [
       "ccache"
       "cmake"
-      "coreutils"
       "dfu-util"
       "dtc"
       "geckodriver"
-      "gnu-sed"
       "gnu-time"
       "ninja"
-      "nmap"
       "openssh"
       "pass"
       "qemu"
@@ -60,7 +51,7 @@ in {
       "balenaetcher"
       "discord"
       "docker"
-      "element"
+      "element" # Matrix
       "firefox"
       "font-fira-code"
       "fujitsu-scansnap-home"
