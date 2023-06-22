@@ -1,0 +1,115 @@
+#command
+\r        forw-line
+\n        forw-line
+e         forw-line
+j         forw-line
+\kd       forw-line
+^E        forw-line
+^N        forw-line
+k         back-line
+y         back-line
+^Y        back-line
+^K        back-line
+^P        back-line
+J         forw-line-force
+K         back-line-force
+Y         back-line-force
+d         forw-scroll
+^D        forw-scroll
+u         back-scroll
+^U        back-scroll
+\40       forw-screen
+f         forw-screen
+^F        forw-screen
+^V        forw-screen
+\kD       forw-screen
+b         back-screen
+^B        back-screen
+\kU       back-screen
+z         forw-window
+w         back-window
+F         forw-forever
+R         repaint-flush
+r         repaint
+^R        repaint
+^L        repaint
+g         goto-line
+\kh       goto-line
+<         goto-line
+p         percent
+%         percent
+h         left-scroll
+\kl       left-scroll
+l         right-scroll
+\kr       right-scroll
+{         forw-bracket {}
+}         back-bracket {}
+(         forw-bracket ()
+)         back-bracket ()
+[         forw-bracket []
+]         back-bracket []
+G         goto-end
+>         goto-end
+\ke       goto-end
+=         status
+^G        status
+:f        status
+/         forw-search
+?         back-search
+n         repeat-search
+N         reverse-search
+&         filter
+m         set-mark
+M         set-mark-bottom
+'         goto-mark
+^X^X      goto-mark
+E         examine
+:e        examine
+^X^V      examine
+:n        next-file
+:p        prev-file
+t         next-tag
+T         prev-tag
+:x        index-file
+:d        remove-file
+-         toggle-option
+:t        toggle-option t
+s         toggle-option o
+_         display-option
+|         pipe
+v         visual
+!         shell
++         firstcmd
+H         help
+h         help
+V         version
+0         digit
+1         digit
+2         digit
+3         digit
+4         digit
+5         digit
+6         digit
+7         digit
+8         digit
+9         digit
+q         quit
+Q         quit
+:q        quit
+:Q        quit
+ZZ        quit
+
+#line-edit
+\e        abort
+\t        forw-complete
+\17       back-complete
+^L        expand
+^V        literal
+^A        literal
+\kr       right
+\kl       left
+\kx       delete
+\kh       home
+\ke       end
+\ku       up
+^G        abort
