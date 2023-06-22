@@ -1,31 +1,37 @@
 { pkgs, custom, ... }:
 
 let
+  updateZshCache = pkgs.writeShellScriptBin "updateZshCache" ''
+    zsh <<EOF
+      cachedir="$HOME/.cache/zsh"
+      dumpfile="$cachedir/zcompdump"
+      mkdir -p "$cachedir"
+      if [ -e "$dumpfile" ]; then
+        rm "$dumpfile"
+      fi
+      autoload -Uz compinit && compinit -d "$dumpfile"
+      autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
+    EOF
+  '';
+
   updateScript = pkgs.writeShellScriptBin "update" ''
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
   '';
 in {
-  # List packages installed in system profile. To search by name, run:
-  # $ nix-env -qaP | grep wget
-  environment.systemPackages = with pkgs; [
+  # environment.systemPackages = [];
+  users.users.mmazzanti.packages = with pkgs custom; [
     updateScript
+    updateZshCache
+
     # Terminal utilities
-    bat curl fd fzf git httpie less ripgrep tree vim wget jq yq
+    bat curl fd fzf git httpie ripgrep tree vim wget jq yq
     # Languages
     cargo go ruby python3
-    # MacOS
+    # MacOS replacement tools
     coreutils time gnused
-  ];
 
-  users.users.mmazzanti.packages = [
-    pkgs.hello
-    pkgs.tmux
-    # TODO: Extract terminfo from this
-    pkgs.ncurses
-    custom.direnv
-    custom.zsh
-    custom.nvim
-    custom.short-pwd
+    # Customized tools
+    direnv less nvim short-pwd zsh
   ];
 
   homebrew = {

@@ -64,6 +64,28 @@
         "type": "github"
       }
     },
+    "less": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs/less",
+        "lastModified": 1687431218,
+        "narHash": "sha256-ECRJkUUwkzNlHp8XV38yO6teIpCus2QF/jdItkZfrIw=",
+        "type": "git",
+        "url": "file:.?dir=pkgs/less"
+      },
+      "original": {
+        "dir": "pkgs/less",
+        "type": "git",
+        "url": "file:.?dir=pkgs/less"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1687274257,
@@ -111,6 +133,7 @@
         "darwin": "darwin",
         "direnv": "direnv",
         "flake-utils": "flake-utils",
+        "less": "less",
         "nixpkgs": "nixpkgs",
         "nvim": "nvim",
         "short-pwd": "short-pwd",

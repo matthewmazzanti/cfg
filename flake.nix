@@ -20,6 +20,10 @@
     direnv.url = "git+file:.?dir=pkgs/direnv";
     direnv.inputs.flake-utils.follows = "flake-utils";
     direnv.inputs.nixpkgs.follows = "nixpkgs";
+
+    less.url = "git+file:.?dir=pkgs/less";
+    less.inputs.flake-utils.follows = "flake-utils";
+    less.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -29,6 +33,7 @@
     , nvim
     , zsh
     , direnv
+    , less
     , short-pwd
     , ...
     }: (
@@ -53,6 +58,7 @@
             zsh = zsh.packages.aarch64-darwin.dev;
             short-pwd = short-pwd.packages.aarch64-darwin.default;
             direnv = direnv.packages.aarch64-darwin.dev;
+            less = less.packages.aarch64-darwin.dev;
           };
           modules = [
             ./configuration.nix

@@ -18,6 +18,7 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 update_flake "$ROOT/pkgs/direnv"
+update_flake "$ROOT/pkgs/less"
 update_flake "$ROOT/pkgs/nvim"
 update_flake "$ROOT/pkgs/short-pwd"
 update_flake "$ROOT/pkgs/tmux"
