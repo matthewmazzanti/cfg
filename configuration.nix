@@ -19,10 +19,7 @@ let
   '';
 in {
   # environment.systemPackages = [];
-  users.users.mmazzanti.packages = with pkgs custom; [
-    updateScript
-    updateZshCache
-
+  users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
     bat curl fd fzf git httpie ripgrep tree vim wget jq yq
     # Languages
@@ -30,9 +27,13 @@ in {
     # MacOS replacement tools
     coreutils time gnused
 
+  ]) ++ (with custom; [
+    updateScript
+    updateZshCache
+
     # Customized tools
     direnv less nvim short-pwd zsh
-  ];
+  ]);
 
   homebrew = {
     enable = true;
