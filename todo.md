@@ -4,7 +4,7 @@
   (dependency of flake-utils)
 
 ## Neovim
-- Flesh out picker with more flexible behavior
+- Flesh out picker with more flexible behavior (https://github.com/nvim-telescope/telescope-file-browser.nvim)
 - Path autocompletion for cmp
 - Pre-compile Lua code
 - Pre-compile LuaSnip JSON snippets (from VSCode)

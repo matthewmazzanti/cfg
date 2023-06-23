@@ -7,21 +7,23 @@ let
     # Update zsh completion cache on next start
     dumpfile="$HOME/.cache/zsh/zcompdump"
     if [ -e "$dumpfile" ]; then
-      rm "$HOME/.cache/zsh/zcompdump"
+      rm "$dumpfile"
     fi
   '';
 in {
   # environment.systemPackages = [];
   users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
-    bat curl fd fzf git httpie ripgrep tree vim wget jq yq
+    bat fd fzf git ripgrep tree vim jq yq visidata
     # Networking
-    nmap
+    nmap httpie wget curl
     # Languages
     cargo go ruby python3
+    # Misc
+    pass tio wakeonlan
     # MacOS replacement tools
-    coreutils time gnused
-
+    coreutils time gnused time openssh
+    alacritty
   ]) ++ (with custom; [
     updateScript
 
@@ -35,16 +37,9 @@ in {
       "ccache"
       "cmake"
       "dfu-util"
-      "dtc"
-      "geckodriver"
-      "gnu-time"
+      "dtc" # Device tree compiler, zephyr
       "ninja"
-      "openssh"
-      "pass"
       "qemu"
-      "saulpw/vd/visidata"
-      "tio"
-      "wakeonlan"
     ];
     casks = [
       "1password"
@@ -82,10 +77,12 @@ in {
     experimental-features = nix-command flakes
   '';
 
-  programs.zsh.enable = true;
-  programs.zsh.promptInit = "";
-  programs.zsh.enableCompletion = false;
-  programs.zsh.enableBashCompletion = false;
+  programs.zsh = {
+    enable = true;
+    promptInit = "";
+    enableCompletion = false;
+    enableBashCompletion = false;
+  };
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
