@@ -3,7 +3,11 @@
 -- Color theme
 -- TODO: develop own nix script for color injection?
 
-require("gruvbox").setup({
+local gruvbox = require("gruvbox")
+
+vim.opt.background = "dark"
+
+gruvbox.setup({
     undercurl = true,
     underline = true,
     bold = false,
@@ -13,8 +17,16 @@ require("gruvbox").setup({
         operators = false,
         folds = false,
     },
+    overrides = {
+        SignColumn = { fg = "none", bg = "none" },
+        GruvboxRedSign = { bg = "none" },
+        GruvboxGreenSign = { bg = "none" },
+        GruvboxYellowSign = { bg = "none" },
+        GruvboxBlueSign = { bg = "none" },
+        GruvboxPurpleSign = { bg = "none" },
+        GruvboxAquaSign = { bg = "none" },
+        GruvboxOrangeSign = { bg = "none" }
+    }
 })
 
-vim.opt.background = "dark"
 vim.cmd("colorscheme gruvbox")
-vim.api.nvim_set_hl(0, "SignColumn", { ctermfg = "none", ctermbg = "none" })
