@@ -10,6 +10,9 @@
 - Pre-compile LuaSnip JSON snippets (from VSCode)
 - Tweak cmp auto-selection and enter behavior
 - Add rename ui functionality
+- Fix file path to always be relative - sometimes is home-based when using file
+  picker
+- Editor config
 
 ## Zsh
 - Re-target zsh history file
