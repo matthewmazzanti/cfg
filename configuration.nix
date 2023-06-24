@@ -18,7 +18,7 @@ in {
     # Networking
     nmap httpie wget curl
     # Languages
-    cargo go ruby python3
+    rustc cargo go ruby python3
     # Misc
     pass tio wakeonlan
     # MacOS replacement tools

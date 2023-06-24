@@ -8,11 +8,10 @@
 , neovim-unwrapped
 , vimPlugins
   # Language servers
-, ccls
 , gopls
 , lua-language-server
 , nodePackages
-, rust-analyzer
+, rust-analyzer-unwrapped # Unwrapped, RUST_SRC_PATH seems to have no effect
 , nil
 , ...
 }:
@@ -20,14 +19,12 @@ let
   path = buildEnv {
     name = "nvim-path";
     paths = [
-      ccls
       gopls
       lua-language-server
-      nodePackages.bash-language-server
       nodePackages.pyright
       nodePackages.typescript-language-server
       nil
-      rust-analyzer
+      rust-analyzer-unwrapped
     ];
   };
 
@@ -107,13 +104,9 @@ wrapNeovimUnstable neovim-unwrapped {
   wrapRc = false;
   wrapperArgs = [
     # Add path item to wrapper
-    "--suffix"
-    "PATH"
-    ":"
-    ''${path}/bin''
+    "--suffix" "PATH" ":" ''${path}/bin''
     # Add generated init
-    "--add-flags"
-    ''-u ${init}''
+    "--add-flags" ''-u ${init}''
   ];
   withPython3 = false;
   withNodeJs = false;

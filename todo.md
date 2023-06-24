@@ -12,7 +12,9 @@
 - Add rename ui functionality
 - Fix file path to always be relative - sometimes is home-based when using file
   picker
-- Editor config
+- Per-project editor config, lines, tabs etc
+- NUI rename box (upstream rename lambda?)
+- Re-add CCLS for C projects, if used
 
 ## Zsh
 - Re-target zsh history file
