@@ -39,9 +39,8 @@ end
 local servers = {
     "ccls",
     "gopls",
-    "nil_ls",
     "pyright",
-    "rust_analyzer",
+    "nil_ls",
     "tsserver",
 }
 
@@ -49,6 +48,24 @@ for _, server in ipairs(servers) do
     if find_ls(server) then
         lspconfig[server].setup(defaults)
     end
+end
+
+if find_ls("rust_analyzer") then
+    local settings = {
+        ['rust-analyzer'] = {
+            cargo = {
+                -- Rust toolchain on Nix is in its own drv in the nix store. As
+                -- a result, the default sub-path rust-analyzer looks for doesnt
+                -- work, this works around this
+                --
+                -- Further, there are still errors when there's only cargo
+                -- available
+                sysrootSrc = "",
+            }
+        }
+    }
+
+    lspconfig.rust_analyzer.setup(vim.tbl_extend("force", defaults, settings))
 end
 
 if find_ls("lua_ls") then

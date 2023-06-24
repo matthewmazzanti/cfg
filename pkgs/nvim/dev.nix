@@ -11,7 +11,7 @@
 , gopls
 , lua-language-server
 , nodePackages
-, rust-analyzer-unwrapped # Unwrapped, RUST_SRC_PATH seems to have no effect
+, rust-analyzer
 , nil
 , ...
 }:
@@ -24,7 +24,7 @@ let
       nodePackages.pyright
       nodePackages.typescript-language-server
       nil
-      rust-analyzer-unwrapped
+      rust-analyzer
     ];
   };
 
