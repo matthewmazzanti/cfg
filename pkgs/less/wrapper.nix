@@ -13,9 +13,12 @@ let
       paths = [ less ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        mv "$out/bin/less" "$out/bin/less-unwrapped"
+        name="less"
+        exe="$out/bin/$name"
+        unwrapped="$out/bin/$name-unwrapped"
+        mv "$exe" "$unwrapped"
         makeWrapper \
-          "$out/bin/less-unwrapped" "$out/bin/less" \
+          "$(readlink -f "$unwrapped")" "$exe" \
           --add-flags '--lesskey-src=${lesskeyDrv}' \
           ${lib.escapeShellArgs wrapperArgs}
       '';

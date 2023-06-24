@@ -35,9 +35,12 @@ let
       paths = [ zsh ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        mv "$out/bin/zsh" "$out/bin/zsh-unwrapped"
+        name="zsh"
+        exe="$out/bin/$name"
+        unwrapped="$out/bin/$name-unwrapped"
+        mv "$exe" "$unwrapped"
         makeWrapper \
-          "$out/bin/zsh-unwrapped" "$out/bin/zsh" \
+          "$(readlink -f "$unwrapped")" "$exe" \
           --set ZDOTDIR "${zdotdir}"
       '';
     };

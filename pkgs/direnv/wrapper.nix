@@ -31,9 +31,12 @@ let
       paths = [ direnv ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        mv "$out/bin/direnv" "$out/bin/direnv-unwrapped"
+        name="direnv"
+        exe="$out/bin/$name"
+        unwrapped="$out/bin/$name-unwrapped"
+        mv "$exe" "$unwrapped"
         makeWrapper \
-          "$out/bin/direnv-unwrapped" "$out/bin/direnv" \
+          "$(readlink -f "$unwrapped")" "$exe" \
           --set XDG_CONFIG_HOME "${configDir}"
       '';
     };

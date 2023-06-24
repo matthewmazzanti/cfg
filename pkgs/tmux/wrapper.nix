@@ -12,8 +12,9 @@ let
       paths = [ tmux ];
       buildInputs = [ makeWrapper ];
       postBuild = ''
-        exe="$out/bin/tmux"
-        unwrapped="$out/bin/tmux-unwrapped"
+        name="tmux"
+        exe="$out/bin/$name"
+        unwrapped="$out/bin/$name-unwrapped"
         mv "$exe" "$unwrapped"
         makeWrapper \
           "$(readlink -f "$unwrapped")" "$exe" \

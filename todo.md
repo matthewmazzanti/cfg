@@ -18,7 +18,7 @@
 
 ## Zsh
 - Re-target zsh history file
-- Re-target zsh sessions directory
+- Startup seems slow occasionally
 
 ## iTerm2
 - Figure out how to get plist property loading to work
