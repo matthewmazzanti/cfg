@@ -5,6 +5,9 @@ def qwer():
 # This is some long
 # and complex
 # comment
+# Just making
+# sure that it
+# still works
 def foobar(qwer, world):
     """
     qwer

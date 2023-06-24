@@ -31,14 +31,14 @@ vim.opt.backspace = {"indent", "eol", "start"}
 vim.opt.colorcolumn = "81"
 vim.opt.textwidth = 80
 -- May be more options to explore here
-vim.opt.formatoptions = table.concat({
-    "c", -- Auto wrap comments
-    "r", -- Add comment leader on <CR> in insert mode
-    "o", -- Add comment leader when hitting "O" or "o"
-    "j", -- Remove comment leader when joining lines
-    "q", -- Format comments with gq
-    "l", -- Don't format long lines by default
-}, "")
+vim.opt.formatoptions:append({
+    c = true, -- Auto wrap comments
+    r = true, -- Add comment leader on <CR> in insert mode
+    o = true, -- Add comment leader when hitting "O" or "o"
+    j = true, -- Remove comment leader when joining lines
+    q = true, -- Format comments with gq
+    l = true, -- Don't format long lines by default
+})
 vim.opt.linebreak = true
 vim.opt.wrap = false
 
@@ -81,8 +81,10 @@ vim.opt.autoread = true
 -- Always show sign column for marks, errors
 vim.opt.signcolumn = "yes"
 
--- Ignore insert completion messages
-vim.opt.shortmess:append("c")
+vim.opt.shortmess:append({
+    c = true, -- Ignore insert completion messages
+    I = true, -- Skip startup message
+})
 
 -- Set leader key for other commands
 vim.g.mapleader = ";"
@@ -104,4 +106,11 @@ vim.filetype.add({
     },
 })
 
-vim.cmd("clearjumps")
+-- Stack like jump options, refresh on startup
+vim.opt.jumpoptions = "stack"
+vim.api.nvim_create_autocmd({"VimEnter"}, {
+    pattern = {"*"},
+    callback = function ()
+        vim.cmd("clearjumps")
+    end
+})
