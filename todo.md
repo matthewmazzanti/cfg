@@ -15,6 +15,19 @@
 - Pre-compile LuaSnip JSON snippets (from VSCode)
 - Pre-compile Lua code
 - Re-add CCLS for C projects, if used
+- Add floating window borders for lsp, set color to none (how?)
+```
+local border = "rounded"
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+  vim.lsp.handlers.hover, { border = border }
+)
+
+vim.lsp.handlers["textDocument/signature_help"] = vim.lsp.with(
+  vim.lsp.handlers.signature_help, { border = border }
+)
+
+require("lspconfig.ui.windows").default_options.border = border
+```
 
 ## Zsh
 - Re-target zsh history file
