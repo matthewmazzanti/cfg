@@ -8,7 +8,7 @@ function clip-wrap-widgets() {
             eval "
             function _clip-wrapped-$widget() {
                 zle .$widget
-                print -rn \"\$CUTBUFFER\" | pbcopy
+                print -rn -- \"\$CUTBUFFER\" | pbcopy
             }
             "
         else
