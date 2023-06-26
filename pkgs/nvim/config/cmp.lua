@@ -98,4 +98,10 @@ cmp.setup({
     },
 })
 
+cmp.setup.filetype({ "rust", "help" }, {
+    window = {
+        documentation = cmp.config.disable
+    }
+})
+
 vim.keymap.set("i", "<C-n>", cmp.complete)
