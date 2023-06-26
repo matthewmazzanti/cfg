@@ -23,7 +23,7 @@ in {
     pass tio wakeonlan
     # MacOS replacement tools
     coreutils time gnused time openssh
-    alacritty
+    alacritty helix
   ]) ++ (with custom; [
     updateScript
 
