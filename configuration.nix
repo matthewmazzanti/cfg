@@ -18,7 +18,7 @@ in {
     # Networking
     nmap httpie wget curl
     # Languages
-    rustc cargo go ruby python3
+    rustc cargo go ruby (python3.withPackages (ps: [ps.pandas]))
     # Misc
     pass tio wakeonlan
     # MacOS replacement tools
@@ -50,6 +50,7 @@ in {
       "firefox"
       "font-fira-code"
       "fujitsu-scansnap-home"
+      "google-drive"
       "gcc-arm-embedded"
       "gimp"
       "google-chrome"
