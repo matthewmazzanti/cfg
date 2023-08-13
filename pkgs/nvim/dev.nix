@@ -13,6 +13,7 @@
 , nodePackages
 , rust-analyzer
 , nil
+, ccls
 , ...
 }:
 let
@@ -25,6 +26,7 @@ let
       nodePackages.typescript-language-server
       nil
       rust-analyzer
+      ccls
     ];
   };
 
@@ -45,7 +47,7 @@ let
     vim-wordmotion # CamelCase and other motions
     vim-easyclip # Improved yank/delete buffer better
     vim-sandwich # Surround
-    hop-nvim # Visual interactive jumps using treesitter
+    # hop-nvim # Visual interactive jumps using treesitter
 
     # Telescope
     telescope-nvim

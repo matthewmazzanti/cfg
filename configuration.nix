@@ -24,6 +24,9 @@ in {
     # MacOS replacement tools
     coreutils time gnused time openssh
     alacritty helix
+    clang
+
+    # qemu
   ]) ++ (with custom; [
     updateScript
 
@@ -40,6 +43,7 @@ in {
       "dtc" # Device tree compiler, zephyr
       "ninja"
       "qemu"
+      "libvirt"
     ];
     casks = [
       "1password"

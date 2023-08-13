@@ -1,3 +1,4 @@
+import hashlib
 
 def qwer():
     return
@@ -23,3 +24,6 @@ def barbaz():
 
 def partial_test():
     foobar(barbaz(), "world")
+
+def example():
+    m = hashlib.sha256()
