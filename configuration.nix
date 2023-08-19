@@ -26,6 +26,9 @@ in {
     alacritty helix
     clang
 
+    # cloud
+    terraform
+    awscli2
     # qemu
   ]) ++ (with custom; [
     updateScript
