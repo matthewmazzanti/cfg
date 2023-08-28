@@ -29,6 +29,7 @@ in {
     # cloud
     terraform
     awscli2
+    gh
     # qemu
   ]) ++ (with custom; [
     updateScript

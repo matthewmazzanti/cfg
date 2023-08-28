@@ -39,6 +39,8 @@ let
     nix = two-space;
     cpp = two-space;
     h = two-space;
+    terraform = two-space;
+    hcl = two-space;
     markdown = ''
       ${two-space}
       vim.opt_local.spell = true

@@ -72,6 +72,7 @@ let
       dockerfile
       go
       haskell
+      hcl
       html
       javascript
       json
@@ -81,6 +82,7 @@ let
       python
       ruby
       typescript
+      terraform
       yaml
     ]))
     nvim-treesitter-textobjects # Treesitter powered textobjects
