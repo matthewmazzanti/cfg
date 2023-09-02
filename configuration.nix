@@ -82,7 +82,17 @@ in {
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
+  nix.buildMachines = [{
+    sshUser = "build";
+    hostName = "192.168.65.2";
+    systems = ["x86_64-linux" "aarch64-linux"];
+    protocol = "ssh-ng";
+    maxJobs = 8;
+  }];
+  nix.distributedBuilds = true;
+  # optional, useful when the builder has a faster internet connection than yours
   nix.extraOptions = ''
+    builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
 
