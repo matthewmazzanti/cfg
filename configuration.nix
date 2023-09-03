@@ -86,9 +86,9 @@ in {
     sshUser = "build";
     hostName = "192.168.65.2";
     systems = ["x86_64-linux" "aarch64-linux"];
-    protocol = "ssh";
+    protocol = "ssh-ng";
     maxJobs = 8;
-    hostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
+    publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
   }];
   nix.distributedBuilds = true;
   # optional, useful when the builder has a faster internet connection than yours
