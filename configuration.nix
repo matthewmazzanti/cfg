@@ -97,12 +97,6 @@ in {
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
-  nix.settings.substituters = [
-    "http://192.168.65.2:5000"
-  ];
-  nix.settings.trusted-public-keys = [
-    "192.168.65.2:KbRTTxdX2O2nckcHJEXktRtmhtHk8HFkImkpRbwellc="
-  ];
 
   programs.zsh = {
     enable = true;
