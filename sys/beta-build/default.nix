@@ -32,6 +32,10 @@
   environment.systemPackages = with pkgs; [
     vim
     wget
+    git
   ];
   virtualisation.rosetta.enable = true;
+
+  services.nix-serve.enable = true;
+  services.nix-serve.openFirewall = true;
 }

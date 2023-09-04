@@ -18,13 +18,14 @@ in {
     # Networking
     nmap httpie wget curl
     # Languages
-    rustc cargo go ruby (python3.withPackages (ps: [ps.pandas]))
+    rustc cargo go ruby (python311.withPackages (ps: [ps.pandas]))
     # Misc
     pass tio wakeonlan
     # MacOS replacement tools
     coreutils time gnused time openssh
     alacritty helix
     clang
+    poetry
 
     # cloud
     terraform
@@ -96,6 +97,12 @@ in {
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
+  nix.settings.substituters = [
+    "http://192.168.65.2:5000"
+  ];
+  nix.settings.trusted-public-keys = [
+    "192.168.65.2:KbRTTxdX2O2nckcHJEXktRtmhtHk8HFkImkpRbwellc="
+  ];
 
   programs.zsh = {
     enable = true;
