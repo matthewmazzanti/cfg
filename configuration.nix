@@ -56,16 +56,16 @@ in
     awscli2
     gh
     # qemu
-  ]) ++ (with custom; [
+  ]) ++ [
     updateScript
 
     # Customized tools
-    direnv.dev
-    less.dev
-    nvim.dev
-    short-pwd.default
-    zsh.dev
-  ]);
+    custom."direnv/dev"
+    custom."less/dev"
+    custom."nvim/dev"
+    custom."short-pwd/default"
+    custom."zsh/dev"
+  ];
 
   homebrew = {
     enable = true;
