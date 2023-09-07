@@ -97,6 +97,7 @@ in {
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
+  nix.settings.trusted-users = ["mmazzanti"];
 
   programs.zsh = {
     enable = true;
