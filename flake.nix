@@ -24,6 +24,7 @@
     , ...
     }@inputs:
     let
+      inherit (flake-utils.lib) eachDefaultSystem flattenTree;
       # Workaround for subflake UX
       # Ideally I'd be able to reference a flake in the pkgs/ dir with a URL in
       # the inputs - something like path:/pkgs/nvim or git+file:.?path=pkgs/nvim
@@ -41,18 +42,26 @@
 
       # General outputs
       # Provided for all default systems
-      outputs = flake-utils.lib.eachDefaultSystem (system:
+      outputs = eachDefaultSystem (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          packages = {
+          # Packages doesn't allow nested outputs - use flatten tree to fix
+          # this. Requires some massaging to set the `recurseForDerivations`
+          # attribute on each sub-item
+          packages = let
+            # TODO: Custom implementation with an unflatten reversal?
+            recurse = builtins.mapAttrs (_: value: 
+              value // { recurseForDerivations = true; }
+            );
+          in flattenTree (recurse {
             nvim = nvim.packages.${system};
             zsh = zsh.packages.${system};
             short-pwd = short-pwd.packages.${system};
             direnv = direnv.packages.${system};
             less = less.packages.${system};
-          };
+          });
 
           devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
@@ -68,15 +77,11 @@
       # System configurations
       # In separate attr set since they only build for a single arch
       configuration = {
-        darwinConfigurations.beta =
-          let
-            system = "aarch64-darwin";
-          in
-          darwin.lib.darwinSystem {
-            inherit system;
-            specialArgs.custom = self.packages.${system};
-            modules = [ ./configuration.nix ];
-          };
+        darwinConfigurations.beta = darwin.lib.darwinSystem rec {
+          system = "aarch64-darwin";
+          specialArgs.custom = self.packages.${system};
+          modules = [ ./configuration.nix ];
+        };
 
         nixosConfigurations.beta-build = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
