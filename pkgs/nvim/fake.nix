@@ -36,7 +36,6 @@
       in
       {
         packages.root = pkgs.callPackage ./root.nix { };
-        packages.foobar = pkgs.callPackage ./root.nix { };
         packages.dev = pkgs.callPackage ./dev.nix { };
       }
     );

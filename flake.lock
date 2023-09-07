@@ -43,31 +43,6 @@
         "type": "github"
       }
     },
-    "direnv": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "pkgs/direnv",
-        "lastModified": 1694089306,
-        "narHash": "sha256-0sRjNSNguHiiGhybK/dh4AawkTRu5HwpdIKztvio6kw=",
-        "ref": "refs/heads/dev",
-        "rev": "1e25e5377e1981cab3c231aa9f9efe3d48e1384a",
-        "revCount": 146,
-        "type": "git",
-        "url": "file:.?dir=pkgs/direnv"
-      },
-      "original": {
-        "dir": "pkgs/direnv",
-        "type": "git",
-        "url": "file:.?dir=pkgs/direnv"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -102,31 +77,6 @@
         "type": "github"
       }
     },
-    "less": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "pkgs/less",
-        "lastModified": 1694089306,
-        "narHash": "sha256-0sRjNSNguHiiGhybK/dh4AawkTRu5HwpdIKztvio6kw=",
-        "ref": "refs/heads/dev",
-        "rev": "1e25e5377e1981cab3c231aa9f9efe3d48e1384a",
-        "revCount": 146,
-        "type": "git",
-        "url": "file:.?dir=pkgs/less"
-      },
-      "original": {
-        "dir": "pkgs/less",
-        "type": "git",
-        "url": "file:.?dir=pkgs/less"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1694032533,
@@ -143,68 +93,13 @@
         "type": "github"
       }
     },
-    "nvim": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "vim-easyclip": "vim-easyclip"
-      },
-      "locked": {
-        "dir": "pkgs/nvim",
-        "lastModified": 1694089306,
-        "narHash": "sha256-0sRjNSNguHiiGhybK/dh4AawkTRu5HwpdIKztvio6kw=",
-        "ref": "refs/heads/dev",
-        "rev": "1e25e5377e1981cab3c231aa9f9efe3d48e1384a",
-        "revCount": 146,
-        "type": "git",
-        "url": "file:.?dir=pkgs/nvim"
-      },
-      "original": {
-        "dir": "pkgs/nvim",
-        "type": "git",
-        "url": "file:.?dir=pkgs/nvim"
-      }
-    },
     "root": {
       "inputs": {
         "darwin": "darwin",
         "deploy-rs": "deploy-rs",
-        "direnv": "direnv",
         "flake-utils": "flake-utils",
-        "less": "less",
         "nixpkgs": "nixpkgs",
-        "nvim": "nvim",
-        "short-pwd": "short-pwd",
-        "zsh": "zsh"
-      }
-    },
-    "short-pwd": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "pkgs/short-pwd",
-        "lastModified": 1694089306,
-        "narHash": "sha256-0sRjNSNguHiiGhybK/dh4AawkTRu5HwpdIKztvio6kw=",
-        "ref": "refs/heads/dev",
-        "rev": "1e25e5377e1981cab3c231aa9f9efe3d48e1384a",
-        "revCount": 146,
-        "type": "git",
-        "url": "file:.?dir=pkgs/short-pwd"
-      },
-      "original": {
-        "dir": "pkgs/short-pwd",
-        "type": "git",
-        "url": "file:.?dir=pkgs/short-pwd"
+        "vim-easyclip": "vim-easyclip"
       }
     },
     "systems": {
@@ -252,31 +147,6 @@
         "ref": "master",
         "repo": "vim-easyclip",
         "type": "github"
-      }
-    },
-    "zsh": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "dir": "pkgs/zsh",
-        "lastModified": 1694089306,
-        "narHash": "sha256-0sRjNSNguHiiGhybK/dh4AawkTRu5HwpdIKztvio6kw=",
-        "ref": "refs/heads/dev",
-        "rev": "1e25e5377e1981cab3c231aa9f9efe3d48e1384a",
-        "revCount": 146,
-        "type": "git",
-        "url": "file:.?dir=pkgs/zsh"
-      },
-      "original": {
-        "dir": "pkgs/zsh",
-        "type": "git",
-        "url": "file:.?dir=pkgs/zsh"
       }
     }
   },

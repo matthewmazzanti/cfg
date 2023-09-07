@@ -107,9 +107,13 @@ wrapNeovimUnstable neovim-unwrapped {
   wrapRc = false;
   wrapperArgs = [
     # Add path item to wrapper
-    "--suffix" "PATH" ":" ''${path}/bin''
+    "--suffix"
+    "PATH"
+    ":"
+    ''${path}/bin''
     # Add generated init
-    "--add-flags" ''-u ${init}''
+    "--add-flags"
+    ''-u ${init}''
   ];
   withPython3 = false;
   withNodeJs = false;

@@ -10,25 +10,9 @@
     deploy-rs.url = "github:serokell/deploy-rs";
     deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
 
-    nvim.url = "git+file:.?dir=pkgs/nvim";
-    nvim.inputs.flake-utils.follows = "flake-utils";
-    nvim.inputs.nixpkgs.follows = "nixpkgs";
-
-    zsh.url = "git+file:.?dir=pkgs/zsh";
-    zsh.inputs.flake-utils.follows = "flake-utils";
-    zsh.inputs.nixpkgs.follows = "nixpkgs";
-
-    short-pwd.url = "git+file:.?dir=pkgs/short-pwd";
-    short-pwd.inputs.flake-utils.follows = "flake-utils";
-    short-pwd.inputs.nixpkgs.follows = "nixpkgs";
-
-    direnv.url = "git+file:.?dir=pkgs/direnv";
-    direnv.inputs.flake-utils.follows = "flake-utils";
-    direnv.inputs.nixpkgs.follows = "nixpkgs";
-
-    less.url = "git+file:.?dir=pkgs/less";
-    less.inputs.flake-utils.follows = "flake-utils";
-    less.inputs.nixpkgs.follows = "nixpkgs";
+    # Neovim plugins
+    vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
+    vim-easyclip.flake = false;
   };
 
   outputs =
@@ -37,39 +21,49 @@
     , darwin
     , flake-utils
     , deploy-rs
-    , nvim
-    , zsh
-    , direnv
-    , less
-    , short-pwd
     , ...
-    }: (
-      (flake-utils.lib.eachDefaultSystem (system: let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nixpkgs-fmt
-            nix-tree
-            poetry
-            go
-            deploy-rs.packages.${system}.default
-          ];
-        };
-      })) // {
-        darwinConfigurations.beta = darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
-          specialArgs.custom = {
-            nvim = nvim.packages.aarch64-darwin.dev;
-            zsh = zsh.packages.aarch64-darwin.dev;
-            short-pwd = short-pwd.packages.aarch64-darwin.default;
-            direnv = direnv.packages.aarch64-darwin.dev;
-            less = less.packages.aarch64-darwin.dev;
+    }@inputs:
+    let
+      nvim = (import ./pkgs/nvim/fake.nix).outputs inputs;
+      zsh = (import ./pkgs/zsh/fake.nix).outputs inputs;
+      short-pwd = (import ./pkgs/short-pwd/fake.nix).outputs inputs;
+      direnv = (import ./pkgs/direnv/fake.nix).outputs inputs;
+      less = (import ./pkgs/less/fake.nix).outputs inputs;
+
+      outputs = flake-utils.lib.eachDefaultSystem (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          packages = {
+            nvim = nvim.packages.${system};
+            zsh = zsh.packages.${system};
+            short-pwd = short-pwd.packages.${system};
+            direnv = direnv.packages.${system};
+            less = less.packages.${system};
           };
-          modules = [
-            ./configuration.nix
-          ];
-        };
+
+          devShells.default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              nixpkgs-fmt
+              nix-tree
+              poetry
+              go
+              deploy-rs.packages.${system}.default
+            ];
+          };
+        });
+
+      configuration = {
+        darwinConfigurations.beta =
+          let
+            system = "aarch64-darwin";
+          in
+          darwin.lib.darwinSystem {
+            inherit system;
+            specialArgs.custom = self.packages.${system};
+            modules = [ ./configuration.nix ];
+          };
 
         nixosConfigurations.beta-build = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -85,10 +79,7 @@
           profiles.system.path = deploy-rs.lib.x86_64-linux.activate.nixos
             self.nixosConfigurations.beta-build;
         };
-
-        # checks = builtins.mapAttrs (system: deployLib:
-        #   deployLib.deployChecks self.deploy
-        # ) deploy-rs.lib;
-      }
-    );
+      };
+    in
+    outputs // configuration;
 }

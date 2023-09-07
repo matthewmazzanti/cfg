@@ -10,20 +10,44 @@ let
       rm "$dumpfile"
     fi
   '';
-in {
+in
+{
   # environment.systemPackages = [];
   users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
-    bat fd fzf git ripgrep tree vim jq yq visidata
+    bat
+    fd
+    fzf
+    git
+    ripgrep
+    tree
+    vim
+    jq
+    yq
+    visidata
     # Networking
-    nmap httpie wget curl
+    nmap
+    httpie
+    wget
+    curl
     # Languages
-    rustc cargo go ruby (python311.withPackages (ps: [ps.pandas]))
+    rustc
+    cargo
+    go
+    ruby
+    (python311.withPackages (ps: [ ps.pandas ]))
     # Misc
-    pass tio wakeonlan
+    pass
+    tio
+    wakeonlan
     # MacOS replacement tools
-    coreutils time gnused time openssh
-    alacritty helix
+    coreutils
+    time
+    gnused
+    time
+    openssh
+    alacritty
+    helix
     clang
     poetry
 
@@ -36,7 +60,11 @@ in {
     updateScript
 
     # Customized tools
-    direnv less nvim short-pwd zsh
+    direnv.dev
+    less.dev
+    nvim.dev
+    short-pwd.default
+    zsh.dev
   ]);
 
   homebrew = {
@@ -86,7 +114,7 @@ in {
   nix.buildMachines = [{
     sshUser = "build";
     hostName = "192.168.65.2";
-    systems = ["x86_64-linux" "aarch64-linux"];
+    systems = [ "x86_64-linux" "aarch64-linux" ];
     protocol = "ssh-ng";
     maxJobs = 8;
     publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
@@ -97,7 +125,7 @@ in {
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
-  nix.settings.trusted-users = ["mmazzanti"];
+  nix.settings.trusted-users = [ "mmazzanti" ];
 
   programs.zsh = {
     enable = true;
