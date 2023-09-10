@@ -13,6 +13,9 @@
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
+
+    direnv-patched.url = "github:matthewmazzanti/direnv/master";
+    direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

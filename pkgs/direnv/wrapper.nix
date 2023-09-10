@@ -6,12 +6,12 @@ let
       passAsFile = builtins.attrNames args;
       # $passAsFile in builder seems to ignore empty strings/files
       buildCommand = ''
-        mkdir -p "$out/direnv"
+        mkdir -p "$out"
         for var in $passAsFile; do
             varPath="''${var}Path"
             varPath="''${!varPath}"
 
-            outPath="$out/direnv/$var"
+            outPath="$out/$var"
             cp "$varPath" "$outPath"
         done
       '';
@@ -32,12 +32,13 @@ let
       buildInputs = [ makeWrapper ];
       postBuild = ''
         name="direnv"
-        exe="$out/bin/$name"
+        wrapped="$out/bin/$name"
         unwrapped="$out/bin/$name-unwrapped"
-        mv "$exe" "$unwrapped"
+        mv "$wrapped" "$unwrapped"
         makeWrapper \
-          "$(readlink -f "$unwrapped")" "$exe" \
-          --set XDG_CONFIG_HOME "${configDir}"
+          "$(readlink -f "$unwrapped")" "$wrapped" \
+          --set DIRENV_SELF_PATH "$wrapped" \
+          --set DIRENV_CONFIG '${configDir}'
       '';
     };
 in
