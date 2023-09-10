@@ -68,6 +68,7 @@ let
     (nvim-treesitter.withPlugins (plugins: with plugins; [
       bash
       c
+      cpp
       css
       dockerfile
       go
