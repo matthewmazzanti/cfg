@@ -26,8 +26,19 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOcILRGzPmY2c4QJkuLVF5NhBubrRPZUn96eiABvVFuF root@beta.local"
     ];
   };
-  nix.settings.trusted-users = [ "root" "@wheel" ];
   security.sudo.wheelNeedsPassword = false;
+
+  nix.settings.trusted-users = [ "root" "@wheel" ];
+  nix.extraOptions = ''
+    builders-use-substitutes = true
+    secret-key-files = /var/cache-priv-key.pem
+  '';
+  services.nix-serve = {
+    enable = true;
+    secretKeyFile = "/var/cache-priv-key.pem";
+    port = 80;
+    openFirewall = true;
+  };
 
   environment.systemPackages = with pkgs; [
     vim

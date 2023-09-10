@@ -126,6 +126,8 @@ in
     experimental-features = nix-command flakes
   '';
   nix.settings.trusted-users = [ "mmazzanti" ];
+  nix.settings.trusted-substituters = ["http://192.168.65.2"];
+  nix.settings.trusted-public-keys = ["192.168.65.2:+Mp9NqYcoUvsKMtds81iGD2mHsv19F9kkQa9I9mBhdY="];
 
   programs.zsh = {
     enable = true;
