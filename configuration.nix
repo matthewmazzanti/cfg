@@ -15,46 +15,18 @@ in
   # environment.systemPackages = [];
   users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
-    bat
-    fd
-    fzf
-    git
-    ripgrep
-    tree
-    vim
-    jq
-    yq
-    visidata
+    bat fd fzf git ripgrep tree vim jq yq visidata
     # Networking
-    nmap
-    httpie
-    wget
-    curl
+    nmap httpie wget curl
     # Languages
-    rustc
-    cargo
-    go
-    ruby
-    (python311.withPackages (ps: [ ps.pandas ]))
+    rustc cargo go ruby (python311.withPackages (ps: [ ps.pandas ]))
     # Misc
-    pass
-    tio
-    wakeonlan
+    pass tio wakeonlan
     # MacOS replacement tools
-    coreutils
-    time
-    gnused
-    time
-    openssh
-    alacritty
-    helix
-    clang
-    poetry
+    coreutils time gnused time openssh alacritty helix clang poetry
 
     # cloud
-    terraform
-    awscli2
-    gh
+    terraform awscli2 gh
     # qemu
   ]) ++ [
     updateScript

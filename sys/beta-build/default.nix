@@ -30,6 +30,7 @@
 
   nix.settings.trusted-users = [ "root" "@wheel" ];
   nix.extraOptions = ''
+    experimental-features = nix-command flakes
     builders-use-substitutes = true
     secret-key-files = /var/cache-priv-key.pem
   '';

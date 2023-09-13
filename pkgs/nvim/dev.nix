@@ -7,19 +7,13 @@
 , wrapNeovimUnstable
 , neovim-unwrapped
 , vimPlugins
-  # Language servers
-, gopls
-, lua-language-server
-, nodePackages
-, rust-analyzer
-, nil
-, ccls
+, pkgs
 , ...
 }:
 let
   path = buildEnv {
     name = "nvim-path";
-    paths = [
+    paths = with pkgs; [
       gopls
       lua-language-server
       nodePackages.pyright
@@ -27,6 +21,7 @@ let
       nil
       rust-analyzer
       ccls
+      fd
     ];
   };
 
