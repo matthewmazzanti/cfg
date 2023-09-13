@@ -87,6 +87,8 @@ let
     source ${./config/history.zsh}
     source ${./config/ls.zsh}
     source ${./config/tar.zsh}
+
+    cfg="$HOME/src/nix/cfg"
   '';
 in
 wrapZsh {

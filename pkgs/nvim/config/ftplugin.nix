@@ -33,6 +33,7 @@ let
     javascript = two-space;
     typescript = two-space;
     html = two-space;
+    htmldjango = two-space;
     css = two-space;
     json = two-space;
     yaml = two-space;

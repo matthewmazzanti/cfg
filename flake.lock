@@ -133,6 +133,23 @@
         "type": "github"
       }
     },
+    "nvim-ts-autotag": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1694497418,
+        "narHash": "sha256-ATuecpdrP5dgnahsue5N6OA7XHBh8uzHxCsC36kgNLU=",
+        "owner": "matthewmazzanti",
+        "repo": "nvim-ts-autotag",
+        "rev": "837a888b8d9111451c8695046a5c98050578babb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "matthewmazzanti",
+        "ref": "main",
+        "repo": "nvim-ts-autotag",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "darwin": "darwin",
@@ -140,6 +157,7 @@
         "direnv-patched": "direnv-patched",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs",
+        "nvim-ts-autotag": "nvim-ts-autotag",
         "vim-easyclip": "vim-easyclip"
       }
     },

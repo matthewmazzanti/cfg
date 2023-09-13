@@ -14,6 +14,11 @@
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
 
+    # Fork to fix htmldjango
+    # TODO: Upstream these changes
+    nvim-ts-autotag.url = "github:matthewmazzanti/nvim-ts-autotag/main";
+    nvim-ts-autotag.flake = false;
+
     direnv-patched.url = "github:matthewmazzanti/direnv/master";
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
   };

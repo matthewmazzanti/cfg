@@ -85,6 +85,9 @@ let
       typescript
       terraform
       yaml
+      html
+      htmldjango
+      xml
     ]))
     nvim-treesitter-textobjects # Treesitter powered textobjects
     nvim-ts-autotag # Auto XML/HTML tag closing
