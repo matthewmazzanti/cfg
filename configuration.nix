@@ -20,6 +20,7 @@ in
     nmap httpie wget curl
     # Languages
     rustc cargo go ruby (python311.withPackages (ps: [ ps.pandas ]))
+
     # Misc
     pass tio wakeonlan
     # MacOS replacement tools
@@ -27,6 +28,7 @@ in
 
     # cloud
     terraform awscli2 gh
+    nodejs
     # qemu
   ]) ++ [
     updateScript
