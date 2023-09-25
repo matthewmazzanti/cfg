@@ -21,6 +21,9 @@
 
     direnv-patched.url = "github:matthewmazzanti/direnv/master";
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
+
+    tree-sitter-starlark.url = "github:amaanq/tree-sitter-starlark/master";
+    tree-sitter-starlark.flake = false;
   };
 
   outputs =
@@ -104,6 +107,12 @@
 
           profiles.system.path = deploy-rs.lib.x86_64-linux.activate.nixos
             self.nixosConfigurations.beta-build;
+        };
+
+        darwinConfigurations.delta = darwin.lib.darwinSystem rec {
+          system = "aarch64-darwin";
+          specialArgs.custom = self.packages.${system};
+          modules = [ ./sys/delta/configuration.nix ];
         };
       };
     in

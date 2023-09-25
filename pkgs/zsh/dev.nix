@@ -22,25 +22,12 @@ let
   };
 
   zshrc = ''
-    function () {
-      local count=1
-      local before="/usr/local/bin"
-      local brew_prefix="/opt/homebrew"
-
-      # Add brew prefix before system, after nix
-      for seg in "''${path[@]}"; do
-        if [ "$seg" = "$before" ]; then
-          path[$count]=("$brew_prefix/bin" "$before")
-          break
-        fi
-        ((count++))
-      done
-
-      fpath+=("$brew_prefix/share/zsh/site-functions")
-    }
+    if [[ -f "$HOME/.zshrc" ]]; then
+      source "$HOME/.zshrc"
+    fi
 
     function () {
-      local cachedir="$HOME/.cache/zsh"
+      local cachedir="$HOME/.cache/zsh"zsh
       local dumpfile="$cachedir/zcompdump"
 
       if [ ! -d "$cachedir" ]; then
@@ -80,8 +67,14 @@ let
     ZSH_AUTOSUGGEST_USE_ASYNC=true
     ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"
 
-    eval "$(direnv hook zsh)"
-    source "$(fzf-share)/key-bindings.zsh"
+    if command -v direnv &> /dev/null; then
+      eval "$(direnv hook zsh)";
+    fi
+
+    if command -v fzf-share &> /dev/null; then
+      source "$(fzf-share)/key-bindings.zsh"
+    fi
+
     source ${./config/vim.zsh}
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}

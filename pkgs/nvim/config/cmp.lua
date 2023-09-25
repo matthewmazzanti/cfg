@@ -76,12 +76,6 @@ cmp.setup({
     mapping = cmp.mapping.preset.insert({
         ["<C-d>"] = cmp.mapping.scroll_docs(4),
         ["<C-u>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-Space>"] = cmp.mapping.complete(),
-        ["<C-e>"] = cmp.mapping.abort(),
-        -- Accept currently selected item. Set `select` to `false` to only
-        -- confirm explicitly selected items.
-        -- TODO: Check back in on this
-        ["<CR>"] = cmp.mapping.confirm({ select = true }),
     }),
     sources = cmp.config.sources({
         { name = "nvim_lsp" },

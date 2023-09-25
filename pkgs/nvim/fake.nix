@@ -19,8 +19,8 @@
         # TODO: Upstream easyclip - or un-upstream everything?
         nvimOverlay = _: super:
           let
-            buildPlugin = super.vimUtils.buildVimPluginFrom2Nix;
             versionOf = src: builtins.toString src.lastModified;
+            buildPlugin = super.vimUtils.buildVimPlugin;
           in
           {
             vimPlugins = super.vimPlugins // {
@@ -37,6 +37,16 @@
                 src = inputs.nvim-ts-autotag;
               };
             };
+
+            tree-sitter = super.tree-sitter.override {
+              extraGrammars = {
+                starlark = super.tree-sitter.buildGrammar {
+                  language = "starlark";
+                  version = versionOf inputs.tree-sitter-starlark;
+                  src = inputs.tree-sitter-starlark;
+                };
+              };
+            };
           };
 
         pkgs = nixpkgs.legacyPackages.${system}.extend nvimOverlay;
@@ -44,6 +54,7 @@
       {
         packages.root = pkgs.callPackage ./root.nix { };
         packages.dev = pkgs.callPackage ./dev.nix { };
+        packages.web = pkgs.callPackage ./web.nix { };
       }
     );
 }

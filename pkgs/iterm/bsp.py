@@ -9,13 +9,13 @@ async def get_app(conn: it.Connection) -> it.App:
 
 def find_parent(splitter: it.Splitter, session: it.Session) -> it.Splitter:
     for child in splitter.children:
+        if child is session:
+            return splitter
+
         if isinstance(child, it.Splitter):
             res = find_parent(child, session)
             if res is not None:
                 return res
-
-        elif child is session:
-            return splitter
 
     raise AssertionError("Session not found in tree")
 
@@ -39,7 +39,8 @@ async def main(conn):
         if len(tab.root.children) > 1:
             vertical = not find_parent(tab.root, session).vertical
 
-        await session.async_split_pane(vertical)
+        profile = await session.async_get_profile()
+        await session.async_split_pane(vertical, profile=profile.name)
 
     await bsp_split.async_register(conn)
 

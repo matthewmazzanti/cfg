@@ -158,6 +158,7 @@
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs",
         "nvim-ts-autotag": "nvim-ts-autotag",
+        "tree-sitter-starlark": "tree-sitter-starlark",
         "vim-easyclip": "vim-easyclip"
       }
     },
@@ -203,6 +204,23 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "tree-sitter-starlark": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1716611067,
+        "narHash": "sha256-Qp7FvREjO+FP7ovj6UE8JA3Se8W46iGxNrmmSsruOdA=",
+        "owner": "amaanq",
+        "repo": "tree-sitter-starlark",
+        "rev": "018d0e09d9d0f0dd6740a37682b8ee4512e8b2ac",
+        "type": "github"
+      },
+      "original": {
+        "owner": "amaanq",
+        "ref": "master",
+        "repo": "tree-sitter-starlark",
         "type": "github"
       }
     },

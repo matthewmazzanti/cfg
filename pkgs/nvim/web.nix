@@ -14,13 +14,9 @@ let
   path = buildEnv {
     name = "nvim-path";
     paths = with pkgs; [
-      gopls
       lua-language-server
       nodePackages.pyright
       nodePackages.typescript-language-server
-      nil
-      rust-analyzer
-      ccls
       fd
     ];
   };
@@ -61,29 +57,24 @@ let
 
     # Treesitter
     (nvim-treesitter.withPlugins (plugins: with plugins; [
-      bash
-      c
-      cpp
       css
+      javascript
+      typescript
+      tsx
+
+      bash
       dockerfile
-      go
-      haskell
       hcl
       html
-      javascript
       json
       lua
       markdown
       nix
       python
-      ruby
-      starlark
-      typescript
       terraform
       yaml
-      html
-      htmldjango
       xml
+      starlark
     ]))
     nvim-treesitter-textobjects # Treesitter powered textobjects
     nvim-ts-autotag # Auto XML/HTML tag closing

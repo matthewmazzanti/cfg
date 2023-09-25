@@ -100,6 +100,7 @@ vim.opt.clipboard = "unnamedplus"
 vim.filetype.add({
     filename = {
         [".envrc"] = "sh",
+        ["Tiltfile"] = "starlark",
     },
     pattern = {
         ["*.conf"] = "conf",
@@ -114,3 +115,11 @@ vim.api.nvim_create_autocmd({"VimEnter"}, {
         vim.cmd("clearjumps")
     end
 })
+
+vim.api.nvim_create_user_command(
+    "Share",
+    function()
+        vim.opt.relativenumber = not vim.opt.relativenumber
+    end,
+    { nargs = 0 }
+)

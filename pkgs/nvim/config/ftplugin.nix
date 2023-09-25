@@ -21,8 +21,8 @@ let
 
     # Four space languages
     python = ''
-      vim.opt_local.colorcolumn = "80"
-      vim.opt_local.textwidth = 79
+      vim.opt_local.colorcolumn = "89"
+      vim.opt_local.textwidth = 88
     '';
     # Use vim :help for Lua files
     lua = ''

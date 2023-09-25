@@ -39,7 +39,6 @@ end
 local servers = {
     "ccls",
     "gopls",
-    "pyright",
     "nil_ls",
     "tsserver",
 }
@@ -48,6 +47,27 @@ for _, server in ipairs(servers) do
     if find_ls(server) then
         lspconfig[server].setup(defaults)
     end
+end
+
+local function find_python(root_dir)
+    local venv_python = root_dir .. "/.venv/bin/python"
+    if vim.fn.filereadable(venv_python) == 1 then
+        return venv_python
+    end
+
+    return vim.fn.exepath("python")
+end
+
+if find_ls("pyright") then
+    local settings = {
+        root_dir = lspconfig.util.root_pattern("pyproject.toml"),
+        on_new_config = function(config, root_dir)
+            local python = find_python(root_dir)
+            config.settings.python.pythonPath = python
+        end
+    }
+
+    lspconfig.pyright.setup(vim.tbl_extend("force", defaults, settings))
 end
 
 if find_ls("rust_analyzer") then
