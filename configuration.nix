@@ -15,7 +15,7 @@ in
   # environment.systemPackages = [];
   users.users.mmazzanti.packages = (with pkgs; [
     # Terminal utilities
-    bat fd fzf git ripgrep tree vim jq yq visidata
+    bat fd fzf git ripgrep tree vim jq yq visidata htop
     # Networking
     nmap httpie wget curl
     # Languages
@@ -27,9 +27,11 @@ in
     coreutils time gnused time openssh alacritty helix clang poetry
 
     # cloud
-    terraform awscli2 gh
-    nodejs
+    awscli2 gh nodejs
     # qemu
+    tmux screen
+    # nix
+    nix-tree
   ]) ++ [
     updateScript
 

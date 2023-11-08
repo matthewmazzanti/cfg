@@ -47,6 +47,7 @@ zle -N zle-keymap-select prompt_save_mode
 zle -N zle-line-init prompt_save_mode
 # When entering an SSH session, reset cursor to block
 add-zsh-hook zshexit prompt_block_cursor
+add-zsh-hook preexec prompt_block_cursor
 
 # Render a zsh prompt color string like "%F{yellow}foobar%f"
 function prompt_color() {
