@@ -19,12 +19,12 @@ in
     # Networking
     nmap httpie wget curl
     # Languages
-    rustc cargo go ruby (python311.withPackages (ps: [ ps.pandas ]))
+    rustc cargo go ruby python312 poetry
 
     # Misc
     pass tio wakeonlan
     # MacOS replacement tools
-    coreutils time gnused time openssh alacritty helix clang poetry
+    coreutils time gnused time openssh alacritty helix clang
 
     # cloud
     awscli2 gh nodejs
