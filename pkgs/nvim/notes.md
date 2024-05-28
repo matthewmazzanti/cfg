@@ -1,3 +1,6 @@
+# Interesting plugins
+- https://github.com/nvim-tree/nvim-tree.lua
+
 # Rust Analyzer
 - Requires `rustc` and `cargo` available in path, otherwise fails somewhat
   silently

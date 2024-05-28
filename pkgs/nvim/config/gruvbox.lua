@@ -26,7 +26,12 @@ gruvbox.setup({
         GruvboxPurpleSign = { bg = "none" },
         GruvboxAquaSign = { bg = "none" },
         GruvboxOrangeSign = { bg = "none" }
-    }
+    },
 })
 
 vim.cmd("colorscheme gruvbox")
+
+-- Set the floating border for LSP/default hover windows to normal background
+-- gray
+vim.api.nvim_set_hl(0, "FloatBorder", { link = "GruvboxGray" })
+vim.api.nvim_set_hl(0, "NormalFloat", { link = "GruvboxGray" })

@@ -1,5 +1,7 @@
 import hashlib
 
+import mock
+
 def qwer():
     return
 
@@ -27,5 +29,3 @@ def partial_test():
 
 def example():
     m = hashlib.sha256()
-
-hashlib.

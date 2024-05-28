@@ -27,7 +27,7 @@ let
     fi
 
     function () {
-      local cachedir="$HOME/.cache/zsh"zsh
+      local cachedir="$HOME/.cache/zsh"
       local dumpfile="$cachedir/zcompdump"
 
       if [ ! -d "$cachedir" ]; then

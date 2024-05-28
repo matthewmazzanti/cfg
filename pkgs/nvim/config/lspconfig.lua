@@ -25,6 +25,23 @@ local defaults = {
         set("n", "<leader>a", vim.lsp.buf.code_action)
         set("n", "<leader>r", vim.lsp.buf.rename)
     end,
+    -- Add the border on hover and on signature help popup window
+    handlers = {
+        ["textDocument/hover"] = vim.lsp.with(
+            vim.lsp.handlers.hover,
+            {
+                border = "rounded",
+                wrap = false,
+            }
+        ),
+        ["textDocument/signatureHelp"] = vim.lsp.with(
+            vim.lsp.handlers.signature_help,
+            {
+                border = "rounded",
+                wrap = false,
+            }
+        ),
+    },
 }
 
 -- Check that server binary exists

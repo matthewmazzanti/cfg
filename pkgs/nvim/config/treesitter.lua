@@ -3,7 +3,7 @@
 local treesitter = require("nvim-treesitter.configs")
 
 treesitter.setup({
-    -- Modules and its options go her
+    -- Modules and its options go here
     modules = {},
     ensure_installed = {},
     ignore_install = {},
@@ -15,7 +15,6 @@ treesitter.setup({
         -- nix possibly go.
         enable = true,
     },
-    autotag = { enable = true },
     textobjects = {
         enable = true,
         select = {
@@ -34,3 +33,5 @@ treesitter.setup({
         }
     },
 })
+
+require("nvim-ts-autotag").setup()
