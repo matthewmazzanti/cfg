@@ -19,7 +19,7 @@
     darwin,
     ...
   } @ inputs: let
-    inherit (import ./lib nixpkgs) eachSystem eachSystemFlattenFlakes;
+    inherit (import ./lib nixpkgs) eachSystem eachSystemFlattenFlakes eachSystemShell;
   in {
     packages = eachSystemFlattenFlakes {
       # Workaround for subflake UX
@@ -40,15 +40,13 @@
       less = (import ./pkgs/less/fake.nix).outputs inputs;
     };
 
-    devShells = eachSystem ({pkgs, ...}: {
-      default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          nix-tree
-          poetry
-          go
-          alejandra
-        ];
-      };
+    devShell = eachSystemShell ({pkgs, ...}: {
+      packages = with pkgs; [
+        nix-tree
+        poetry
+        go
+        alejandra
+      ];
     });
 
     formatter = eachSystem ({pkgs, ...}: pkgs.alejandra);

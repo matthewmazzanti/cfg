@@ -17,9 +17,21 @@ in rec {
     );
 
   eachSystemOverlay = overlay: f:
-    eachSystem ({ pkgs, ...} @ inputs: f (inputs // {
-      pkgs = pkgs.extend overlay;
-    }));
+    eachSystem ({pkgs, ...} @ inputs:
+      f (inputs
+        // {
+          pkgs = pkgs.extend overlay;
+        }));
+
+  eachSystemShell = inputs:
+    eachSystem (
+      {
+        pkgs,
+        system,
+        ...
+      } @ systemInputs:
+        (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
+    );
 
   # Map over attribute names (only)
   # dict[str, a] -> (str -> str) -> dict[str, a]
