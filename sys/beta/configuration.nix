@@ -2,6 +2,7 @@
 
 let
   updateScript = pkgs.writeShellScriptBin "update" ''
+    set -e
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
 
     # Update zsh completion cache on next start

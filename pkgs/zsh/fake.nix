@@ -1,7 +1,9 @@
 {
-  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  outputs = { nixpkgs, flake-utils, ... }: with (import ../../lib nixpkgs); {
+  outputs = { nixpkgs, ... }: let
+    inherit (import ../../lib nixpkgs) eachSystem;
+  in {
     packages = eachSystem ({ pkgs, ... }: {
       dev = pkgs.callPackage ./dev.nix { };
     });
