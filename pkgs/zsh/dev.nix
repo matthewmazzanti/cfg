@@ -1,16 +1,16 @@
-{ stdenvNoCC
-, callPackage
-, zsh
-, zsh-fast-syntax-highlighting
-, zsh-autosuggestions
-}:
-let
-  wrapZsh = callPackage ./wrapper.nix { };
+{
+  stdenvNoCC,
+  callPackage,
+  zsh,
+  zsh-fast-syntax-highlighting,
+  zsh-autosuggestions,
+}: let
+  wrapZsh = callPackage ./wrapper.nix {};
 
   fshPlugin = ''${zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh'';
   fshTheme = stdenvNoCC.mkDerivation {
     name = "fsh-theme";
-    nativeBuildInputs = [ zsh ];
+    nativeBuildInputs = [zsh];
     buildCommand = ''
       zsh << EOF
         source "${fshPlugin}"
@@ -84,6 +84,6 @@ let
     cfg="$HOME/src/nix/cfg"
   '';
 in
-wrapZsh {
-  inherit zsh zshrc;
-}
+  wrapZsh {
+    inherit zsh zshrc;
+  }

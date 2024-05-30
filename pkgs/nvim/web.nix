@@ -1,16 +1,15 @@
 {
   # Nixpkgs functions
-  callPackage
-, writeText
-, buildEnv
+  callPackage,
+  writeText,
+  buildEnv,
   # Vim stuff
-, wrapNeovimUnstable
-, neovim-unwrapped
-, vimPlugins
-, pkgs
-, ...
-}:
-let
+  wrapNeovimUnstable,
+  neovim-unwrapped,
+  vimPlugins,
+  pkgs,
+  ...
+}: let
   path = buildEnv {
     name = "nvim-path";
     paths = with pkgs; [
@@ -21,7 +20,7 @@ let
     ];
   };
 
-  ftplugin = callPackage ./config/ftplugin.nix { };
+  ftplugin = callPackage ./config/ftplugin.nix {};
 
   plugins = with vimPlugins; [
     # Custom ftplugin stuff
@@ -56,26 +55,27 @@ let
     lsp_lines-nvim
 
     # Treesitter
-    (nvim-treesitter.withPlugins (plugins: with plugins; [
-      css
-      javascript
-      typescript
-      tsx
+    (nvim-treesitter.withPlugins (plugins:
+      with plugins; [
+        css
+        javascript
+        typescript
+        tsx
 
-      bash
-      dockerfile
-      hcl
-      html
-      json
-      lua
-      markdown
-      nix
-      python
-      terraform
-      yaml
-      xml
-      starlark
-    ]))
+        bash
+        dockerfile
+        hcl
+        html
+        json
+        lua
+        markdown
+        nix
+        python
+        terraform
+        yaml
+        xml
+        starlark
+      ]))
     nvim-treesitter-textobjects # Treesitter powered textobjects
     nvim-ts-autotag # Auto XML/HTML tag closing
     treesj # Split/Join list structures
@@ -94,24 +94,24 @@ let
     dofile("${./config/easyclip.lua}")
   '';
 in
-wrapNeovimUnstable neovim-unwrapped {
-  wrapRc = false;
-  wrapperArgs = [
-    # Add path item to wrapper
-    "--suffix"
-    "PATH"
-    ":"
-    ''${path}/bin''
-    # Add generated init
-    "--add-flags"
-    ''-u ${init}''
-  ];
-  withPython3 = false;
-  withNodeJs = false;
-  withRuby = false;
-  vimAlias = true;
-  packpathDirs.myNeovimPackages = {
-    start = plugins;
-    opt = [ ];
-  };
-}
+  wrapNeovimUnstable neovim-unwrapped {
+    wrapRc = false;
+    wrapperArgs = [
+      # Add path item to wrapper
+      "--suffix"
+      "PATH"
+      ":"
+      ''${path}/bin''
+      # Add generated init
+      "--add-flags"
+      ''-u ${init}''
+    ];
+    withPython3 = false;
+    withNodeJs = false;
+    withRuby = false;
+    vimAlias = true;
+    packpathDirs.myNeovimPackages = {
+      start = plugins;
+      opt = [];
+    };
+  }

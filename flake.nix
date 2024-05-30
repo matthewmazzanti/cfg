@@ -13,7 +13,12 @@
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, darwin, ... }@inputs: let
+  outputs = {
+    self,
+    nixpkgs,
+    darwin,
+    ...
+  } @ inputs: let
     inherit (import ./lib nixpkgs) eachSystem eachSystemFlattenFlakes;
   in {
     packages = eachSystemFlattenFlakes {
@@ -35,13 +40,13 @@
       less = (import ./pkgs/less/fake.nix).outputs inputs;
     };
 
-    devShells = eachSystem ({ pkgs, ... }: {
+    devShells = eachSystem ({pkgs, ...}: {
       default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          nixpkgs-fmt
           nix-tree
           poetry
           go
+          alejandra
         ];
       };
     });
@@ -50,13 +55,13 @@
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [ ./sys/beta/configuration.nix ];
+        modules = [./sys/beta/configuration.nix];
       };
 
       delta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [ ./sys/delta/configuration.nix ];
+        modules = [./sys/delta/configuration.nix];
       };
     };
   };

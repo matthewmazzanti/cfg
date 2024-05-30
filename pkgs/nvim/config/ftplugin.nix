@@ -1,5 +1,4 @@
-{ stdenvNoCC, ... }:
-let
+{stdenvNoCC, ...}: let
   two-space = ''
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
@@ -48,14 +47,15 @@ let
     '';
   };
 in
-stdenvNoCC.mkDerivation (ftplugin // {
-  name = "ftplugin";
-  passAsFile = builtins.attrNames ftplugin;
-  buildCommand = ''
-    mkdir -p "$out/ftplugin"
-    for var in $passAsFile; do
-        pathVar="''${var}Path"
-        cat "''${!pathVar}" > "$out/ftplugin/$var.lua"
-    done
-  '';
-})
+  stdenvNoCC.mkDerivation (ftplugin
+    // {
+      name = "ftplugin";
+      passAsFile = builtins.attrNames ftplugin;
+      buildCommand = ''
+        mkdir -p "$out/ftplugin"
+        for var in $passAsFile; do
+            pathVar="''${var}Path"
+            cat "''${!pathVar}" > "$out/ftplugin/$var.lua"
+        done
+      '';
+    })

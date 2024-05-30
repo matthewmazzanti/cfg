@@ -1,6 +1,8 @@
-{ pkgs, custom, ... }:
-
-let
+{
+  pkgs,
+  custom,
+  ...
+}: let
   updateScript = pkgs.writeShellScriptBin "update" ''
     set -e
     darwin-rebuild --flake "$HOME/src/nix/cfg" switch
@@ -11,38 +13,69 @@ let
       rm "$dumpfile"
     fi
   '';
-in
-{
+in {
   # environment.systemPackages = [];
-  users.users.mmazzanti.packages = (with pkgs; [
-    # Terminal utilities
-    bat fd fzf git ripgrep tree vim jq yq visidata htop
-    # Networking
-    nmap httpie wget curl
-    # Languages
-    rustc cargo go ruby python312 poetry
+  users.users.mmazzanti.packages =
+    (with pkgs; [
+      # Terminal utilities
+      bat
+      fd
+      fzf
+      git
+      ripgrep
+      tree
+      vim
+      jq
+      yq
+      visidata
+      htop
+      # Networking
+      nmap
+      httpie
+      wget
+      curl
+      # Languages
+      rustc
+      cargo
+      go
+      ruby
+      python312
+      poetry
 
-    # Misc
-    pass tio wakeonlan
-    # MacOS replacement tools
-    coreutils time gnused time openssh alacritty helix clang
+      # Misc
+      pass
+      tio
+      wakeonlan
+      # MacOS replacement tools
+      coreutils
+      time
+      gnused
+      time
+      openssh
+      alacritty
+      helix
+      clang
 
-    # cloud
-    awscli2 gh nodejs
-    # qemu
-    tmux screen
-    # nix
-    nix-tree
-  ]) ++ [
-    updateScript
+      # cloud
+      awscli2
+      gh
+      nodejs
+      # qemu
+      tmux
+      screen
+      # nix
+      nix-tree
+    ])
+    ++ [
+      updateScript
 
-    # Customized tools
-    custom."direnv/dev"
-    custom."less/dev"
-    custom."nvim/dev"
-    custom."short-pwd/default"
-    custom."zsh/dev"
-  ];
+      # Customized tools
+      custom."direnv/dev"
+      custom."less/dev"
+      custom."nvim/dev"
+      custom."short-pwd/default"
+      custom."zsh/dev"
+    ];
 
   homebrew = {
     enable = true;
@@ -88,21 +121,23 @@ in
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
-  nix.buildMachines = [{
-    sshUser = "build";
-    hostName = "192.168.65.2";
-    systems = [ "x86_64-linux" "aarch64-linux" ];
-    protocol = "ssh-ng";
-    maxJobs = 8;
-    publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
-  }];
+  nix.buildMachines = [
+    {
+      sshUser = "build";
+      hostName = "192.168.65.2";
+      systems = ["x86_64-linux" "aarch64-linux"];
+      protocol = "ssh-ng";
+      maxJobs = 8;
+      publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
+    }
+  ];
   nix.distributedBuilds = true;
   # optional, useful when the builder has a faster internet connection than yours
   nix.extraOptions = ''
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
-  nix.settings.trusted-users = [ "mmazzanti" ];
+  nix.settings.trusted-users = ["mmazzanti"];
   # nix.settings.trusted-substituters = ["http://192.168.65.2"];
   # nix.settings.trusted-public-keys = ["192.168.65.2:+Mp9NqYcoUvsKMtds81iGD2mHsv19F9kkQa9I9mBhdY="];
 

@@ -1,16 +1,19 @@
-{ lib, symlinkJoin, makeWrapper, writeText }:
-let
-  wrapper =
-    { tmux
-    , conf ? ""
-    }:
-    let
-      confDrv = writeText "tmux.conf" conf;
-    in
+{
+  lib,
+  symlinkJoin,
+  makeWrapper,
+  writeText,
+}: let
+  wrapper = {
+    tmux,
+    conf ? "",
+  }: let
+    confDrv = writeText "tmux.conf" conf;
+  in
     symlinkJoin {
       name = "tmux";
-      paths = [ tmux ];
-      buildInputs = [ makeWrapper ];
+      paths = [tmux];
+      buildInputs = [makeWrapper];
       postBuild = ''
         name="tmux"
         exe="$out/bin/$name"
@@ -22,4 +25,4 @@ let
       '';
     };
 in
-lib.makeOverridable wrapper
+  lib.makeOverridable wrapper

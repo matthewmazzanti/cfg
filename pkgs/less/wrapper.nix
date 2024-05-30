@@ -1,17 +1,20 @@
-{ lib, symlinkJoin, makeWrapper, writeText }:
-let
-  wrapper =
-    { less
-    , lesskey
-    , wrapperArgs ? [ ]
-    }:
-    let
-      lesskeyDrv = writeText "lesskey" lesskey;
-    in
+{
+  lib,
+  symlinkJoin,
+  makeWrapper,
+  writeText,
+}: let
+  wrapper = {
+    less,
+    lesskey,
+    wrapperArgs ? [],
+  }: let
+    lesskeyDrv = writeText "lesskey" lesskey;
+  in
     symlinkJoin {
       name = "less";
-      paths = [ less ];
-      buildInputs = [ makeWrapper ];
+      paths = [less];
+      buildInputs = [makeWrapper];
       postBuild = ''
         name="less"
         exe="$out/bin/$name"
@@ -24,4 +27,4 @@ let
       '';
     };
 in
-lib.makeOverridable wrapper
+  lib.makeOverridable wrapper

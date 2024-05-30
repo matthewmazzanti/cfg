@@ -1,9 +1,9 @@
-{ callPackage
-, direnv
-, nix-direnv
-}:
-let
-  wrapper = callPackage ./wrapper.nix { };
+{
+  callPackage,
+  direnv,
+  nix-direnv,
+}: let
+  wrapper = callPackage ./wrapper.nix {};
   direnvrc = ''
     source ${nix-direnv}/share/nix-direnv/direnvrc
 
@@ -32,6 +32,6 @@ let
     }
   '';
 in
-wrapper {
-  inherit direnv direnvrc;
-}
+  wrapper {
+    inherit direnv direnvrc;
+  }

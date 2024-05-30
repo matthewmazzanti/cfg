@@ -1,10 +1,10 @@
 {
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  outputs = { nixpkgs, ... }: let
+  outputs = {nixpkgs, ...}: let
     inherit (import ../../lib nixpkgs) eachSystem;
   in {
-    packages = eachSystem ({ pkgs, ... }: {
+    packages = eachSystem ({pkgs, ...}: {
       default = pkgs.buildGoPackage {
         pname = "short-pwd";
         version = "0.0.3";

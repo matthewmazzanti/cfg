@@ -1,10 +1,10 @@
-{ callPackage
-, tmux
-}:
-let
-  wrapper = callPackage ./wrapper.nix { };
+{
+  callPackage,
+  tmux,
+}: let
+  wrapper = callPackage ./wrapper.nix {};
   conf = builtins.readFile ./tmux.conf;
 in
-wrapper {
-  inherit tmux conf;
-}
+  wrapper {
+    inherit tmux conf;
+  }
