@@ -51,6 +51,8 @@
       };
     });
 
+    formatter = eachSystem ({pkgs, ...}: pkgs.alejandra);
+
     configuration.darwinConfigurations = {
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
