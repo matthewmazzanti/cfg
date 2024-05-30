@@ -16,6 +16,15 @@ in rec {
         }
     );
 
+  eachSystemOverlay = overlay: f:
+    genAttrs systems (
+      system:
+        f {
+          system = system;
+          pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
+        }
+    );
+
   # Map over attribute names (only)
   # dict[str, a] -> (str -> str) -> dict[str, a]
   mapAttrNames = f: set:
