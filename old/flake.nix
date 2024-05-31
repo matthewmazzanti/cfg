@@ -86,7 +86,7 @@
         };
       };
     };
-  in rec {
+  in {
     nixosConfigurations = {
       lambda = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -98,25 +98,10 @@
         modules = [ base ./systems/omega.nix ];
       };
 
-      iota = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [ base ./systems/iota.nix ];
-      };
-
       pi = inputs.nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         modules = [ base ./modules ./systems/pi ];
       };
-    };
-
-    hydraJobs = let
-      getConfig = name:
-        nixosConfigurations."${name}".config.system.build.toplevel;
-    in {
-      lambda.x86_64-linux = getConfig "lambda";
-      omega.x86_64-linux = getConfig "omega";
-      iota.x86_64-linux = getConfig "iota";
-      pi.aarch64-linux = getConfig "pi";
     };
   };
 }
