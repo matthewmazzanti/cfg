@@ -108,11 +108,6 @@ in {
         gnome3.adwaita-icon-theme
         unclutter-xfixes
         picom
-        /*
-        picom-next
-        dunst
-        libnotify
-        */
         hsetroot
         rofi
         jq
@@ -275,38 +270,6 @@ in {
 
           Install.WantedBy = [ "bspwm.target" ];
         };
-
-        /*
-        imwheel = {
-          Unit = {
-            Description = "increase scroll speed";
-            PartOf = [ "bspwm.target" ];
-          };
-
-          Service = {
-            ExecStart = "${pkgs.imwheel}/bin/imwheel --detach --buttons 45";
-            RestartSec = 3;
-            Restart = "always";
-          };
-
-          Install.WantedBy = [ "bspwm.target" ];
-        };
-
-        hass-notify = {
-          Unit = {
-            Description = "Notifications from homeassistant";
-            PartOf = [ "bspwm.target" ];
-          };
-
-          Service = {
-            ExecStart = "${hass-notify}/bin/hass_notify --cmd ${pkgs.libnotify}/bin/notify-send";
-            RestartSec = 3;
-            Restart = "always";
-          };
-
-          Install.WantedBy = [ "bspwm.target" ];
-        };
-        */
       };
     };
   };

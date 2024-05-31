@@ -26,20 +26,6 @@ in {
   ];
 
   config = {
-    /*
-    nix.settings = rec {
-      trusted-substituters = [
-        "https://cache.omega.xi/"
-      ];
-      substituters = trusted-substituters;
-      trusted-public-keys = [
-        "cache.omega.xi:C8TuMqMY42vyb2YsOvpnbvwhSy8D2fmSrf3EY85LG6c="
-      ];
-      trusted-users = [ "mmazzanti" ];
-      sandbox = true;
-    };
-    */
-
     time.timeZone = "America/New_York";
     i18n.defaultLocale = "en_US.UTF-8";
 

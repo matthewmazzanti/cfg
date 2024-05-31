@@ -67,13 +67,6 @@
             src = inputs.orgmode-nvim-src;
           };
         };
-
-        /*
-        picom-next = super.picom.overrideAttrs (attrs: {
-          src = inputs.picom-next-src;
-          version = versionOf inputs.picom-next-src;
-        });
-        */
       })];
 
       nix.extraOptions = "experimental-features = nix-command flakes";

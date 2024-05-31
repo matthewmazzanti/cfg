@@ -159,26 +159,6 @@ in {
     systemd.user = {
       startServices = true;
       sessionVariables = config.home.sessionVariables;
-
-      /*
-      services = {
-        imapnotify = {
-          Unit = {
-            Description = "IMAP notification daemon";
-            PartOf = [ "default.target" ];
-          };
-
-          Service = {
-            Environment="PATH=${pkgs.bash}/bin:${pkgs.coreutils}/bin:${pkgs.isync}/bin";
-            ExecStart = "${pkgs.goimapnotify}/bin/goimapnotify -conf ${dirs.config}/imapnotify.conf";
-            RestartSec = 3;
-            Restart = "always";
-          };
-
-          Install.WantedBy = [ "default.target" ];
-        };
-      };
-      */
     };
   };
 }
