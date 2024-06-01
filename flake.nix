@@ -51,7 +51,7 @@
 
     formatter = eachSystem ({pkgs, ...}: pkgs.alejandra);
 
-    configuration.darwinConfigurations = {
+    darwinConfigurations = {
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};

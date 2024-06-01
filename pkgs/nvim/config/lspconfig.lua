@@ -81,6 +81,7 @@ if find_ls("pyright") then
         on_new_config = function(config, root_dir)
             local python = find_python(root_dir)
             config.settings.python.pythonPath = python
+            config.settings.python.analysis.autoImportCompletions = false
         end
     }
 
