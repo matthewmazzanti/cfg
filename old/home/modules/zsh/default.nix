@@ -39,7 +39,7 @@ in
     programs.zsh = {
       enable = true;
       defaultKeymap = "viins";
-      autosuggestions.enable = true;
+      autosuggestion.enable = true;
       # Disable to use fast-syntax-highlighting
       enableCompletion = false;
       history.share = false;
