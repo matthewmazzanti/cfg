@@ -44,7 +44,7 @@
   programs.openvpn3.enable = true;
 
   boot = {
-    zfs.enableUnstable = true;
+    zfs.enable = true;
     supportedFilesystems = [ "zfs" ];
     binfmt.emulatedSystems = ["aarch64-linux"];
 

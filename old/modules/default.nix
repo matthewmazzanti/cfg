@@ -59,7 +59,7 @@ in {
       gnupg.agent = {
         enable = true;
         enableSSHSupport = true;
-        pinentryFlavor = if cfg.graphical.enable then "qt" else "curses";
+        pinentryPackage = if cfg.graphical.enable then pkgs.pinentry-qt else pinentry-curses;
       };
     };
 
