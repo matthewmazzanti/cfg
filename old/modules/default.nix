@@ -78,7 +78,7 @@ in {
     };
 
     services = {
-      openssh = {
+      openssh.settings = {
         enable = true;
         PermitRootLogin = "no";
         PasswordAuthentication = false;
