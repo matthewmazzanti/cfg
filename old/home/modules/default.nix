@@ -1,14 +1,9 @@
-{ pkgs, lib, config, neovim-flake, ... }:
+{ pkgs, lib, config, custom, ... }:
 
 with lib;
 let
   dirs = config.home.xdg.dirs;
   home-pkgs = import ../pkgs { pkgs = pkgs; };
-
-  neovim = neovim-flake.default.override {
-    imports = [ neovim-flake.profiles.mmazzanti ];
-    vimAlias = true;
-  };
 in {
   imports = [
     ./sets
@@ -121,7 +116,7 @@ in {
         fantasque-sans-mono
         etBook
 
-        neovim
+        custom."nvim/dev"
         steam
         _1password-gui
       ];
