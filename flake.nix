@@ -11,17 +11,36 @@
 
     direnv-patched.url = "github:matthewmazzanti/direnv/master";
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Old system compat
+    nixpkgs-old.url = "nixpkgs/nixos-23.11";
+
+    home-manager-old.url = "github:nix-community/home-manager/release-23.11";
+    home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";
   };
 
   outputs = {
     self,
     nixpkgs,
     darwin,
+    home-manager-old,
     ...
   } @ inputs: let
-    inherit (import ./lib nixpkgs) eachSystem eachSystemFlattenFlakes eachSystemShell;
+    lib = (import ./lib nixpkgs);
+
+    base = { pkgs, ... }: {
+      imports = [ home-manager-old.nixosModules.home-manager ];
+
+      nix.extraOptions = "experimental-features = nix-command flakes";
+
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        extraSpecialArgs.custom = self.packages.${pkgs.system};
+      };
+    };
   in {
-    packages = eachSystemFlattenFlakes {
+    packages = lib.eachSystemFlattenFlakes {
       # Workaround for subflake UX
       # Ideally I'd be able to reference a flake in the pkgs/ dir with a URL
       # in the inputs - something like path:/pkgs/nvim or
@@ -40,7 +59,7 @@
       less = (import ./pkgs/less/fake.nix).outputs inputs;
     };
 
-    devShell = eachSystemShell ({pkgs, ...}: {
+    devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
         nix-tree
         poetry
@@ -49,7 +68,7 @@
       ];
     });
 
-    formatter = eachSystem ({pkgs, ...}: pkgs.alejandra);
+    formatter = lib.eachSystem ({pkgs, ...}: pkgs.alejandra);
 
     darwinConfigurations = {
       beta = darwin.lib.darwinSystem rec {
@@ -62,6 +81,26 @@
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
         modules = [./sys/delta/configuration.nix];
+      };
+    };
+
+    nixosConfigurations = {
+      lambda = inputs.nixpkgs-old.lib.nixosSystem rec {
+        system = "x86_64-linux";
+        specialArgs.custom = self.packages.${system};
+        modules = [ base ./old/systems/lambda.nix ];
+      };
+
+      omega = inputs.nixpkgs-old.lib.nixosSystem rec {
+        system = "x86_64-linux";
+        specialArgs.custom = self.packages.${system};
+        modules = [ base ./old/systems/omega.nix ];
+      };
+
+      pi = inputs.nixpkgs-old.lib.nixosSystem rec {
+        system = "aarch64-linux";
+        specialArgs.custom = self.packages.${system};
+        modules = [ base ./old/modules ./old/systems/pi ];
       };
     };
   };

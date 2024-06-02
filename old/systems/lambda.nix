@@ -7,7 +7,7 @@
       enable = true;
       hidpi = true;
     };
-    virt.host = true;
+    virt.host = false;
   };
 
   services = {
