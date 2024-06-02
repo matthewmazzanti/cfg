@@ -13,9 +13,9 @@
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
 
     # Old system compat
-    nixpkgs-old.url = "nixpkgs/nixos-23.11";
+    nixpkgs-old.url = "nixpkgs/nixos-24.05";
 
-    home-manager-old.url = "github:nix-community/home-manager/release-23.11";
+    home-manager-old.url = "github:nix-community/home-manager/release-24.05";
     home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";
   };
 
