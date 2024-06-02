@@ -11,10 +11,10 @@ in
     home.packages = with pkgs; [
       spotifyd
       playerctl
-      spotify-tui
       ncspot
     ];
 
+    /*
     systemd.user.services = {
       spotifyd = {
         Unit = {
@@ -31,5 +31,6 @@ in
         Install.WantedBy = [ "default.target" ];
       };
     };
+    */
   };
 }
