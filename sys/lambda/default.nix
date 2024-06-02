@@ -1,5 +1,5 @@
 { pkgs, ... }: {
-  imports = [ ./hardware/lambda.nix ../modules ];
+  imports = [ ./hardware.nix ../../old/modules ];
 
   nixpkgs.config.allowUnfree = true;
   usage = {
@@ -71,7 +71,7 @@
   };
 
   home-manager.users.mmazzanti = {
-    imports = [ ../home/modules ];
+    imports = [ ../../old/home/modules ];
 
     home.stateVersion = "18.09";
 

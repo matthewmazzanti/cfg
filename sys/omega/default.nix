@@ -2,7 +2,7 @@
 let
   hostName = "omega";
 in {
-  imports = [ ./hardware/omega.nix ../modules ];
+  imports = [ ./hardware.nix ../../old/modules ];
 
   nixpkgs.config.allowUnfree = true;
   # TODO: nix 2.4 broke nix-serve. Use this until this

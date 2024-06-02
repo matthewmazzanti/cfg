@@ -1,9 +1,9 @@
-{ config, pkgs, ... }: {
+{ pkgs, ... }: {
   imports = [
     ./hardware-configuration.nix
     ./home-automation.nix
     # TODO: Clean this up
-    ../../modules
+    ../../old/modules
   ];
 
   usage = {

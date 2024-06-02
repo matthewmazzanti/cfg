@@ -74,13 +74,13 @@
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [./sys/beta/configuration.nix];
+        modules = [./sys/beta];
       };
 
       delta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [./sys/delta/configuration.nix];
+        modules = [./sys/delta];
       };
     };
 
@@ -88,19 +88,19 @@
       lambda = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base ./old/systems/lambda.nix ];
+        modules = [ base ./sys/lambda ];
       };
 
       omega = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base ./old/systems/omega.nix ];
+        modules = [ base ./sys/omega ];
       };
 
       pi = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "aarch64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base ./old/modules ./old/systems/pi ];
+        modules = [ base ./sys/pi ];
       };
     };
   };
