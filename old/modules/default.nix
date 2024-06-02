@@ -1,23 +1,10 @@
-{ pkgs, lib, config,... }:
+{ pkgs, lib, config, custom, ... }:
 
 with lib;
 
 let
   cfg = config.usage;
-
   keys = (import ./keys);
-
-  # TODO: Remove this, replace with configured neovim
-  neovim = pkgs.neovim.override {
-    configure = {
-      customRC = readFile ./vimrc.vim;
-      packages.custom.start = with pkgs.vimPlugins; [ gruvbox vim-nix ];
-    };
-    viAlias = true;
-    vimAlias = true;
-    withPython3 = false;
-    withRuby = false;
-  };
 in {
   imports = [
     ./git-server.nix
@@ -53,8 +40,7 @@ in {
         tmux
         kitty.terminfo
         ethtool
-      ] ++ [
-        neovim
+        custom."nvim/root"
       ];
 
       pathsToLink = [ "/share/zsh" ];

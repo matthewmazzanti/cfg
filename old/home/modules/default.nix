@@ -15,7 +15,6 @@ in {
 
     ./bat
     ./zsh
-    # ./neovim
     ./xdg
     ./less
     ./dunst
