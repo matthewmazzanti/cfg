@@ -57,7 +57,7 @@ in {
       vim.defaultEditor = true;
       zsh.enable = true;
       gnupg.agent = {
-        enabled = true;
+        enable = true;
         enableSSHSupport = true;
         pinentryPackage = if cfg.graphical.enable then pkgs.pinentry-qt else pinentry-curses;
       };
