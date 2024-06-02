@@ -48,7 +48,7 @@
     supportedFilesystems = [ "zfs" ];
     binfmt.emulatedSystems = ["aarch64-linux"];
 
-    cleanTmpDir = true;
+    tmp.cleanOnBoot = true;
     loader = {
       systemd-boot.enable = true;
       systemd-boot.configurationLimit = 10;

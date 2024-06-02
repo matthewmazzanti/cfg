@@ -80,9 +80,9 @@ in {
     services = {
       openssh = {
         enable = true;
-        permitRootLogin = "no";
-        passwordAuthentication = false;
-        kbdInteractiveAuthentication = false;
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
       };
 
       getty = {
