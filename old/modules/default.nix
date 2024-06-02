@@ -64,11 +64,13 @@ in {
     };
 
     services = {
-      openssh.settings = {
+      openssh = {
         enable = true;
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-        KbdInteractiveAuthentication = false;
+        settings = {
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
+        };
       };
 
       getty = {
