@@ -1,3 +1,4 @@
+# TODO: Module used anywhere?
 { pkgs, lib, config,... }:
 
 with lib;
@@ -54,6 +55,7 @@ in {
         database.type = "postgres";
         httpAddress = "127.0.0.1";
         domain = "${hostName}";
+        # TODO: This is wrong
         rootUrl = "http://${hostName}.olympus/";
         extraConfig = ''
           STATIC_URL_PREFIX = ${staticUrlPath}

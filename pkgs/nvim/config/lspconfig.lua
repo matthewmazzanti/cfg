@@ -2,6 +2,8 @@
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
 local lspconfig = require("lspconfig")
 
+require("lspconfig.ui.windows").default_options.border = "rounded"
+
 local defaults = {
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
     on_attach = function(_client, bufnr)
@@ -90,7 +92,7 @@ end
 
 if find_ls("rust_analyzer") then
     local settings = {
-        ['rust-analyzer'] = {
+        ["rust-analyzer"] = {
             cargo = {
                 -- Rust toolchain on Nix is in its own drv in the nix store. As
                 -- a result, the default sub-path rust-analyzer looks for doesnt

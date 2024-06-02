@@ -46,7 +46,6 @@
   boot = {
     zfs.enableUnstable = true;
     supportedFilesystems = [ "zfs" ];
-    # kernelPackages = pkgs.linuxPackages_5_14;
     binfmt.emulatedSystems = ["aarch64-linux"];
 
     cleanTmpDir = true;
@@ -69,7 +68,6 @@
       "usb"
       "dialout"
       "input"
-      # "jackaudio"
     ];
   };
 

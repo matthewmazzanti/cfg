@@ -7,6 +7,7 @@ let
 
   keys = (import ./keys);
 
+  # TODO: Remove this, replace with configured neovim
   neovim = pkgs.neovim.override {
     configure = {
       customRC = readFile ./vimrc.vim;
