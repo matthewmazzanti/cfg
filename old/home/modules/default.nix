@@ -116,7 +116,6 @@ in {
         etBook
 
         custom."nvim/dev"
-        steam
         _1password-gui
       ];
 

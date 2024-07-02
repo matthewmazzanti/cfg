@@ -53,8 +53,6 @@ let
 
     bspc rule -a qutebrowser desktop=j
     bspc rule -a Spotify desktop=h
-    bspc rule -a Steam desktop=s
-    bspc rule -a dota2 desktop=s
     bspc rule -a 'Microsoft Teams - Preview' desktop=l
     bspc rule -a Firefox desktop=k
     bspc rule -a Zathura desktop=k state=tiled
