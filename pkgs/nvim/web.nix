@@ -14,7 +14,7 @@
     name = "nvim-path";
     paths = with pkgs; [
       lua-language-server
-      nodePackages.pyright
+      pyright
       nodePackages.typescript-language-server
       fd
     ];
@@ -110,8 +110,5 @@ in
     withNodeJs = false;
     withRuby = false;
     vimAlias = true;
-    packpathDirs.myNeovimPackages = {
-      start = plugins;
-      opt = [];
-    };
+    plugins = plugins;
   }

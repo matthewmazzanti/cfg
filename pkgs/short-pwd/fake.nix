@@ -5,10 +5,10 @@
     inherit (import ../../lib nixpkgs) eachSystem;
   in {
     packages = eachSystem ({pkgs, ...}: {
-      default = pkgs.buildGoPackage {
+      default = pkgs.buildGoModule {
         pname = "short-pwd";
         version = "0.0.3";
-        goPackagePath = "github.com/matthewmazzanti/cfg/short-pwd";
+        vendorHash = null;
         src = ./.;
         meta = {
           description = "Print a path shortened to a number of columns";

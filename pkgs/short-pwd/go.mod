@@ -1,3 +1,3 @@
-module github.com/matthewmazzanti/cfg
+module github.com/matthewmazzanti/short-pwd
 
 go 1.20
