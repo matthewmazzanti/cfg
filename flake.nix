@@ -109,7 +109,7 @@
       home-assistant = inputs.nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         modules = [
-          nixos-hardware.nixosConfigurations.raspberry-pi-4
+          nixos-hardware.nixosModules.raspberry-pi-4
           ./sys/home-assistant
         ];
       };
