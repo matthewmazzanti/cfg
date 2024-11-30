@@ -25,7 +25,7 @@ in {
       tree
       vim
       jq
-      yq
+      yq-go
       visidata
       # Networking
       nmap

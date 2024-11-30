@@ -48,8 +48,9 @@ local defaults = {
 
 -- Check that server binary exists
 local function find_ls(server_name)
-    local require_path = "lspconfig.server_configurations." .. server_name
-    local cfg = require(require_path)
+    -- This is a hack for pulling internals...
+    local require_path = "lspconfig.configs." .. server_name
+    local cfg = lspconfig[server_name].config_def
     return vim.fn.executable(cfg.default_config.cmd[1]) == 1
 end
 
@@ -59,7 +60,7 @@ local servers = {
     "ccls",
     "gopls",
     "nil_ls",
-    "tsserver",
+    "ts_ls",
 }
 
 for _, server in ipairs(servers) do

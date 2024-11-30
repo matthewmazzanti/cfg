@@ -22,13 +22,10 @@ in
     withNodeJs = false;
     withRuby = false;
     vimAlias = true;
-    packpathDirs.myNeovimPackages = {
-      start = with vimPlugins; [
-        ftplugin
-        vim-python-pep8-indent
-        vim-nix
-        gruvbox-nvim
-      ];
-      opt = [];
-    };
+    plugins = with vimPlugins; [
+      ftplugin
+      vim-python-pep8-indent
+      vim-nix
+      gruvbox-nvim
+    ];
   }
