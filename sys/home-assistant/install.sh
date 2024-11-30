@@ -2,7 +2,7 @@
 set -ex
 
 if ! command -v git; then
-    nix-env --install git
+    nix-env -iA git
 fi
 
 start="0%"
