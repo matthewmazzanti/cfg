@@ -31,11 +31,8 @@ parted "$disk" -- mkpart primary "$swap_offset" "100%"
 sleep 1
 
 # Setup partitions
-# Format firmware partition
 mkfs.fat -F 32 -n FIRMWARE "$firmware_part"
-# Setup swap
 mkswap --label swap "$swap_part"
-# Format main drive
 mkfs.ext4 -L nixos "$nixos_part"
 
 # Mount filesystems
@@ -50,11 +47,19 @@ git clone \
     https://github.com/matthewmazzanti/cfg.git \
     /mnt/etc/nixos
 
-system="home-assistant"
+# Bootstrap installer script, workaround for installing firmware
+pushd /mnt/ect/nixos/sys/home-assistant
+nix-build \
+    --expr 'with import <nixpkgs> {}; (callPackage ./install-firmware.nix {}).installScript' \
+    --out-link /tmp/firmware-installer
+popd
 
+# Install onto drive
+system="home-assistant"
 nixos-generate-config \
     --root /mnt \
     --show-hardware-config \
     > "/mnt/etc/nixos/sys/$system/hardware.nix"
-
+/tmp/firmware-installer/bin/install-rpi-firmware /mnt/boot/firmware
+exit
 nixos-install --root /mnt --flake "/mnt/etc/nixos#$system"
