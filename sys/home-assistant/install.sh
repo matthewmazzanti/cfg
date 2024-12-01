@@ -31,20 +31,18 @@ parted "$disk" -- set 3 boot on
 sleep 1
 
 # Setup partitions
-# Format main drive
-mkfs.ext4 -L nixos "$nixos_part"
-# Setup swap
-mkswap --label swap "$swap_part"
 # Format firmware partition
 mkfs.fat -F 32 -n FIRMWARE "$firmware_part"
+# Setup swap
+mkswap --label swap "$swap_part"
+# Format main drive
+mkfs.ext4 -L nixos "$nixos_part"
 
 # Mount filesystems
 swapon "$swap_part"
 mount "$nixos_part" /mnt
 mkdir --parents /mnt/boot/firmware
 mount "$firmware_part" /mnt/boot/firmware
-
-exit
 
 # Clone git config
 git clone \
