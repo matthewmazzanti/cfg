@@ -2,18 +2,14 @@
 set -euxo pipefail
 
 if ! command -v git; then
-    nix-env -iA nixos.git
+    nix-env -iA nixpkgs.git
 fi
 
-start="0%"
-firmware="1GB"
-swap="4GB"
-system="home-assistant"
-
+# Variables for disk reference. Use by ID to ensure correct disk
 disk="/dev/disk/by-id/usb-SSI_M.2_NVME_SSD_00000000000000000000-0:0"
-nixos_part="$disk-part1"
+firmware_part="$disk-part1"
 swap_part="$disk-part2"
-firmware_part="$disk-part3"
+nixos_part="$disk-part3"
 
 umount /mnt/boot/firmware || true
 umount /mnt/boot || true
@@ -23,11 +19,14 @@ wipefs -a "$disk"*
 
 # Partition disk
 # Layout: 512MB ESP, 4GB swap, rest filled with ext4 root
+start_offset="0%"
+swap_offset="4GB"
+firmware_offset="1GB"
 parted "$disk" -- mklabel gpt
-parted "$disk" -- mkpart primary "$firmware" "-$swap"
+parted "$disk" -- mkpart FIRMWARE fat32 "0%" "$firmware_offset"
+parted "$disk" -- mkpart swap linux-swap "$firmware_offset" "$swap_offset"
+parted "$disk" -- mkpart primary "$firmware_offset" "-$swap_offset"
 parted "$disk" -- set 1 boot on
-parted "$disk" -- mkpart swap linux-swap "-$swap" 100%
-parted "$disk" -- mkpart FIRMWARE fat32 "$start" "$firmware"
 
 # Wait for entries to show up
 sleep 1
@@ -53,6 +52,8 @@ git clone \
     --branch=integrate-old \
     https://github.com/matthewmazzanti/cfg.git \
     /mnt/etc/nixos
+
+system="home-assistant"
 
 nixos-generate-config \
     --root /mnt \
