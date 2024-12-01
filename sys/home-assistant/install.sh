@@ -18,14 +18,13 @@ swapoff "$swap_part" || true
 wipefs -a "$disk"*
 
 # Partition disk
-# Layout: 512MB ESP, 4GB swap, rest filled with ext4 root
-start_offset="0%"
-swap_offset="4GB"
-firmware_offset="1GB"
+# Layout: 100MB firmware, 4GB swap, rest filled with ext4 root
+firmware_offset="100MB"
+swap_offset="4100MB"
 parted "$disk" -- mklabel gpt
 parted "$disk" -- mkpart FIRMWARE fat32 "0%" "$firmware_offset"
 parted "$disk" -- mkpart swap linux-swap "$firmware_offset" "$swap_offset"
-parted "$disk" -- mkpart primary "$firmware_offset" "-$swap_offset"
+parted "$disk" -- mkpart primary "$swap_offset" "100%"
 parted "$disk" -- set 1 boot on
 
 # Wait for entries to show up
