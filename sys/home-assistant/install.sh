@@ -60,5 +60,6 @@ nixos-generate-config \
     --show-hardware-config \
     > "/mnt/etc/nixos/sys/$system/hardware.nix"
 /tmp/firmware-installer/bin/install-rpi-firmware /mnt/boot/firmware
-exit
 nixos-install --root /mnt --flake "/mnt/etc/nixos#$system"
+
+echo "nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd'"

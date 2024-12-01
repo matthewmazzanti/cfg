@@ -24,7 +24,7 @@
     # Raspberry pi specific stuff
     libraspberrypi
     raspberrypi-eeprom
-    (pkgs.callPackage ./install-firmware.nix {})
+    (pkgs.callPackage ./install-firmware.nix {}).installScript
   ];
 
   services.openssh = {
