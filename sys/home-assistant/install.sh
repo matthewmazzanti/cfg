@@ -21,7 +21,7 @@ wipefs -a "$disk"*
 # Layout: 100MB firmware, 4GB swap, rest filled with ext4 root
 # Sector size: 512B
 start_offset="34s" # This is sectors
-firmware_offset="1953125s" # 100MiB + 34s
+firmware_offset="1953126s" # 100MiB + 34s
 swap_offset="8593442s" # 4GiB + 100MiB + 34s
 parted "$disk" -- mklabel gpt
 parted "$disk" -- mkpart FIRMWARE fat32 "34s" "$firmware_offset"
