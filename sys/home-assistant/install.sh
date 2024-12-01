@@ -19,13 +19,13 @@ wipefs -a "$disk"*
 
 # Partition disk
 # Layout: 100MB firmware, 4GB swap, rest filled with ext4 root
-firmware_offset="100MB"
-swap_offset="4100MB"
+firmware_offset="100002048" # 100MB + 2048B
+swap_offset="4100002048" # 4GB + 100MB + 2048B
 parted "$disk" -- mklabel gpt
-parted "$disk" -- mkpart FIRMWARE fat32 "0%" "$firmware_offset"
+parted "$disk" -- mkpart FIRMWARE fat32 "2048" "$firmware_offset"
+parted "$disk" -- set 1 esp on
 parted "$disk" -- mkpart swap linux-swap "$firmware_offset" "$swap_offset"
 parted "$disk" -- mkpart primary "$swap_offset" "100%"
-parted "$disk" -- set 3 boot on
 
 # Wait for entries to show up
 sleep 1
