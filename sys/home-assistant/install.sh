@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 if ! command -v git; then
-    nix-env -iA git
+    nix-env -iA nixos.git
 fi
 
 start="0%"
@@ -18,7 +18,7 @@ firmware_part="$disk-part3"
 umount /mnt/boot/firmware || true
 umount /mnt/boot || true
 umount /mnt || true
-swapoff "$partlabel/swap" || true
+swapoff "$swap_part" || true
 wipefs -a "$disk"*
 
 # Partition disk
