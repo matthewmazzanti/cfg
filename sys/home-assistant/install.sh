@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
-set -ex
+set -euxo pipefail
 
 if ! command -v git; then
     nix-env -iA git
 fi
 
 start="0%"
-esp="1GB"
+firmware="1GB"
 swap="4GB"
 system="home-assistant"
 
 disk="/dev/disk/by-id/usb-SSI_M.2_NVME_SSD_00000000000000000000-0:0"
-partlabel="/dev/disk/by-partlabel"
-label="/dev/disk/by-label"
+nixos_part="$disk-part1"
+swap_part="$disk-part2"
+firmware_part="$disk-part3"
 
+umount /mnt/boot/firmware || true
 umount /mnt/boot || true
 umount /mnt || true
 swapoff "$partlabel/swap" || true
@@ -22,29 +24,29 @@ wipefs -a "$disk"*
 # Partition disk
 # Layout: 512MB ESP, 4GB swap, rest filled with ext4 root
 parted "$disk" -- mklabel gpt
-parted "$disk" -- mkpart primary "$esp" "-$swap"
+parted "$disk" -- mkpart primary "$firmware" "-$swap"
+parted "$disk" -- set 1 boot on
 parted "$disk" -- mkpart swap linux-swap "-$swap" 100%
-parted "$disk" -- mkpart ESP fat32 "$start" "$esp"
-parted "$disk" -- set 3 esp on
+parted "$disk" -- mkpart FIRMWARE fat32 "$start" "$firmware"
 
-# Wait for by-partlabel entries to show up
+# Wait for entries to show up
 sleep 1
 
+# Setup partitions
 # Format main drive
-mkfs.ext4 -L nixos "$partlabel/primary"
+mkfs.ext4 -L nixos "$nixos_part"
 # Setup swap
-mkswap --label swap "$partlabel/swap"
-swapon "$partlabel/swap"
-# Format EFI partition
-mkfs.fat -F 32 -n boot "$partlabel/ESP"
-
-# Wait for by-label entries to show up
-sleep 1
+mkswap --label swap "$swap_part"
+# Format firmware partition
+mkfs.fat -F 32 -n FIRMWARE "$firmware_part"
 
 # Mount filesystems
-mount "$label/nixos" /mnt
-mkdir --parents /mnt/boot
-mount "$label/boot" /mnt/boot
+swapon "$swap_part"
+mount "$nixos_part" /mnt
+mkdir --parents /mnt/boot/firmware
+mount "$firmware_part" /mnt/boot/firmware
+
+exit
 
 # Clone git config
 git clone \
