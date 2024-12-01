@@ -21,10 +21,10 @@ wipefs -a "$disk"*
 # Layout: 100MB firmware, 4GB swap, rest filled with ext4 root
 # Sector size: 512B
 parted "$disk" -- mklabel gpt
-parted "$disk" -- mkpart FIRMWARE fat32 "34s" "204834s" # 100MiB + 34s
+parted "$disk" -- mkpart FIRMWARE fat32 "2048s" "206847s" # 100MiB + 2048s
 parted "$disk" -- set 1 esp on
-parted "$disk" -- mkpart swap linux-swap "204835s" "8593442s" # 4GiB + 100MiB + 34s
-parted "$disk" -- mkpart primary "8593443s" "100%"
+parted "$disk" -- mkpart swap linux-swap "206848s" "8595455s" # 4GiB + 100MiB + 2048s
+parted "$disk" -- mkpart primary "8595456s" "100%"
 
 # Wait for entries to show up
 sleep 1
@@ -62,4 +62,5 @@ nixos-generate-config \
 /tmp/firmware-installer/bin/install-rpi-firmware /mnt/boot/firmware
 nixos-install --root /mnt --flake "/mnt/etc/nixos#$system"
 
-echo "nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd'"
+nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd'
+nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd mmazzanti'
