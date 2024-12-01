@@ -22,9 +22,9 @@ wipefs -a "$disk"*
 # Sector size: 512B
 parted "$disk" -- mklabel gpt
 parted "$disk" -- mkpart FIRMWARE fat32 "2048s" "206847s" # 100MiB + 2048s
-parted "$disk" -- set 1 esp on
 parted "$disk" -- mkpart swap linux-swap "206848s" "8595455s" # 4GiB + 100MiB + 2048s
 parted "$disk" -- mkpart primary "8595456s" "100%"
+parted "$disk" -- set 3 esp on
 
 # Wait for entries to show up
 sleep 1
