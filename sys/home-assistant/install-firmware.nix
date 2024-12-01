@@ -53,7 +53,7 @@ let
   # Simple script to copy into the firmware directory. Might want to be smarter
   # in the future and copy directly to firmware partition
   installScript = pkgs.writeShellScriptBin "install-rpi-firmware" ''
-    cp -r ${firmwareContents} ''${1:-/boot/firmware}
+    cp -r ${firmwareContents}/. ''${1:-/boot/firmware}/
   '';
 in {
   inherit configTxt firmwareContents installScript;
