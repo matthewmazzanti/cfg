@@ -1,44 +1,46 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
 if ! command -v git; then
     nix-env -iA nixpkgs.git
 fi
 
-# Variables for disk reference. Use by ID to ensure correct disk
-disk="/dev/disk/by-id/usb-SSI_M.2_NVME_SSD_00000000000000000000-0:0"
-firmware_part="$disk-part1"
-swap_part="$disk-part2"
-nixos_part="$disk-part3"
+disk="/dev/disk/by-id/nvme-Samsung_SSD_990_EVO_1TB_S7M3NL0X933009L"
+boot_part="/dev/disk/by-partlabel/ESP"
+swap_part="/dev/disk/by-partlabel/swap"
+root_part="/dev/disk/by-partlabel/root"
 
-umount /mnt/boot/firmware || true
 umount /mnt/boot || true
 umount /mnt || true
 swapoff "$swap_part" || true
 wipefs -a "$disk"*
 
 # Partition disk
-# Layout: 100MB firmware, 4GB swap, rest filled with ext4 root
+# Layout: 4GB ESP, 8GB swap, rest filled with ext4 root
 # Sector size: 512B
 parted "$disk" -- mklabel gpt
-parted "$disk" -- mkpart FIRMWARE fat32 "2048s" "206847s" # 100MiB + 2048s
-parted "$disk" -- mkpart swap linux-swap "206848s" "8595455s" # 4GiB + 100MiB + 2048s
-parted "$disk" -- mkpart primary "8595456s" "100%"
-parted "$disk" -- set 3 esp on
+parted "$disk" -- mkpart ESP fat32 "2048s" "8390655s" # 4GiB ESP partition
+parted "$disk" -- set 1 boot on
+parted "$disk" -- mkpart swap linux-swap "8390656s" "25167871s" # 8GiB Swap partition
+parted "$disk" -- mkpart root "25167872s" "100%"
 
-# Wait for entries to show up
-sleep 1
+# Wait for by-label entries to show up
+while [[ ! -e "$root_part" ]]; do
+    sleep 1
+done
 
-# Setup partitions
-mkfs.fat -F 32 -n FIRMWARE "$firmware_part"
+# Enable Swap
 mkswap --label swap "$swap_part"
-mkfs.ext4 -L nixos "$nixos_part"
-
-# Mount filesystems
 swapon "$swap_part"
-mount "$nixos_part" /mnt
-mkdir --parents /mnt/boot/firmware
-mount "$firmware_part" /mnt/boot/firmware
+
+# Set up root partition
+mkfs.ext4 -L root "$root_part"
+mount "$root_part" /mnt
+
+# Setup boot partition
+mkfs.fat -F 32 -n ESP "$boot_part"
+mkdir --parents /mnt/boot
+mount "$boot_part" /mnt/boot
 
 # Clone git config
 git clone \
@@ -46,21 +48,5 @@ git clone \
     https://github.com/matthewmazzanti/cfg.git \
     /mnt/etc/nixos
 
-# Bootstrap installer script, workaround for installing firmware
-pushd /mnt/etc/nixos/sys/home-assistant
-nix-build \
-    --expr 'with import <nixpkgs> {}; (callPackage ./install-firmware.nix {}).installScript' \
-    --out-link /tmp/firmware-installer
-popd
-
-# Install onto drive
 system="home-assistant"
-nixos-generate-config \
-    --root /mnt \
-    --show-hardware-config \
-    > "/mnt/etc/nixos/sys/$system/hardware.nix"
-/tmp/firmware-installer/bin/install-rpi-firmware /mnt/boot/firmware
 nixos-install --root /mnt --flake "/mnt/etc/nixos#$system"
-
-# nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd'
-# nixos-enter --root /mnt -c '/nix/var/nix/profiles/system/sw/bin/passwd mmazzanti'

@@ -106,11 +106,10 @@
         modules = [ base ./sys/pi ];
       };
 
-      home-assistant = inputs.nixpkgs.lib.nixosSystem {
+      home-assistant-pi = inputs.nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         modules = [
-          nixos-hardware.nixosModules.raspberry-pi-4
-          ./sys/home-assistant
+          ./sys/home-assistant-pi
         ];
       };
     };
