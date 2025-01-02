@@ -49,4 +49,8 @@ git clone \
     /mnt/etc/nixos
 
 system="home-assistant"
+nixos-generate-config \
+    --root /mnt \
+    --show-hardware-config \
+    > "/mnt/etc/nixos/sys/$system/hardware.nix"
 nixos-install --root /mnt --flake "/mnt/etc/nixos#$system"
