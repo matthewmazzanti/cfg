@@ -3,7 +3,7 @@ let
   images = builtins.fromJSON (builtins.readFile ./images.lock);
 in {
   # Homeassistant stuff
-  networking.firewall.allowedTCPPorts = [ 8123 8091 ];
+  networking.firewall.enable = false;
 
   virtualisation.oci-containers = {
     containers = {
