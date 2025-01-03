@@ -15,7 +15,7 @@
     paths = with pkgs; [
       gopls
       lua-language-server
-      nodePackages.pyright
+      pyright
       nodePackages.typescript-language-server
       nil
       rust-analyzer

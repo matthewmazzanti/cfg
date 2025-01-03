@@ -35,6 +35,7 @@
     ripgrep
     fd
     git
+    tree
   ];
 
   services.openssh = {

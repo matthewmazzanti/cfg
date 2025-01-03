@@ -65,9 +65,8 @@
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
         nix-tree
-        poetry
         go
-        alejandra
+        uv
       ];
     });
 
