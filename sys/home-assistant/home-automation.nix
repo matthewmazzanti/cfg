@@ -16,6 +16,7 @@ in {
           environment = {
             TZ = config.time.timeZone;
           };
+          ports = [ "0.0.0.0:8123:8123" ];
           volumes = ["/var/lib/home-assistant/config:/config"];
           extraOptions = [
             "--privileged"
