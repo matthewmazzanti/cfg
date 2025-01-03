@@ -11,7 +11,7 @@ in {
       backend = "podman";
       containers = {
         home-assistant = {
-          image = images.home-assistant.lock;
+          image = "ghcr.io/home-assistant/home-assistant:stable"; # images.home-assistant.lock;
           autoStart = true;
           environment = {
             TZ = config.time.timeZone;
