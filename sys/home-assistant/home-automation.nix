@@ -5,14 +5,7 @@ in {
   # Homeassistant stuff
   networking.firewall.allowedTCPPorts = [ 8123 8091 ];
 
-  virtualisation.podman = {
-    enable = true;
-    dockerCompat = true;
-    defaultNetwork.settings.dns_enabled = true;
-  };
-
   virtualisation.oci-containers = {
-    backend = "podman";
     containers = {
       home-assistant = {
         image = "ghcr.io/home-assistant/home-assistant:stable"; # images.home-assistant.lock;
