@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware.nix
+      ./home-automation.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
