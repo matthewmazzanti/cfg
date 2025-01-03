@@ -1,6 +1,6 @@
 { config, ... }:
 let
-  images = builtins.fromJSON "images.lock";
+  images = builtins.fromJSON ./images.lock;
 in {
   # Homeassistant stuff
   networking.firewall.allowedTCPPorts = [ 8123 8091 ];
