@@ -13,7 +13,10 @@ in {
         environment = {
           TZ = config.time.timeZone;
         };
-        volumes = [ "/var/lib/home-assistant/config:/config" ];
+        volumes = [
+          "/var/lib/home-assistant/config:/config"
+          "${./home-assistant/configuration.yaml}:/config/configuration.yaml:ro"
+        ];
         extraOptions = [ "--network=host" ];
       };
       /*
