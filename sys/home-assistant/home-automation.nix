@@ -1,8 +1,11 @@
 { config, ... }:
+# TODOS:
+# - Run containers as non-root
+# - More complex configuration/ui-lovelace configuration reloads
 let
   images = builtins.fromJSON (builtins.readFile ./images.lock);
 in {
-  # Homeassistant stuff
+  # Allow Home Assistant to discover local devices
   networking.firewall.enable = false;
 
   virtualisation.oci-containers = {
@@ -19,13 +22,11 @@ in {
         ];
         extraOptions = [ "--network=host" ];
       };
-      /*
       zwave-js = {
-        image = "zwavejs/zwave-js-ui:latest";
+        image = images.zwave-js.lock;
         autoStart = true;
         environment = {
           TZ = config.time.timeZone;
-          ZWAVEJS_EXTERNAL_CONFIG = "/usr/src/app/store/.config-db";
         };
         environmentFiles = [
           "/var/lib/zwave-js/env.secret"
@@ -39,7 +40,6 @@ in {
           "--device=/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"
         ];
       };
-      */
     };
   };
 }

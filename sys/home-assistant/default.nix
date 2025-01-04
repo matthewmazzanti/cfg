@@ -53,7 +53,7 @@
 
   users.users.mmazzanti = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" "dialout" ];
+    extraGroups = [ "wheel" "podman" "dialout" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB4h5HZCnD2uFkpb8Z/pPQKXrtdV5YU3DG1w+9rOyddy mmazzanti@beta.xi"
     ];

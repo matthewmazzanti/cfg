@@ -1,6 +1,6 @@
 {
   "home-assistant": {
-    "lock": "ghcr.io/home-assistant/home-assistant@sha256:db0f344d5126bfedd7bf18e0bfb8249a9a5e6785e2f6cb3728edbd393fff1981",
+    "lock": "ghcr.io/home-assistant/home-assistant@sha256:473cc062ca249449d93d2976a648c3215e1b12f84a23cce5a5151c9700aaa12a",
     "image": "ghcr.io/home-assistant/home-assistant:stable",
     "platform": {
       "architecture": "amd64",
