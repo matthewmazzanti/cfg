@@ -20,7 +20,10 @@ in {
           "/var/lib/home-assistant/config:/config"
           "${./home-assistant/configuration.yaml}:/config/configuration.yaml:ro"
         ];
-        extraOptions = [ "--network=host" ];
+        extraOptions = [
+          "--privileged"
+          "--network=host"
+        ];
       };
       zwave-js = {
         image = images.zwave-js.lock;
