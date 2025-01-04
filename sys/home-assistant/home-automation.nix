@@ -8,15 +8,13 @@ in {
   virtualisation.oci-containers = {
     containers = {
       home-assistant = {
-        image = "ghcr.io/home-assistant/home-assistant:stable"; # images.home-assistant.lock;
+        image = images.home-assistant.lock;
         autoStart = true;
         environment = {
           TZ = config.time.timeZone;
         };
-        volumes = ["/var/lib/home-assistant/config:/config"];
-        extraOptions = [
-          "--network=host"
-        ];
+        volumes = [ "/var/lib/home-assistant/config:/config" ];
+        extraOptions = [ "--network=host" ];
       };
       /*
       zwave-js = {
