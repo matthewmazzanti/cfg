@@ -5,7 +5,7 @@ sun:
 zeroconf:
 dhcp:
 
-automations:
+automation:
   - id: turn_off_apple_tvs
     alias: Turn off Apple TVs
     trigger:
