@@ -21,7 +21,6 @@ in {
           "${./home-assistant/configuration.yaml}:/config/configuration.yaml:ro"
         ];
         extraOptions = [
-          "--privileged"
           "--network=host"
         ];
       };

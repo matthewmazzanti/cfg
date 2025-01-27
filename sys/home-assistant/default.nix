@@ -37,6 +37,7 @@
     fd
     git
     tree
+    jq
   ];
 
   services.openssh = {
