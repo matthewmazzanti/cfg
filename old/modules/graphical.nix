@@ -40,8 +40,6 @@ in {
     hardware = {
       opengl = {
         enable = true;
-        driSupport = true;
-        driSupport32Bit = true;
         extraPackages = [ pkgs.libva ];
       };
       pulseaudio = {
