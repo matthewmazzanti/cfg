@@ -1,0 +1,82 @@
+set realname = "Matthew Mazzanti"
+set use_from = yes
+set envelope_from = yes
+set ssl_force_tls = yes
+
+set my_pass = "`pass show secrets/gmail`"
+set imap_user = "matthew.mazzanti@gmail.com"
+set imap_pass = $my_pass
+set smtp_url = "smtps://matthew.mazzanti@gmail.com@smtp.gmail.com:465"
+set smtp_pass = $my_pass
+set from = "matthew.mazzanti@gmail.com"
+
+set mbox_type = Maildir
+set folder = "~/.mail/gmail"
+set spoolfile = +Inbox
+set record = +Sent
+set postponed = +Drafts
+set header_cache=~/.cache/mutt/headers
+set message_cachedir=~/.cache/mutt/messages
+
+set sort = threads
+set sort_aux = reverse-last-date-received
+
+set editor = nvim
+auto_view text/html
+alternative_order text/html text/plain text/enriched
+
+bind pager j next-line
+bind pager k previous-line
+bind attach,index,pager \CD next-page
+bind attach,index,pager \CU previous-page
+bind pager g top
+bind pager G bottom
+bind attach,index g first-entry
+bind attach,index G last-entry
+
+# basic colors ---------------------------------------------------------
+color normal        white           default
+color error         red             default
+color tilde         black           default
+color message       cyan            default
+color markers       red             white
+color attachment    white           default
+color search        brightmagenta   default
+color indicator     brightblack     yellow
+color tree          green          default
+
+# sidebarh
+color sidebar_new   default blue
+
+# index ----------------------------------------------------------------
+
+color index         red             default         "~A"    # all messages
+color index         brightred       default         "~E"    # expired messages
+color index         blue            default         "~N"    # new messages
+color index         blue            default         "~O"    # old messages
+color index         brightmagenta   default         "~Q"    # messages that have been replied to
+color index         brightwhite     default         "~R"    # read messages
+color index         blue            default         "~U"    # unread messages
+color index         brightyellow    default         "~v"    # messages part of a collapsed thread
+color index         brightyellow    default         "~P"    # messages from me
+color index         red             default         "~F"    # flagged messages
+color index         black           red             "~D"    # deleted messages
+
+# message headers ------------------------------------------------------
+
+color hdrdefault    brightgreen     default
+color header        brightyellow    default         "^(From)"
+color header        blue            default         "^(Subject)"
+
+# body -----------------------------------------------------------------
+
+color quoted        blue            default
+color quoted1       cyan            default
+color quoted2       yellow          default
+color quoted3       red             default
+color quoted4       brightred       default
+
+color signature     brightblack     default
+color bold          black           default
+color underline     black           default
+color normal        default         default

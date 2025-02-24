@@ -15,7 +15,7 @@
     paths = with pkgs; [
       gopls
       lua-language-server
-      nodePackages.pyright
+      pyright
       nodePackages.typescript-language-server
       nil
       rust-analyzer
@@ -70,6 +70,8 @@
         haskell
         hcl
         html
+        html
+        htmldjango
         javascript
         json
         lua
@@ -77,13 +79,12 @@
         nix
         python
         ruby
+        rust
         starlark
-        typescript
         terraform
-        yaml
-        html
-        htmldjango
+        typescript
         xml
+        yaml
       ]))
     nvim-treesitter-textobjects # Treesitter powered textobjects
     nvim-ts-autotag # Auto XML/HTML tag closing

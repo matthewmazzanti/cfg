@@ -1,0 +1,6 @@
+vms/
+result
+__pycache__/
+*.egg-info
+home.nix
+**/.direnv

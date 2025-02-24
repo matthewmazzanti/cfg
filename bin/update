@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+nix flake update
+uv --project=scripts/docker-sha run \
+    scripts/docker-sha/main.py \
+    sys/home-assistant/images.json

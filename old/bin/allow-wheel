@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+NIXOS="/etc/nixos"
+GROUP="wheel"
+
+# Configure repo
+git -C "$NIXOS" config core.sharedRepository group
+
+# Change all files to group ownership
+chown -R "root:$GROUP" "$NIXOS"
+
+# Change group permissions to user permissions
+chmod -R g=u "$NIXOS"
+
+# New files get directory's group
+find "$NIXOS" -type d -exec chmod g+s {} +
