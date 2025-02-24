@@ -155,7 +155,6 @@
       enable = true;
       hidpi = true;
     };
-    virt.host = false;
   };
 
   services = {
