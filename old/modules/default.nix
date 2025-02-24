@@ -54,7 +54,6 @@ in {
     };
 
     programs = {
-      vim.defaultEditor = true;
       zsh.enable = true;
       gnupg.agent = {
         enable = true;

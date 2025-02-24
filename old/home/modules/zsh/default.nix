@@ -44,7 +44,7 @@ in
       enableCompletion = false;
       history.share = false;
 
-      plugins = with pkgs; [
+      plugins = [
         {
           name = "fast-syntax-highlighting";
           src = "${pkgs.zsh-fast-syntax-highlighting}/share/zsh/site-functions";
@@ -66,6 +66,7 @@ in
         GIT_PAGER = "${pager}";
         LESS="";
         LESSHIST = "${xdg.dirs.history}/less";
+        EDITOR = "vim";
 
         GPG_TTY = "$(tty)";
 
