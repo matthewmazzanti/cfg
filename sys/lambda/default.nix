@@ -16,7 +16,7 @@
   services = {
     xserver.dpi = 168;
     udev = {
-      packages = [ pkgs.dolphinEmu ];
+      packages = [ pkgs.dolphin-emu ];
       extraHwdb = ''
         # Naga Trinity
         mouse:usb:v1532p0067:*
