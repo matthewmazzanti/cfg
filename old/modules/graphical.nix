@@ -30,25 +30,24 @@ in {
 
       dbus.enable = true;
 
-      pipewire.enable = false;
     };
 
     programs.dconf.enable = true;
 
-    hardware = {
-      opengl = {
-        enable = true;
-        extraPackages = [ pkgs.libva ];
+    services.pipewire.enable = false;
+    services.pulseaudio = {
+      enable = true;
+      support32Bit = true;
+      daemon.config = {
+        resample-method = "speex-float-10";
+        avoid-resampling = "true";
+        default-sample-rate = "48000";
       };
-      pulseaudio = {
-        enable = true;
-        support32Bit = true;
-        daemon.config = {
-          resample-method = "speex-float-10";
-          avoid-resampling = "true";
-          default-sample-rate = "48000";
-        };
-      };
+    };
+
+    hardware.graphics = {
+      enable = true;
+      extraPackages = [ pkgs.libva ];
     };
   };
 }
