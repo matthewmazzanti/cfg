@@ -8,9 +8,9 @@ config="$(printf '%q\n' $2)"
 # TODO:
 # tempdir
 # cleanup
-ssh lambda.lan -tt <<EOF
+ssh lambda.lan <<EOF
     set -euo pipefail
     cd ~/src/nix/cfg
     git reset --hard
-    nix build .#nixosConfigurations.${config}.config.system.build.toplevel
+    nix build -L .#nixosConfigurations.${config}.config.system.build.toplevel
 EOF
