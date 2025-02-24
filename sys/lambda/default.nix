@@ -33,79 +33,73 @@ in {
           ethtool
           custom."nvim/root"
         ];
+      };
 
-        pathsToLink = [ "/share/zsh" ];
+      environment.pathsToLink = [ "/share/zsh" ];
 
-        etc = {
-          "inputrc".text = ''
-            set editing-mode vi
-            set keymap vi
-          '';
+      environment.etc = {
+        "inputrc".text = ''
+          set editing-mode vi
+          set keymap vi
+        '';
+      };
+
+      programs.zsh.enable = true;
+      programs.gnupg.agent = {
+        enable = true;
+        enableSSHSupport = true;
+        pinentryPackage = pkgs.pinentry-qt;
+      };
+
+      services.openssh = {
+        enable = true;
+        settings = {
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+          KbdInteractiveAuthentication = false;
         };
       };
 
-      programs = {
-        zsh.enable = true;
-        gnupg.agent = {
-          enable = true;
-          enableSSHSupport = true;
-          pinentryPackage = pkgs.pinentry-qt;
-        };
-      };
-
-      services = {
-        openssh = {
-          enable = true;
-          settings = {
-            PermitRootLogin = "no";
-            PasswordAuthentication = false;
-            KbdInteractiveAuthentication = false;
-          };
-        };
-
-        getty = {
-          greetingLine = "${config.networking.hostName}";
-          helpLine = mkForce "";
-        };
+      services.getty = {
+        greetingLine = "${config.networking.hostName}";
+        helpLine = mkForce "";
       };
 
       security.pki.certificates = [
         (builtins.readFile ../../old/modules/keys/ca.crt)
       ];
 
-      users = {
-        defaultUserShell = pkgs.zsh;
-        users.mmazzanti = {
-          isNormalUser = true;
-          extraGroups = [ "wheel" ];
-          openssh.authorizedKeys.keys = with keys.mmazzanti; [
-            lambda
-            iota
-            beta
-          ];
-        };
+      users.defaultUserShell = pkgs.zsh;
+
+      users.users.mmazzanti = {
+        isNormalUser = true;
+        extraGroups = [ "wheel" ];
+        openssh.authorizedKeys.keys = with keys.mmazzanti; [
+          lambda
+          iota
+          beta
+        ];
       };
     }
     # graphical.nix
     {
       users.users.mmazzanti.extraGroups = [ "video" "audio" ];
 
-      services = {
-        xserver = {
-          enable = true;
-          displayManager.startx.enable = true;
-          autoRepeatDelay = 300;
-          autoRepeatInterval = 40;
-          enableCtrlAltBackspace = true;
-          videoDrivers = ["amdgpu"];
-        };
-
-        dbus.enable = true;
-
-      };
-
       programs.dconf.enable = true;
 
+      services.xserver = {
+        enable = true;
+        displayManager.startx.enable = true;
+        autoRepeatDelay = 300;
+        autoRepeatInterval = 40;
+        enableCtrlAltBackspace = true;
+        videoDrivers = ["amdgpu"];
+      };
+
+      # Not sure what this is for
+      services.dbus.enable = true;
+
+      # 24.09 made pipewire the default - unset for now
       services.pipewire.enable = false;
       services.pulseaudio = {
         enable = true;
@@ -118,7 +112,9 @@ in {
       };
 
       hardware.graphics = {
+        # Enables gpu accelerated graphics
         enable = true;
+        # Not sure what this is for
         extraPackages = [ pkgs.libva ];
       };
     }
@@ -160,16 +156,13 @@ in {
 
   programs.openvpn3.enable = true;
 
-  boot = {
-    supportedFilesystems = [ "zfs" ];
-    binfmt.emulatedSystems = ["aarch64-linux"];
-
-    tmp.cleanOnBoot = true;
-    loader = {
-      systemd-boot.enable = true;
-      systemd-boot.configurationLimit = 10;
-      efi.canTouchEfiVariables = true;
-    };
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
+  boot.tmp.cleanOnBoot = true;
+  boot.loader = {
+    systemd-boot.enable = true;
+    systemd-boot.configurationLimit = 10;
+    efi.canTouchEfiVariables = true;
   };
 
   networking = {
@@ -179,13 +172,11 @@ in {
     firewall.allowedTCPPorts = [ 8080 ];
   };
 
-  users.users.mmazzanti = {
-    extraGroups = [
-      "usb"
-      "dialout"
-      "input"
-    ];
-  };
+  users.users.mmazzanti.extraGroups = [
+    "usb"
+    "dialout"
+    "input"
+  ];
 
   home-manager.users.mmazzanti = {
     imports = [ ../../old/home/modules ];
