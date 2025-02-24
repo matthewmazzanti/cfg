@@ -103,19 +103,6 @@
         system = "x86_64-linux";
         modules = [ ./sys/home-assistant ];
       };
-
-      pi = inputs.nixpkgs-old.lib.nixosSystem rec {
-        system = "aarch64-linux";
-        specialArgs.custom = self.packages.${system};
-        modules = [ base ./sys/pi ];
-      };
-
-      home-assistant-pi = inputs.nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [
-          ./sys/home-assistant-pi
-        ];
-      };
     };
   };
 }

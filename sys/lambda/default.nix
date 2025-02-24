@@ -84,8 +84,6 @@
     home.packages = with pkgs; [
       xdg-user-dirs
       niv
-      qjackctl
-      spicetify-cli
       hid-listen
     ];
 
