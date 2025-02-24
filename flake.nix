@@ -5,6 +5,9 @@
     darwin.url = "github:lnl7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -25,6 +28,7 @@
     self,
     nixpkgs,
     darwin,
+    home-manager,
     home-manager-old,
     nixos-hardware,
     ...
@@ -32,6 +36,18 @@
     lib = (import ./lib nixpkgs);
 
     base = { pkgs, ... }: {
+      imports = [ home-manager.nixosModules.home-manager ];
+
+      nix.extraOptions = "experimental-features = nix-command flakes";
+
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        extraSpecialArgs.custom = self.packages.${pkgs.system};
+      };
+    };
+
+    base-old = { pkgs, ... }: {
       imports = [ home-manager-old.nixosModules.home-manager ];
 
       nix.extraOptions = "experimental-features = nix-command flakes";
@@ -87,7 +103,7 @@
     };
 
     nixosConfigurations = {
-      lambda = inputs.nixpkgs-old.lib.nixosSystem rec {
+      lambda = inputs.nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
         modules = [ base ./sys/lambda ];
@@ -96,7 +112,7 @@
       omega = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base ./sys/omega ];
+        modules = [ base-old ./sys/omega ];
       };
 
       home-assistant = inputs.nixpkgs.lib.nixosSystem {
