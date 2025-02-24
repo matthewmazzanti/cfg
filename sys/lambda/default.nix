@@ -1,7 +1,158 @@
 { pkgs, ... }: {
   imports = [
     ./hardware.nix
-    ../../old/modules
+    ({ pkgs, lib, config, custom, ... }:
+
+    with lib;
+
+    let
+      cfg = config.usage;
+      keys = (import ../../old/modules/keys);
+    in {
+      imports = [
+        ../../old/modules/git-server.nix
+        ../../old/modules/graphical.nix
+        ../../old/modules/virt-host.nix
+        ../../old/modules/webhook-rebuild.nix
+      ];
+
+      config = {
+        time.timeZone = "America/New_York";
+        i18n.defaultLocale = "en_US.UTF-8";
+
+        console = {
+          font = if cfg.graphical.hidpi
+            then "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz"
+            else "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
+          keyMap = "us";
+        };
+
+        environment = {
+          systemPackages = with pkgs; [
+            gnutls
+            pciutils
+            usbutils
+
+            wget
+            curl
+            tree
+            git
+
+            gnupg
+            zsh
+            tmux
+            kitty.terminfo
+            ethtool
+            custom."nvim/root"
+          ];
+
+          pathsToLink = [ "/share/zsh" ];
+
+          etc = {
+            "inputrc".text = ''
+              set editing-mode vi
+              set keymap vi
+            '';
+          };
+        };
+
+        programs = {
+          zsh.enable = true;
+          gnupg.agent = {
+            enable = true;
+            enableSSHSupport = true;
+            pinentryPackage = if cfg.graphical.enable then pkgs.pinentry-qt else pinentry-curses;
+          };
+        };
+
+        services = {
+          openssh = {
+            enable = true;
+            settings = {
+              PermitRootLogin = "no";
+              PasswordAuthentication = false;
+              KbdInteractiveAuthentication = false;
+            };
+          };
+
+          getty = {
+            greetingLine = "${config.networking.hostName}";
+            helpLine = mkForce "";
+          };
+        };
+
+        security.pki.certificates = [
+          (builtins.readFile ../../old/modules/keys/ca.crt)
+        ];
+
+        users = {
+          defaultUserShell = pkgs.zsh;
+          users.mmazzanti = {
+            isNormalUser = true;
+            extraGroups = [ "wheel" ];
+            openssh.authorizedKeys.keys = with keys.mmazzanti; [
+              lambda
+              iota
+              beta
+            ];
+          };
+        };
+      };
+    })
+    # graphical.nix
+    ({ pkgs, lib, config,... }:
+
+    with lib;
+
+    let
+      cfg = config.usage.graphical;
+    in {
+      options.usage.graphical = {
+        enable = mkEnableOption "graphical";
+
+        hidpi = mkOption {
+          default = false;
+          type = types.bool;
+          description = "Whether the screen is high dpi";
+        };
+      };
+
+      config = mkIf cfg.enable {
+        users.users.mmazzanti.extraGroups = [ "video" "audio" ];
+
+        services = {
+          xserver = {
+            enable = true;
+            displayManager.startx.enable = true;
+            autoRepeatDelay = 300;
+            autoRepeatInterval = 40;
+            enableCtrlAltBackspace = true;
+            videoDrivers = ["amdgpu"];
+          };
+
+          dbus.enable = true;
+
+        };
+
+        programs.dconf.enable = true;
+
+        services.pipewire.enable = false;
+        services.pulseaudio = {
+          enable = true;
+          support32Bit = true;
+          daemon.config = {
+            resample-method = "speex-float-10";
+            avoid-resampling = "true";
+            default-sample-rate = "48000";
+          };
+        };
+
+        hardware.graphics = {
+          enable = true;
+          extraPackages = [ pkgs.libva ];
+        };
+      };
+    })
   ];
 
   nixpkgs.config.allowUnfree = true;
