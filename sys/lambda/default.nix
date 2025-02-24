@@ -10,12 +10,6 @@
       cfg = config.usage;
       keys = (import ../../old/modules/keys);
     in {
-      imports = [
-        ../../old/modules/git-server.nix
-        ../../old/modules/virt-host.nix
-        ../../old/modules/webhook-rebuild.nix
-      ];
-
       config = {
         time.timeZone = "America/New_York";
         i18n.defaultLocale = "en_US.UTF-8";
