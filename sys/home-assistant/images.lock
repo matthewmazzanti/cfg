@@ -1,6 +1,6 @@
 {
   "home-assistant": {
-    "lock": "ghcr.io/home-assistant/home-assistant@sha256:473cc062ca249449d93d2976a648c3215e1b12f84a23cce5a5151c9700aaa12a",
+    "lock": "ghcr.io/home-assistant/home-assistant@sha256:5b69ca3b3c1a13b8fe05a052a5110f7e2bffca1bf448af44bd52e52a27400c36",
     "image": "ghcr.io/home-assistant/home-assistant:stable",
     "platform": {
       "architecture": "amd64",
@@ -8,7 +8,7 @@
     }
   },
   "zwave-js": {
-    "lock": "registry-1.docker.io/zwavejs/zwave-js-ui@sha256:4798bb152afa7afc7f19ea1e221e94130b4a038fd7d17478a2893b233efc20d0",
+    "lock": "registry-1.docker.io/zwavejs/zwave-js-ui@sha256:3743ef89de38cfaea07546544b1e2ab15962489721c87b64a46b3e7272d71669",
     "image": "zwavejs/zwave-js-ui:latest",
     "platform": {
       "architecture": "amd64",
