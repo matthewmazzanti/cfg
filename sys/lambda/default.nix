@@ -6,126 +6,122 @@ in {
   imports = [
     ./hardware.nix
     # modules/default.nix
-    ({
-      config = {
-        time.timeZone = "America/New_York";
-        i18n.defaultLocale = "en_US.UTF-8";
+    {
+      time.timeZone = "America/New_York";
+      i18n.defaultLocale = "en_US.UTF-8";
 
-        console = {
-          font = "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz";
-          keyMap = "us";
-        };
+      console = {
+        font = "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz";
+        keyMap = "us";
+      };
 
-        environment = {
-          systemPackages = with pkgs; [
-            gnutls
-            pciutils
-            usbutils
+      environment = {
+        systemPackages = with pkgs; [
+          gnutls
+          pciutils
+          usbutils
 
-            wget
-            curl
-            tree
-            git
+          wget
+          curl
+          tree
+          git
 
-            gnupg
-            zsh
-            tmux
-            kitty.terminfo
-            ethtool
-            custom."nvim/root"
-          ];
-
-          pathsToLink = [ "/share/zsh" ];
-
-          etc = {
-            "inputrc".text = ''
-              set editing-mode vi
-              set keymap vi
-            '';
-          };
-        };
-
-        programs = {
-          zsh.enable = true;
-          gnupg.agent = {
-            enable = true;
-            enableSSHSupport = true;
-            pinentryPackage = pkgs.pinentry-qt;
-          };
-        };
-
-        services = {
-          openssh = {
-            enable = true;
-            settings = {
-              PermitRootLogin = "no";
-              PasswordAuthentication = false;
-              KbdInteractiveAuthentication = false;
-            };
-          };
-
-          getty = {
-            greetingLine = "${config.networking.hostName}";
-            helpLine = mkForce "";
-          };
-        };
-
-        security.pki.certificates = [
-          (builtins.readFile ../../old/modules/keys/ca.crt)
+          gnupg
+          zsh
+          tmux
+          kitty.terminfo
+          ethtool
+          custom."nvim/root"
         ];
 
-        users = {
-          defaultUserShell = pkgs.zsh;
-          users.mmazzanti = {
-            isNormalUser = true;
-            extraGroups = [ "wheel" ];
-            openssh.authorizedKeys.keys = with keys.mmazzanti; [
-              lambda
-              iota
-              beta
-            ];
-          };
+        pathsToLink = [ "/share/zsh" ];
+
+        etc = {
+          "inputrc".text = ''
+            set editing-mode vi
+            set keymap vi
+          '';
         };
       };
-    })
+
+      programs = {
+        zsh.enable = true;
+        gnupg.agent = {
+          enable = true;
+          enableSSHSupport = true;
+          pinentryPackage = pkgs.pinentry-qt;
+        };
+      };
+
+      services = {
+        openssh = {
+          enable = true;
+          settings = {
+            PermitRootLogin = "no";
+            PasswordAuthentication = false;
+            KbdInteractiveAuthentication = false;
+          };
+        };
+
+        getty = {
+          greetingLine = "${config.networking.hostName}";
+          helpLine = mkForce "";
+        };
+      };
+
+      security.pki.certificates = [
+        (builtins.readFile ../../old/modules/keys/ca.crt)
+      ];
+
+      users = {
+        defaultUserShell = pkgs.zsh;
+        users.mmazzanti = {
+          isNormalUser = true;
+          extraGroups = [ "wheel" ];
+          openssh.authorizedKeys.keys = with keys.mmazzanti; [
+            lambda
+            iota
+            beta
+          ];
+        };
+      };
+    }
     # graphical.nix
-    ({
-      config = {
-        users.users.mmazzanti.extraGroups = [ "video" "audio" ];
+    {
+      users.users.mmazzanti.extraGroups = [ "video" "audio" ];
 
-        services = {
-          xserver = {
-            enable = true;
-            displayManager.startx.enable = true;
-            autoRepeatDelay = 300;
-            autoRepeatInterval = 40;
-            enableCtrlAltBackspace = true;
-            videoDrivers = ["amdgpu"];
-          };
-
-          dbus.enable = true;
-
+      services = {
+        xserver = {
+          enable = true;
+          displayManager.startx.enable = true;
+          autoRepeatDelay = 300;
+          autoRepeatInterval = 40;
+          enableCtrlAltBackspace = true;
+          videoDrivers = ["amdgpu"];
         };
 
-        programs.dconf.enable = true;
+        dbus.enable = true;
 
-        services.pipewire.enable = false;
-        services.pulseaudio = {
-          enable = true;
-          support32Bit = true;
-          daemon.config = {
-            resample-method = "speex-float-10";
-            avoid-resampling = "true";
-            default-sample-rate = "48000";
-          };
-        };
+      };
 
-        hardware.graphics = {
-          enable = true;
-          extraPackages = [ pkgs.libva ];
+      programs.dconf.enable = true;
+
+      services.pipewire.enable = false;
+      services.pulseaudio = {
+        enable = true;
+        support32Bit = true;
+        daemon.config = {
+          resample-method = "speex-float-10";
+          avoid-resampling = "true";
+          default-sample-rate = "48000";
         };
       };
-    })
+
+      hardware.graphics = {
+        enable = true;
+        extraPackages = [ pkgs.libva ];
+      };
+    }
   ];
 
   nixpkgs.config.allowUnfree = true;
