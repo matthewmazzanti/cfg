@@ -8,7 +8,7 @@ config="$(printf '%q\n' $2)"
 # TODO:
 # tempdir
 # cleanup
-ssh lambda.lan <<EOF
+ssh "$host" -T <<EOF
     set -euo pipefail
     cd ~/src/nix/cfg
     git reset --hard
