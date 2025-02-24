@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   imports = [
     ./hardware.nix
+    # modules/default.nix
     ({ pkgs, lib, config, custom, ... }:
 
     with lib;
@@ -11,7 +12,6 @@
     in {
       imports = [
         ../../old/modules/git-server.nix
-        ../../old/modules/graphical.nix
         ../../old/modules/virt-host.nix
         ../../old/modules/webhook-rebuild.nix
       ];
