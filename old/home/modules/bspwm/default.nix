@@ -103,7 +103,7 @@ in {
         polybar
         xorg.xdpyinfo
         xorg.xev
-        gnome3.adwaita-icon-theme
+        gnome.adwaita-icon-theme
         unclutter-xfixes
         picom
         hsetroot
