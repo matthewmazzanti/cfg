@@ -7,7 +7,6 @@
     with lib;
 
     let
-      cfg = config.usage;
       keys = (import ../../old/modules/keys);
     in {
       config = {
@@ -15,9 +14,7 @@
         i18n.defaultLocale = "en_US.UTF-8";
 
         console = {
-          font = if cfg.graphical.hidpi
-            then "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz"
-            else "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
+          font = "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz";
           keyMap = "us";
         };
 
@@ -55,7 +52,7 @@
           gnupg.agent = {
             enable = true;
             enableSSHSupport = true;
-            pinentryPackage = if cfg.graphical.enable then pkgs.pinentry-qt else pinentry-curses;
+            pinentryPackage = pkgs.pinentry-qt;
           };
         };
 
@@ -94,24 +91,10 @@
       };
     })
     # graphical.nix
-    ({ pkgs, lib, config,... }:
+    ({ pkgs, ... }:
 
-    with lib;
-
-    let
-      cfg = config.usage.graphical;
-    in {
-      options.usage.graphical = {
-        enable = mkEnableOption "graphical";
-
-        hidpi = mkOption {
-          default = false;
-          type = types.bool;
-          description = "Whether the screen is high dpi";
-        };
-      };
-
-      config = mkIf cfg.enable {
+    {
+      config = {
         users.users.mmazzanti.extraGroups = [ "video" "audio" ];
 
         services = {
@@ -150,12 +133,6 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
-  usage = {
-    graphical = {
-      enable = true;
-      hidpi = true;
-    };
-  };
 
   services = {
     xserver.dpi = 168;
