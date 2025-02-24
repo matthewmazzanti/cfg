@@ -120,8 +120,6 @@ in {
         dolphin-emu
       ];
 
-      programs.steam.enable = true;
-
       sessionVariables = {
         "EDITOR" = "nvim";
         "QT_SCALE_FACTOR" = "2";
