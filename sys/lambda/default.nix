@@ -1,14 +1,12 @@
-{ pkgs, ... }: {
+{ pkgs, lib, config, custom, ... }: 
+with lib;
+let
+  keys = (import ../../old/modules/keys);
+in {
   imports = [
     ./hardware.nix
     # modules/default.nix
-    ({ pkgs, lib, config, custom, ... }:
-
-    with lib;
-
-    let
-      keys = (import ../../old/modules/keys);
-    in {
+    ({
       config = {
         time.timeZone = "America/New_York";
         i18n.defaultLocale = "en_US.UTF-8";
@@ -91,9 +89,7 @@
       };
     })
     # graphical.nix
-    ({ pkgs, ... }:
-
-    {
+    ({
       config = {
         users.users.mmazzanti.extraGroups = [ "video" "audio" ];
 
