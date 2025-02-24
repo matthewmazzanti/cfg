@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+host="$1"
+config="$(printf '%q\n' $2)"
+
+# TODO:
+# tempdir
+# cleanup
+ssh lambda.lan -t <<EOF
+    set -euo pipefail
+    cd ~/src/nix/cfg
+    git reset --hard
+    nix build .#nixosConfigurations.${config}.system.build.toplevel
+EOF
