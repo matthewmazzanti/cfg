@@ -26,13 +26,11 @@ in {
         autoRepeatInterval = 40;
         enableCtrlAltBackspace = true;
         videoDrivers = ["amdgpu"];
-        deviceSection = ''
-          Option "SWCursor" "false"
-          Option "HWCursor" "true"
-        '';
       };
 
       dbus.enable = true;
+
+      pipewire.enable = false;
     };
 
     programs.dconf.enable = true;

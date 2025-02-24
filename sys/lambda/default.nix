@@ -74,8 +74,6 @@
     ];
   };
 
-
-
   home-manager.users.mmazzanti = {
     imports = [ ../../old/home/modules ];
 
@@ -86,8 +84,6 @@
       niv
       hid-listen
     ];
-
-    services.lorri.enable = true;
 
     home.file = {
       ".gnupg/sshcontrol".text = ''
