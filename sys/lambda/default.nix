@@ -1,10 +1,10 @@
 { pkgs, lib, config, custom, ... }: 
-with lib;
 let
-  keys = (import ../../old/modules/keys);
+  keys = import ../../pkgs/keys;
 in {
   imports = [ ./hardware.nix ];
 
+  # === BOOT ===
   boot.supportedFilesystems = [ "zfs" ];
   boot.binfmt.emulatedSystems = ["aarch64-linux"];
   boot.tmp.cleanOnBoot = true;
@@ -14,9 +14,11 @@ in {
     efi.canTouchEfiVariables = true;
   };
 
+  # === TIME ===
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # === CONSOLE ===
   # Console visual things
   console = {
     font = "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz";
@@ -24,15 +26,13 @@ in {
   };
   services.getty = {
     greetingLine = "${config.networking.hostName}";
-    helpLine = mkForce "";
+    helpLine = lib.mkForce "";
   };
-
   # Enable and set zsh as default
   programs.zsh.enable = true;
   # Not sure what this is for
   environment.pathsToLink = [ "/share/zsh" ];
   users.defaultUserShell = pkgs.zsh;
-
   # Set vi mode in global inputrc
   environment.etc = {
     "inputrc".text = ''
@@ -96,14 +96,15 @@ in {
     };
   };
 
+  # === NETWORKING ===
   networking = {
     hostId = "f43d79c6";
     hostName = "lambda";
   };
-
   # Enable wake on lan
   networking.interfaces.enp5s0.wakeOnLan.enable = true;
 
+  # === USER ===
   users.users.mmazzanti.extraGroups = [
     "wheel"
     "usb"
@@ -115,7 +116,7 @@ in {
   users.users.mmazzanti.isNormalUser = true;
 
 
-  # gnupg - TODO: Remove
+  # GPG
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
@@ -131,9 +132,8 @@ in {
       KbdInteractiveAuthentication = false;
     };
   };
-  users.users.mmazzanti.openssh.authorizedKeys.keys = with keys.mmazzanti; [
+  users.users.mmazzanti.openssh.authorizedKeys.keys = with keys.ssh; [
     lambda
-    iota
     beta
   ];
 
@@ -159,25 +159,43 @@ in {
     # Debugging utilities
     pciutils
     usbutils
-    radeontop
-    radeon-profile
+    # Monitor control
     ddcutil
+    # Network control
+    ethtool
+    # Read sensor data
+    lm_sensors
+    # GPU control/debug
+    amdgpu_top
+    # Audio Control/debug
+    pavucontrol
+    # HID Control/debug
+    hid-listen
 
     # Basic console utils
+    # Top alternatives
+    htop
+    bottom
+    # Network fetches
     wget
     curl
+    # Core utils
+    zsh
+    custom."nvim/root"
+    # Helpful utilities
     tree
     git
+    fd
+    ripgrep
+    tmux
+    # Kitty terminfo stuff
+    kitty.terminfo
 
     # Not sure what this is for
     gnutls
-    # gnupg
+    # GPG
+    # TODO: Remove(?)
     gnupg
-    zsh
-    tmux
-    kitty.terminfo
-    ethtool
-    custom."nvim/root"
   ];
 
   home-manager.users.mmazzanti = {
@@ -187,8 +205,6 @@ in {
 
     home.packages = with pkgs; [
       xdg-user-dirs
-      niv
-      hid-listen
     ];
 
     home.file = {
