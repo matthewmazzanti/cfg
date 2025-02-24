@@ -14,7 +14,7 @@
     name = "nvim-path";
     paths = with pkgs; [
       lua-language-server
-      nodePackages.pyright
+      pyright
       nodePackages.typescript-language-server
       fd
     ];

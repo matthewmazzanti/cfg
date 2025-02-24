@@ -1,5 +1,8 @@
 { pkgs, ... }: {
-  imports = [ ./hardware.nix ../../old/modules ];
+  imports = [
+    ./hardware.nix
+    ../../old/modules
+  ];
 
   nixpkgs.config.allowUnfree = true;
   usage = {
@@ -13,6 +16,7 @@
   services = {
     xserver.dpi = 168;
     udev = {
+      packages = [ pkgs.dolphinEmu ];
       extraHwdb = ''
         # Naga Trinity
         mouse:usb:v1532p0067:*
@@ -69,6 +73,8 @@
       "input"
     ];
   };
+
+
 
   home-manager.users.mmazzanti = {
     imports = [ ../../old/home/modules ];

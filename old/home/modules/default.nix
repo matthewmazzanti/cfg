@@ -117,6 +117,8 @@ in {
 
         custom."nvim/dev"
         _1password-gui
+        steam
+        dolphin-emu
       ];
 
       sessionVariables = {
