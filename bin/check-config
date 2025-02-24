@@ -12,5 +12,5 @@ ssh lambda.lan -t <<EOF
     set -euo pipefail
     cd ~/src/nix/cfg
     git reset --hard
-    nix build .#nixosConfigurations.${config}.system.build.toplevel
+    nix build .#nixosConfigurations.${config}.config.system.build.toplevel
 EOF
