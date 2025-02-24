@@ -1,11 +1,10 @@
-{ buildGoPackage, pkgs }:
-
-buildGoPackage rec {
+{ pkgs }:
+pkgs.buildGoModule {
   pname = "short-pwd";
-  version = "0.0.2";
-  goPackagePath = "github.com/matthewmazzanti/short-pwd";
+  version = "0.0.3";
+  vendorHash = null;
   src = ./.;
   meta = {
-    description = "A small script providing path display with shortening";
+    description = "Print a path shortened to a number of columns";
   };
 }
