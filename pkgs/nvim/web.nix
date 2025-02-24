@@ -110,8 +110,5 @@ in
     withNodeJs = false;
     withRuby = false;
     vimAlias = true;
-    packpathDirs.myNeovimPackages = {
-      start = plugins;
-      opt = [];
-    };
+    plugins = plugins;
   }

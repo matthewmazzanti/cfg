@@ -1,0 +1,187 @@
+logger:
+  default:  "info"
+
+sun:
+zeroconf:
+dhcp:
+
+automation:
+  - id: turn_off_master_bedroom_apple_tv
+    alias: Turn off Apple TVs
+    trigger:
+      - platform: time
+        at: "01:00:00"
+      - platform: time
+        at: "02:00:00"
+    action:
+      - service: media_player.turn_off
+        target:
+          entity_id:
+            - media_player.master_bedroom
+
+  - id: turn_off_living_room_apple_tv
+    alias: Turn off Apple TVs
+    trigger:
+      - platform: time
+        at: "01:00:00"
+      - platform: time
+        at: "02:00:00"
+    action:
+      - service: media_player.turn_off
+        target:
+          entity_id:
+            - media_player.living_room
+
+  - id: turn_on_espresso_machine
+    alias: Turn on Espresso Machine
+    trigger:
+      - platform: time
+        at: "07:30:00"
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.espresso_machine
+
+  - id: turn_off_espresso_machine
+    alias: Turn off Espresso Machine
+    trigger:
+      - platform: time
+        at: "19:00:00"
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.espresso_machine
+
+  - id: pico_living_room_1
+    alias: Living Room Pico 1 Handler
+    trigger:
+      - platform: event
+        event_type: lutron_caseta_button_event
+        event_data:
+          area_name: Living Room
+          device_name: Living Room 1
+          action: press
+    action:
+      - variables:
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
+      - choose:
+          - conditions: "{{button == 2}}" # Top Button
+            sequence:
+              - service: switch.toggle
+                data:
+                  entity_id: switch.living_room_corner_lamp
+          - conditions: "{{button == 4}}" # Bottom Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 5}}" # Up Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Up Arrow Pressed!"
+                  level: debug
+          - conditions: "{{button == 3}}" # Middle Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Middle Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 6}}" # Bottom Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Arrow Pressed!"
+                  level: debug
+
+  - id: pico_living_room_2
+    alias: Living Room Pico 2 Handler
+    trigger:
+      - platform: event
+        event_type: lutron_caseta_button_event
+        event_data:
+          area_name: Living Room
+          device_name: Living Room 2
+          action: press
+    action:
+      - variables:
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
+      - choose:
+          - conditions: "{{button == 2}}" # Top Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Top Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 4}}" # Bottom Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 5}}" # Up Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Up Arrow Pressed!"
+                  level: debug
+          - conditions: "{{button == 3}}" # Middle Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Middle Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 6}}" # Bottom Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Arrow Pressed!"
+                  level: debug
+
+  - id: pico_master_bedroom
+    alias: Master Bedroom Pico Handler
+    trigger:
+      - platform: event
+        event_type: lutron_caseta_button_event
+        event_data:
+          area_name: Master Bedroom
+          device_name: Master Bedroom
+          action: press
+    action:
+      - variables:
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
+      - choose:
+          - conditions: "{{button == 2}}" # Top Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Top Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 4}}" # Bottom Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 5}}" # Up Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Up Arrow Pressed!"
+                  level: debug
+          - conditions: "{{button == 3}}" # Middle Button
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Middle Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 6}}" # Bottom Arrow
+            sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Bottom Arrow Pressed!"
+                  level: debug

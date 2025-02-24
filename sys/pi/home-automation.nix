@@ -25,9 +25,11 @@
           autoStart = true;
           environment = {
             TZ = config.time.timeZone;
-            SESSION_SECRET = "55gRFSn7gSabv95LePfe";
             ZWAVEJS_EXTERNAL_CONFIG = "/usr/src/app/store/.config-db";
           };
+          environmentFiles = [
+            "/var/lib/zwave-js/env.secret"
+          ];
           ports = [
             "0.0.0.0:8091:8091"
             "127.0.0.1:3000:3000"

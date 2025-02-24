@@ -17,6 +17,8 @@
 
     home-manager-old.url = "github:nix-community/home-manager/release-24.05";
     home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
   outputs = {
@@ -24,6 +26,7 @@
     nixpkgs,
     darwin,
     home-manager-old,
+    nixos-hardware,
     ...
   } @ inputs: let
     lib = (import ./lib nixpkgs);
@@ -62,9 +65,8 @@
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
         nix-tree
-        poetry
         go
-        alejandra
+        uv
       ];
     });
 
@@ -97,10 +99,22 @@
         modules = [ base ./sys/omega ];
       };
 
+      home-assistant = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [ ./sys/home-assistant ];
+      };
+
       pi = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "aarch64-linux";
         specialArgs.custom = self.packages.${system};
         modules = [ base ./sys/pi ];
+      };
+
+      home-assistant-pi = inputs.nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        modules = [
+          ./sys/home-assistant-pi
+        ];
       };
     };
   };
