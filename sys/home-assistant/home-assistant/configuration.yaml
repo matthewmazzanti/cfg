@@ -4,6 +4,7 @@ logger:
 sun:
 zeroconf:
 dhcp:
+mobile_app:
 
 automation:
   - id: turn_off_master_bedroom_apple_tv
@@ -68,15 +69,15 @@ automation:
       - choose:
           - conditions: "{{button == 2}}" # Top Button
             sequence:
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Top Button Pressed!"
+                  level: debug
+          - conditions: "{{button == 4}}" # Bottom Button
+            sequence:
               - service: switch.toggle
                 data:
                   entity_id: switch.living_room_corner_lamp
-          - conditions: "{{button == 4}}" # Bottom Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Bottom Button Pressed!"
-                  level: debug
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
@@ -118,10 +119,9 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - action: system_log.write
+              - service: switch.toggle
                 data:
-                  message: "Pico {{device}} Bottom Button Pressed!"
-                  level: debug
+                  entity_id: switch.living_room_bookshelf_lamp
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
@@ -163,10 +163,9 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - action: system_log.write
+              - service: switch.toggle
                 data:
-                  message: "Pico {{device}} Bottom Button Pressed!"
-                  level: debug
+                  entity_id: switch.mbr_lamp
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
