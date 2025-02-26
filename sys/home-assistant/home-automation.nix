@@ -47,7 +47,7 @@ in {
 
   services.nginx = {
     enable = true;
-    logError = "stder debug";
+    logError = "stderr debug";
     recommendedProxySettings = true;
     # recommendedTlsSettings = true;
     virtualHosts."home-assistant.iot" = {
