@@ -47,10 +47,12 @@ in {
 
   services.nginx = {
     enable = true;
-    # recommendedTlsSettings = true;
+    recommendedTlsSettings = true;
     virtualHosts = {
       "home-assistant.iot" = {
-        # forceSSL = true;
+        forceSSL = true;
+        sslCertificate = "/var/lib/home-assistant/tls/home-assistant.iot.crt";
+        sslCertificateKey = "/var/lib/home-assistant/tls/home-assistant.iot.key";
         locations."/" = {
           proxyPass = "http://127.0.0.1:8123";
           proxyWebsockets = true;
