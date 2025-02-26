@@ -67,6 +67,9 @@ in {
         };
       };
       "zwave.iot" = {
+        forceSSL = true;
+        sslCertificate = "/var/lib/zwave-js/tls/zwave.iot.crt";
+        sslCertificateKey = "/var/lib/zwave-js/tls/zwave.iot.key";
         locations."/" = {
           proxyPass = "http://127.0.0.1:8091";
           proxyWebsockets = true;
