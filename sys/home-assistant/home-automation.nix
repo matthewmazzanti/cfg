@@ -34,7 +34,7 @@ in {
           "/var/lib/zwave-js/env.secret"
         ];
         ports = [
-          "0.0.0.0:8091:8091"
+          "127.0.0.1:8091:8091"
           "127.0.0.1:3000:3000"
         ];
         volumes = [ "/var/lib/zwave-js/store:/usr/src/app/store" ];

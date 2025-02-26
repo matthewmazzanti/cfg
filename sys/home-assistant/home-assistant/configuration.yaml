@@ -6,6 +6,9 @@ zeroconf:
 dhcp:
 mobile_app:
 
+http:
+  server_host: 127.0.0.1
+
 automation:
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
