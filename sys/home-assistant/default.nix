@@ -2,9 +2,10 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
-
-{
+{ pkgs, ... }:
+let
+  keys = import ../../pkgs/keys;
+in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware.nix
@@ -20,6 +21,20 @@
 
   # Set your time zone.
   time.timeZone = "America/New_York";
+
+  # SSH
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
+  };
+  users.users.mmazzanti.openssh.authorizedKeys.keys = with keys.ssh; [
+    lambda
+    beta
+  ];
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -40,25 +55,14 @@
     jq
   ];
 
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-    };
-  };
-
   users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
-
   users.users.mmazzanti = {
     isNormalUser = true;
     extraGroups = [ "wheel" "podman" "dialout" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB4h5HZCnD2uFkpb8Z/pPQKXrtdV5YU3DG1w+9rOyddy mmazzanti@beta.xi"
-    ];
   };
+
+  security.pki.certificates = [ keys.ca.crt ];
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.

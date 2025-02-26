@@ -4,7 +4,6 @@
     beta = builtins.readFile ./ssh/beta.pub.ssh;
   };
   ca = {
-    crt = builtins.readFile ./ca/ca.crt;
-    chain = builtins.readFile ./xi-ca-chain.cert.pem;
+    crt = builtins.readFile ./ca/mmazzanti.crt;
   };
 }

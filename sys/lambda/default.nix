@@ -138,11 +138,7 @@ in {
   ];
 
   # PKI - trust ca root.
-  # TODO: Make new cert chain
-  security.pki.certificates = [
-    (builtins.readFile ../../old/modules/keys/ca.crt)
-  ];
-
+  security.pki.certificates = [ keys.ca.crt ];
 
   # Gaming things
   nixpkgs.config.allowUnfree = true;
