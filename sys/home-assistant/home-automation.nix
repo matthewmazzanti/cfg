@@ -5,6 +5,12 @@
 let
   images = builtins.fromJSON (builtins.readFile ./images.lock);
 in {
+  # Allow Home Assistant to discover local devices
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 80 443 ];
+  };
+
   virtualisation.oci-containers = {
     containers = {
       home-assistant = {
