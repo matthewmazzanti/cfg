@@ -1,4 +1,4 @@
-{ pkgs, lib, config, custom, ... }: 
+{ pkgs, lib, config, custom, ... }:
 let
   keys = import ../../pkgs/keys;
 in {
@@ -80,7 +80,11 @@ in {
     autoRepeatDelay = 300;
     autoRepeatInterval = 40;
     enableCtrlAltBackspace = true;
-    videoDrivers = ["amdgpu"];
+    # videoDrivers = ["amdgpu"];
+    deviceSection = ''
+      Option "SWCursor" "false"
+      Option "HWCursor" "true"
+    '';
   };
 
   # === AUDIO SETTINGS ===
@@ -105,6 +109,7 @@ in {
   networking.interfaces.enp5s0.wakeOnLan.enable = true;
 
   # === USER ===
+  users.users.mmazzanti.isNormalUser = true;
   users.users.mmazzanti.extraGroups = [
     "wheel"
     "usb"
@@ -113,8 +118,6 @@ in {
     "video"
     "audio"
   ];
-  users.users.mmazzanti.isNormalUser = true;
-
 
   # GPG
   programs.gnupg.agent = {

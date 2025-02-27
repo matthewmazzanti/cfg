@@ -5,17 +5,8 @@ let
   color = config.theme.color;
   xcfg = {
     dpi = 168;
-    enable = true;
-    displayManager.startx.enable = true;
     autoRepeatDelay = 300;
     autoRepeatInterval = 40;
-    enableCtrlAltBackspace = true;
-    useGlamor = true;
-    videoDrivers = ["amdgpu"];
-    deviceSection = ''
-      Option "SWCursor" "false"
-      Option "HWCursor" "true"
-    '';
   };
 
   xargs
@@ -53,6 +44,8 @@ let
 
     bspc rule -a qutebrowser desktop=j
     bspc rule -a Spotify desktop=h
+    bspc rule -a Steam desktop=s
+    bspc rule -a dota2 desktop=s
     bspc rule -a 'Microsoft Teams - Preview' desktop=l
     bspc rule -a Firefox desktop=k
     bspc rule -a Zathura desktop=k state=tiled
