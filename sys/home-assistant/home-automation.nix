@@ -9,8 +9,8 @@ let
 in {
   # Allow Home Assistant to discover local devices
   networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 80 443 ];
+    enable = false;
+    # allowedTCPPorts = [ 80 443 ];
   };
   services.nginx = {
     enable = true;
