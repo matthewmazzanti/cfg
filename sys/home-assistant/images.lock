@@ -8,7 +8,7 @@
     }
   },
   "zwave-js": {
-    "lock": "registry-1.docker.io/zwavejs/zwave-js-ui@sha256:3743ef89de38cfaea07546544b1e2ab15962489721c87b64a46b3e7272d71669",
+    "lock": "registry-1.docker.io/zwavejs/zwave-js-ui@sha256:900eb3a13bcaa123fa68abdc461b4646bee41b22617e19f22f7d4635bd5f5c05",
     "image": "zwavejs/zwave-js-ui:latest",
     "platform": {
       "architecture": "amd64",

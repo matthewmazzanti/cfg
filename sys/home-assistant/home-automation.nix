@@ -8,6 +8,8 @@ let
   zwave-data = "/var/lib/zwave-js";
 in {
   # Allow Home Assistant to discover local devices
+  # TODO: Fix home assistant/apple tv stuff, configure ports correctly.
+  #
   networking.firewall = {
     enable = false;
     # allowedTCPPorts = [ 80 443 ];
@@ -20,6 +22,7 @@ in {
   # === Home Assistant ===
   virtualisation.oci-containers.containers.home-assistant = {
     image = images.home-assistant.lock;
+    serviceName = "home-assistant";
     autoStart = true;
     environment = {
       TZ = config.time.timeZone;
@@ -52,6 +55,7 @@ in {
   # === Zwave JS ===
   virtualisation.oci-containers.containers.zwave-js = {
     image = images.zwave-js.lock;
+    serviceName = "zwave-js";
     autoStart = true;
     environment = {
       TZ = config.time.timeZone;
