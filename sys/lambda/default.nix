@@ -69,7 +69,12 @@ in {
     # Enables gpu accelerated graphics
     enable = true;
     # Not sure what this is for
-    extraPackages = [ pkgs.libva ];
+    extraPackages = with pkgs; [
+      # Video Acceleration
+      libva
+      # Vulkan drivers
+      amdvlk
+    ];
   };
   # xserver settings - these are overriden in custom BS happening in home
   # manager
@@ -80,11 +85,16 @@ in {
     autoRepeatDelay = 300;
     autoRepeatInterval = 40;
     enableCtrlAltBackspace = true;
-    # videoDrivers = ["amdgpu"];
+    videoDrivers = ["amdgpu"];
     deviceSection = ''
-      Option "SWCursor" "false"
-      Option "HWCursor" "true"
+      Option "DRI" "3"
+      Option "VariableRefresh" "true"
+      Option "TearFree" "true"
     '';
+
+    # Maybe some day
+    # desktopManager.gnome.enable = true;
+    # displayManager.gdm.enable = true;
   };
 
   # === AUDIO SETTINGS ===

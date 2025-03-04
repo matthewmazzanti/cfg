@@ -28,9 +28,8 @@ let
   kitty-si = pkgs.callPackage ../../scripts/kitty-si {};
 
   bspwm-config = pkgs.writeShellScript "bspwm-config" ''
-    bspc monitor DisplayPort-0 -d f g d s a v b c x z
-    bspc monitor DisplayPort-1 -d j h k l ";" m n "," "." "/"
-    bspc monitor HDMI-A-0 -d r t e w q u y i o p
+    bspc monitor DisplayPort-0 -d f g d s a v b c x z r t e w q
+    bspc monitor DisplayPort-1 -d j h k l ";" m n "," "." "/" u y i o p
 
     bspc config border_width 4
     bspc config window_gap 40
@@ -43,8 +42,10 @@ let
     bspc config pointer_follows_focus true
 
     bspc rule -a qutebrowser desktop=j
+    bspc rule -a firefox desktop=j
     bspc rule -a Spotify desktop=h
-    bspc rule -a Steam desktop=s
+    bspc rule -a steam desktop=s
+    bspc rule -a steamwebhelper desktop=s
     bspc rule -a dota2 desktop=s
     bspc rule -a 'Microsoft Teams - Preview' desktop=l
     bspc rule -a Firefox desktop=k
@@ -54,8 +55,7 @@ let
   bspwm-script = pkgs.writeShellScript "my-bspwm" ''
     xrandr \
       --output DisplayPort-0 --primary --pos 0x2160 \
-      --output DisplayPort-1 --pos 3840x2160 \
-      --output HDMI-A-0 --pos 1920x0
+      --output DisplayPort-1 --pos 3840x2160
     export XCURSOR_THEME=Adwaita
     export XCURSOR_SIZE=48
     xsetroot -cursor_name left_ptr
