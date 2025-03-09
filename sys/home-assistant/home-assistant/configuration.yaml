@@ -106,7 +106,7 @@ script:
         data:
           command_class: "38"
           property: targetValue
-          value: "{{ brightness }}"
+          value: "{{ value }}"
 
   multicast_light_toggle:
     alias: Multicast light Toggle
@@ -194,7 +194,7 @@ script:
     mode: queued
     sequence:
       - action: script.entities_toggle
-        data:
+        target:
           entity_id:
             - switch.under_cabinet_lights
             - light.island_lights
@@ -227,7 +227,7 @@ script:
             - light.kitchen_lights
             - light.dining_table_lights
         data:
-          value: 0
+          value: 99
 
   ceiling_lights_toggle:
     alias: Ceiling Lights Toggle
