@@ -16,3 +16,7 @@ Thermostat
 - Transition: 69-74
 - Day: 70-75
 - Transition: 69-74
+
+Configs:
+- Change ramp times for zen72
+- Enable scene control for zen72
