@@ -9,7 +9,85 @@ mobile_app:
 http:
   server_host: 127.0.0.1
 
+script:
+  toggle_entities:
+    alias: Toggle Entities
+    description: Toggle a group of entities
+    mode: queued
+    fields:
+      entities:
+        description: List of entity IDs
+        example: ["light.living_room", "switch.fan"]
+        required: true
+        selector:
+          entity:
+            multiple: true
+    sequence:
+      - variables:
+          any_on: "{{ 'on' in entities | map('states') }}"
+      - service: "{{ 'homeassistant.turn_off' if any_on else 'homeassistant.turn_on' }}"
+        target:
+          entity_id: "{{ entities }}"
+
+  # living_room_low_lights_off:
+  # living_room_low_lights_on:
+  # living_room_low_lights_toggle:
+
+  # kitchen_low_lights_off:
+  # kitchen_low_lights_on:
+  # kitchen_low_lights_toggle:
+
+  # ceiling_lights_off:
+  # ceiling_lights_on:
+  # ceiling_lights_on_33:
+  # ceiling_lights_on_66:
+  # ceiling_lights_on_100:
+  # ceiling_lights_toggle:
+
+
 automation:
+  - id: set_day_temp
+    alias: Set Day Temp
+    trigger:
+      - platform: time
+        at: "08:00"
+    action:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.thermostat
+        data:
+          target_temp_high: 75
+          target_temp_low: 70
+
+  - id: set_transition_temp
+    alias: Set Transition Temp
+    trigger:
+      - platform: time
+        at: "07:00"
+      - platform: time
+        at: "22:30"
+    action:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.thermostat
+        data:
+          target_temp_high: 74
+          target_temp_low: 69
+
+  - id: set_night_temp
+    alias: Set Day Temp
+    trigger:
+      - platform: time
+        at: "08:00"
+    action:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.thermostat
+        data:
+          target_temp_high: 73
+          target_temp_low: 68
+
+
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
     trigger:

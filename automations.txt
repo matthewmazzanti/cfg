@@ -1,0 +1,18 @@
+Living Room
+- Low lights on
+- Low lights off
+- Low lights toggle
+Kitchen
+- Low lights on
+- Low lights off
+- Low lights toggle
+- Ceiling lights on 100%
+- Ceiling lights on 66%
+- Ceiling lights on 33%
+- Ceiling lights off
+- Ceiling lights toggle
+Thermostat
+- Night: 68-73
+- Transition: 69-74
+- Day: 70-75
+- Transition: 69-74
