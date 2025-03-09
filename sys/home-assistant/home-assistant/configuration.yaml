@@ -75,7 +75,7 @@ script:
         data:
           command_class: "37"
           property: targetValue
-          value: "{{ 'on' in entity_id | map('states') }}"
+          value: "{{ 'on' not in entity_id | map('states') }}"
 
   kitchen_low_lights_off:
     alias: Kitchen Lights Off
