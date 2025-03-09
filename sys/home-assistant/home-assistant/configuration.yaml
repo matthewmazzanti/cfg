@@ -25,7 +25,7 @@ script:
     sequence:
       - variables:
           any_on: "{{ 'on' in entity_id | map('states') }}"
-      - service: "{{ 'homeassistant.turn_off' if any_on else 'homeassistant.turn_on' }}"
+      - action: "{{ 'homeassistant.turn_off' if any_on else 'homeassistant.turn_on' }}"
         target:
           entity_id: "{{ entity_id }}"
 
@@ -34,7 +34,7 @@ script:
     description: Turn off small side lamps in living room
     mode: queued
     sequence:
-      - service: homeassistant.turn_off
+      - action: homeassistant.turn_off
         target:
           entity_id:
             - switch.living_room_corner_lamp
@@ -45,7 +45,7 @@ script:
     description: Turn on small side lamps in living room
     mode: queued
     sequence:
-      - service: homeassistant.turn_on
+      - action: homeassistant.turn_on
         target:
           entity_id:
             - switch.living_room_corner_lamp
@@ -62,12 +62,65 @@ script:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
 
-  # kitchen_low_lights_off:
-  # kitchen_low_lights_on:
-  # kitchen_low_lights_toggle:
+  kitchen_low_lights_off:
+    alias: Kitchen Lights Off
+    description: Turn off lower lights in kitchen
+    mode: queued
+    sequence:
+      - action: homeassistant.turn_off
+        target:
+          entity_id:
+            - switch.under_cabinet_lights
+            - switch.island_lights
 
-  # ceiling_lights_off:
-  # ceiling_lights_on:
+  kitchen_low_lights_on:
+    alias: Kitchen Lights On
+    description: Turn on lower lights in kitchen
+    mode: queued
+    sequence:
+      - action: homeassistant.turn_on
+        target:
+          entity_id:
+            - switch.under_cabinet_lights
+            - switch.island_lights
+
+  kitchen_low_lights_toggle:
+    alias: Kitchen Lights Toggle
+    description: Turn off lower level lights in kitchen
+    mode: queued
+    sequence:
+      - action: script.toggle_entities
+        data:
+          entity_id:
+            - switch.under_cabinet_lights
+            - switch.island_lights
+
+  ceiling_lights_off:
+    alias: Ceiling Lights Off
+    description: Turn Off First Floor Ceiling Lights
+    mode: queued
+    sequence:
+      - action: homeassistant.turn_off
+        target:
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+
+  ceiling_lights_on:
+    alias: Ceiling Lights On
+    description: Turn On First Floor Ceiling Lights
+    mode: queued
+    sequence:
+      - action: homeassistant.turn_on
+        target:
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+
   # ceiling_lights_on_33:
   # ceiling_lights_on_66:
   # ceiling_lights_on_100:
@@ -125,7 +178,7 @@ automation:
       - platform: time
         at: "02:00:00"
     action:
-      - service: media_player.turn_off
+      - action: media_player.turn_off
         target:
           entity_id:
             - media_player.master_bedroom
@@ -138,7 +191,7 @@ automation:
       - platform: time
         at: "02:00:00"
     action:
-      - service: media_player.turn_off
+      - action: media_player.turn_off
         target:
           entity_id:
             - media_player.living_room
@@ -149,7 +202,7 @@ automation:
       - platform: time
         at: "07:30:00"
     action:
-      - service: switch.turn_on
+      - action: switch.turn_on
         target:
           entity_id: switch.espresso_machine
 
@@ -159,7 +212,7 @@ automation:
       - platform: time
         at: "19:00:00"
     action:
-      - service: switch.turn_off
+      - action: switch.turn_off
         target:
           entity_id: switch.espresso_machine
 
@@ -185,7 +238,7 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - service: switch.toggle
+              - action: switch.toggle
                 data:
                   entity_id: switch.living_room_corner_lamp
           - conditions: "{{button == 5}}" # Up Arrow
@@ -229,7 +282,7 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - service: switch.toggle
+              - action: switch.toggle
                 data:
                   entity_id: switch.living_room_bookshelf_lamp
           - conditions: "{{button == 5}}" # Up Arrow
@@ -273,7 +326,7 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - service: switch.toggle
+              - action: switch.toggle
                 data:
                   entity_id: switch.mbr_lamp
           - conditions: "{{button == 5}}" # Up Arrow
