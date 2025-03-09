@@ -29,9 +29,38 @@ script:
         target:
           entity_id: "{{ entity_id }}"
 
-  # living_room_low_lights_off:
-  # living_room_low_lights_on:
-  # living_room_low_lights_toggle:
+  living_room_low_lights_off:
+    alias: Living Room Lights Off
+    description: Turn off small side lamps in living room
+    mode: queued
+    sequence:
+      - service: homeassistant.turn_off
+        target:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+
+  living_room_low_lights_on:
+    alias: Living Room Lights On
+    description: Turn on small side lamps in living room
+    mode: queued
+    sequence:
+      - service: homeassistant.turn_on
+        target:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+
+  living_room_low_lights_toggle:
+    alias: Living Room Lights Toggle
+    description: Turn off small side lamps in living room
+    mode: queued
+    sequence:
+      - action: script.toggle_entities
+        data:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
 
   # kitchen_low_lights_off:
   # kitchen_low_lights_on:
