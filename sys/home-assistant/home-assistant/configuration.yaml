@@ -53,7 +53,7 @@ script:
 
   living_room_low_lights_toggle:
     alias: Living Room Lights Toggle
-    description: Turn off small side lamps in living room
+    description: Toggle small side lamps in living room
     mode: queued
     sequence:
       - action: script.toggle_entities
@@ -86,7 +86,7 @@ script:
 
   kitchen_low_lights_toggle:
     alias: Kitchen Lights Toggle
-    description: Turn off lower level lights in kitchen
+    description: Toggle lower level lights in kitchen
     mode: queued
     sequence:
       - action: script.toggle_entities
@@ -120,6 +120,20 @@ script:
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
+
+  ceiling_lights_toggle:
+    alias: Ceiling Lights Toggle
+    description: Toggle First Floor Ceiling Lights
+    mode: queued
+    sequence:
+      - action: homeassistant.turn_on
+        target:
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+
 
   # ceiling_lights_on_33:
   # ceiling_lights_on_66:
