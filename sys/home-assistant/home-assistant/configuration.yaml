@@ -10,10 +10,10 @@ http:
   server_host: 127.0.0.1
 
 script:
-  toggle_entities:
+  entities_toggle:
     alias: Toggle Entities
     description: Toggle a group of entities
-    mode: queued
+    mode: parallel
     fields:
       entity_id:
         description: List of entity IDs
@@ -29,20 +29,117 @@ script:
         target:
           entity_id: "{{ entity_id }}"
 
+  multicast_switch_set:
+    alias: Multicast Switch Set
+    description: Set a state for a Group of ZWave switches via multicast
+    mode: parallel
+    fields:
+      entity_id:
+        description: List of ZWave entity IDs
+        required: True
+        selector:
+          entity:
+            multiple: true
+            filter:
+              domain: switch
+              integration: zwave
+    sequence:
+      - action: zwave_js.multicast_set_value
+        target:
+          entity_id: "{{ entity_id }}"
+        data:
+          command_class: "37"
+          property: targetValue
+          value: true
+
+  multicast_switch_toggle:
+    alias: Multicast Switch Toggle
+    description: Toggle a group of zwave switches via multicast
+    mode: parallel
+    fields:
+      entity_id:
+        description: List of ZWave entity IDs
+        required: True
+        selector:
+          entity:
+            multiple: true
+            filter:
+              domain: switch
+              integration: zwave
+      value:
+        description: State to set
+        required: True
+        selector:
+          boolean:
+    sequence:
+      - action: script.multicast_switch_set
+        target:
+          entity_id: "{{ entity_id }}"
+        data:
+          value: "{{ 'on' not in entity_id | map('states') }}"
+
+  multicast_light_set:
+    alias: Multicast light On
+    description: Turn on a Group of ZWave lights via multicast
+    mode: parallel
+    fields:
+      entity_id:
+        description: List of ZWave entity IDs
+        required: True
+        selector:
+          entity:
+            multiple: true
+            filter:
+              domain: light
+              integration: zwave
+      value:
+        description: Brightness to set for light group
+        selector:
+          number:
+            min: 0
+            max: 99
+            step: 1
+    sequence:
+      - action: zwave_js.multicast_set_value
+        target:
+          entity_id: "{{ entity_id }}"
+        data:
+          command_class: "38"
+          property: targetValue
+          value: "{{ brightness }}"
+
+  multicast_light_toggle:
+    alias: Multicast light Toggle
+    description: Toggle a group of zwave lights via multicast
+    mode: parallel
+    fields:
+      entity_id:
+        description: List of ZWave entity IDs
+        required: True
+        selector:
+          entity:
+            multiple: true
+            filter:
+              domain: light
+              integration: zwave
+    sequence:
+      - action: script.multicast_light_set
+        target:
+          entity_id: "{{ entity_id }}"
+        data:
+          value: "{{ 0 if 'on' in entity_id | map('states') else 99 }}"
 
   living_room_low_lights_off:
     alias: Living Room Lights Off
     description: Turn off small side lamps in living room
     mode: queued
     sequence:
-      - action: zwave_js.multicast_set_value
+      - action: script.multicast_switch_set
         target:
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
         data:
-          command_class: "37"
-          property: targetValue
           value: false
 
   living_room_low_lights_on:
@@ -50,14 +147,12 @@ script:
     description: Turn on small side lamps in living room
     mode: queued
     sequence:
-      - action: zwave_js.multicast_set_value
+      - action: script.multicast_switch_set
         target:
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
         data:
-          command_class: "37"
-          property: targetValue
           value: true
 
   living_room_low_lights_toggle:
@@ -65,17 +160,11 @@ script:
     description: Toggle small side lamps in living room
     mode: queued
     sequence:
-      - variables:
+      - action: script.multicast_switch_toggle
+        target:
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
-      - action: zwave_js.multicast_set_value
-        target:
-          entity_id: "{{ entity_id }}"
-        data:
-          command_class: "37"
-          property: targetValue
-          value: "{{ 'on' not in entity_id | map('states') }}"
 
   kitchen_low_lights_off:
     alias: Kitchen Lights Off
@@ -104,7 +193,7 @@ script:
     description: Toggle lower level lights in kitchen
     mode: queued
     sequence:
-      - action: script.toggle_entities
+      - action: script.entities_toggle
         data:
           entity_id:
             - switch.under_cabinet_lights
@@ -115,7 +204,7 @@ script:
     description: Turn Off First Floor Ceiling Lights
     mode: queued
     sequence:
-      - action: zwave_js.multicast_set_value
+      - action: script.multicast_light_set
         target:
           entity_id:
             - light.living_room_lights
@@ -123,8 +212,6 @@ script:
             - light.kitchen_lights
             - light.dining_table_lights
         data:
-          command_class: "38"
-          property: targetValue
           value: 0
 
   ceiling_lights_on:
@@ -132,7 +219,7 @@ script:
     description: Turn On First Floor Ceiling Lights
     mode: queued
     sequence:
-      - action: zwave_js.multicast_set_value
+      - action: script.multicast_light_set
         target:
           entity_id:
             - light.living_room_lights
@@ -140,28 +227,20 @@ script:
             - light.kitchen_lights
             - light.dining_table_lights
         data:
-          command_class: "38"
-          property: targetValue
-          value: 99
+          value: 0
 
   ceiling_lights_toggle:
     alias: Ceiling Lights Toggle
     description: Toggle First Floor Ceiling Lights
     mode: queued
     sequence:
-      - variables:
+      - action: script.multicast_light_toggle
+        target:
           entity_id:
             - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
-      - action: zwave_js.multicast_set_value
-        target:
-          entity_id: "{{ entity_id }}"
-        data:
-          command_class: "38"
-          property: targetValue
-          value: "{{ 0 if 'on' in entity_id | map('states') else 99 }}"
 
 
   # ceiling_lights_on_33:
