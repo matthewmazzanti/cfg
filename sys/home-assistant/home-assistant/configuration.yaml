@@ -15,19 +15,19 @@ script:
     description: Toggle a group of entities
     mode: queued
     fields:
-      entities:
+      entity_id:
         description: List of entity IDs
-        example: ["light.living_room", "switch.fan"]
+        example: '["light.living_room", "switch.fan"]'
         required: true
         selector:
           entity:
             multiple: true
     sequence:
       - variables:
-          any_on: "{{ 'on' in entities | map('states') }}"
+          any_on: "{{ 'on' in entity_id | map('states') }}"
       - service: "{{ 'homeassistant.turn_off' if any_on else 'homeassistant.turn_on' }}"
         target:
-          entity_id: "{{ entities }}"
+          entity_id: "{{ entity_id }}"
 
   # living_room_low_lights_off:
   # living_room_low_lights_on:
