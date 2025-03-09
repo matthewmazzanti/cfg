@@ -43,6 +43,11 @@ script:
             filter:
               domain: switch
               integration: zwave
+      value:
+        description: State to set
+        required: True
+        selector:
+          boolean:
     sequence:
       - action: zwave_js.multicast_set_value
         target:
@@ -50,7 +55,7 @@ script:
         data:
           command_class: "37"
           property: targetValue
-          value: true
+          value: "{{ value }}"
 
   multicast_switch_toggle:
     alias: Multicast Switch Toggle
@@ -66,11 +71,6 @@ script:
             filter:
               domain: switch
               integration: zwave
-      value:
-        description: State to set
-        required: True
-        selector:
-          boolean:
     sequence:
       - action: script.multicast_switch_set
         target:
