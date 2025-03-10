@@ -442,20 +442,17 @@ automation:
       - choose:
           - conditions: "{{button == 2}}" # Top Button
             sequence:
-              - action: light.toggle
-                target:
-                  entity_id: light.living_room_lights
+              - action: script.living_room_low_lights_toggle
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
               - action: switch.toggle
                 data:
-                  entity_id: switch.living_room_corner_lamp
+                  entity_id: switch.living_room_bookshelf_lamp
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Up Arrow Pressed!"
-                  level: debug
+              - action: light.toggle
+                target:
+                  entity_id: light.living_room_lights
           - conditions: "{{button == 3}}" # Middle Button
             sequence:
               - action: system_log.write
@@ -490,7 +487,7 @@ automation:
             sequence:
               - action: switch.toggle
                 data:
-                  entity_id: switch.living_room_bookshelf_lamp
+                  entity_id: switch.living_room_corner_lamp
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
@@ -499,10 +496,7 @@ automation:
                   level: debug
           - conditions: "{{button == 3}}" # Middle Button
             sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Middle Button Pressed!"
-                  level: debug
+              - action: script.kitchen_ceiling_lights_toggle
           - conditions: "{{button == 6}}" # Bottom Arrow
             sequence:
               - action: system_log.write
