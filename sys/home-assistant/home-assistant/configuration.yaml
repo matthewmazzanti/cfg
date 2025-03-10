@@ -204,6 +204,36 @@ script:
             - switch.under_cabinet_lights
             - light.island_lights
 
+  kitchen_ceiling_lights_on:
+    alias: Kitchen Ceiling Lights On
+    description: Turn on all ceiling lights in the kitchen
+    mode: queued
+    sequence:
+      - action: script.multicast_light_set
+        target:
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+        data:
+          value: 99
+
+  kitchen_ceiling_lights_off:
+    alias: Kitchen Ceiling Lights Off
+    description: Turn off all ceiling lights in the kitchen
+    mode: queued
+    sequence:
+      - action: script.multicast_light_set
+        target:
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+        data:
+          value: 0
+
   ceiling_lights_off:
     alias: Ceiling Lights Off
     description: Turn Off First Floor Ceiling Lights
@@ -539,3 +569,69 @@ automation:
           - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
               - action: script.first_floor_evening_off
+
+  - id: sink_lights_scenes
+    alias: Sink Lights Scenes
+    trigger:
+      - platform: event
+        event_type: zwave_js_value_notification
+        event_data:
+          command_class_name: Central Scene
+          device_id: 28b76d6993826e7dd89939ab3fccb403
+    action:
+      - variables:
+          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.event.data.value_raw - 1}}"
+
+      - choose:
+          - conditions: "{{direction == 'up' and count == 2}}"
+            sequence:
+              - action: script.kitchen_ceiling_lights_on
+
+          - conditions: "{{direction == 'down' and count == 2}}"
+            sequence:
+              - action: script.kitchen_ceiling_lights_off
+
+  - id: under_cabinet_lights_scenes
+    alias: Under Cabinet Lights Scenes
+    trigger:
+      - platform: event
+        event_type: zwave_js_value_notification
+        event_data:
+          command_class_name: Central Scene
+          device_id: bd1c6a735198db9c6254448325a0bfc6
+    action:
+      - variables:
+          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.event.data.value_raw - 1}}"
+
+      - choose:
+          - conditions: "{{direction == 'up' and count == 2}}"
+            sequence:
+              - action: script.kitchen_low_lights_on
+
+          - conditions: "{{direction == 'down' and count == 2}}"
+            sequence:
+              - action: script.kitchen_low_lights_off
+
+  - id: island_lights_scenes
+    alias: Under Cabinet Lights Scenes
+    trigger:
+      - platform: event
+        event_type: zwave_js_value_notification
+        event_data:
+          command_class_name: Central Scene
+          device_id: 5c4b7b4db1d411ee1e5bac8ec7f1a091
+    action:
+      - variables:
+          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.event.data.value_raw - 1}}"
+
+      - choose:
+          - conditions: "{{direction == 'up' and count == 2}}"
+            sequence:
+              - action: script.kitchen_ceiling_lights_on
+
+          - conditions: "{{direction == 'down' and count == 2}}"
+            sequence:
+              - action: script.kitchen_ceiling_lights_off
