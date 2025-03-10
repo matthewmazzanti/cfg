@@ -357,7 +357,7 @@ automation:
       - platform: time
         at: "07:00"
       - platform: time
-        at: "22:30"
+        at: "22:00"
     action:
       - action: climate.set_temperature
         target:
@@ -370,7 +370,7 @@ automation:
     alias: Set Day Temp
     trigger:
       - platform: time
-        at: "08:00"
+        at: "23:00"
     action:
       - action: climate.set_temperature
         target:
