@@ -123,8 +123,8 @@
 
       home-assistant = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs.dependencies = {
-          sliderEntityRow = inputs.slider-entity-row;
+        specialArgs.haDeps = {
+          slider-entity-row = inputs.slider-entity-row;
           pyscript = inputs.pyscript;
         };
         modules = [ ./sys/home-assistant ];
