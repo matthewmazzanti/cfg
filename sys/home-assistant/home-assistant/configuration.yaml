@@ -212,7 +212,6 @@ script:
       - action: script.multicast_light_set
         target:
           entity_id:
-            - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
@@ -227,12 +226,23 @@ script:
       - action: script.multicast_light_set
         target:
           entity_id:
-            - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
         data:
           value: 0
+
+  kitchen_ceiling_lights_toggle:
+    alias: Kitchen Ceiling Lights toggle
+    description: Toggle all ceiling lights in the kitchen
+    mode: queued
+    sequence:
+      - action: script.multicast_light_toggle
+        target:
+          entity_id:
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
 
   ceiling_lights_off:
     alias: Ceiling Lights Off
@@ -432,10 +442,9 @@ automation:
       - choose:
           - conditions: "{{button == 2}}" # Top Button
             sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Top Button Pressed!"
-                  level: debug
+              - action: light.toggle
+                target:
+                  entity_id: light.living_room_lights
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
               - action: switch.toggle
@@ -476,10 +485,7 @@ automation:
       - choose:
           - conditions: "{{button == 2}}" # Top Button
             sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Top Button Pressed!"
-                  level: debug
+              - action: script.kitchen_ceiling_lights_toggle
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
               - action: switch.toggle
