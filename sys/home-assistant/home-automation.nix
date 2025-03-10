@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, dependencies, ... }:
 # TODOS:
 # - Run containers as non-root
 # - More complex configuration/ui-lovelace configuration reloads
@@ -30,6 +30,8 @@ in {
     volumes = [
       "${home-assistant-data}/config:/config"
       "${./home-assistant/configuration.yaml}:/config/configuration.yaml:ro"
+      "${dependencies.sliderEntityRow}:/config/www/slider-entity-row:ro"
+      "${dependencies.pyscript}:/config/custom_components/pyscript:ro"
     ];
     extraOptions = [ "--network=host" ];
   };

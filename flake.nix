@@ -22,6 +22,12 @@
     home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    # Home assistant plugins
+    slider-entity-row.url = "github:thomasloven/lovelace-slider-entity-row";
+    slider-entity-row.flake = false;
+    pyscript.url = "github:custom-components/pyscript";
+    pyscript.flake = false;
   };
 
   outputs = {
@@ -117,6 +123,10 @@
 
       home-assistant = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs.dependencies = {
+          sliderEntityRow = inputs.slider-entity-row;
+          pyscript = inputs.pyscript;
+        };
         modules = [ ./sys/home-assistant ];
       };
     };

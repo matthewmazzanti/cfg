@@ -379,7 +379,6 @@ automation:
           target_temp_high: 73
           target_temp_low: 68
 
-
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
     trigger:

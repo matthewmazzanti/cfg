@@ -175,6 +175,22 @@
         "type": "indirect"
       }
     },
+    "pyscript": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1741578157,
+        "narHash": "sha256-rDHkeOjoKjuskKiTcL+8ASdzc1IkVLcCcGlNKFdeG0M=",
+        "owner": "custom-components",
+        "repo": "pyscript",
+        "rev": "2127188a5667c5e8cb2de020e13a087151d4b50d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "custom-components",
+        "repo": "pyscript",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "darwin": "darwin",
@@ -184,7 +200,25 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-old": "nixpkgs-old",
+        "pyscript": "pyscript",
+        "slider-entity-row": "slider-entity-row",
         "vim-easyclip": "vim-easyclip"
+      }
+    },
+    "slider-entity-row": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1703547239,
+        "narHash": "sha256-/unrsfM2s9vZUIQOoMEOr1n01KBgidpGRZ+NDjNNweY=",
+        "owner": "thomasloven",
+        "repo": "lovelace-slider-entity-row",
+        "rev": "708202148519ffb2b6ffdc8ffb1e3be7526b03c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "thomasloven",
+        "repo": "lovelace-slider-entity-row",
+        "type": "github"
       }
     },
     "systems": {
