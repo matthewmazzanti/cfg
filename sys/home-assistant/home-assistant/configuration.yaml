@@ -2,10 +2,15 @@ logger:
   default:  "info"
 
 sun:
+# Enable Apple TV
 zeroconf:
 dhcp:
+# Enable mobile application
 mobile_app:
+# Enable state history
+history:
 
+# Run on localhost, proxying through nginx
 http:
   server_host: 127.0.0.1
 
@@ -510,3 +515,24 @@ automation:
                 data:
                   message: "Pico {{device}} Bottom Arrow Pressed!"
                   level: debug
+
+  - id: living_room_lights_scenes
+    alias: Living Room Lights Scenes
+    trigger:
+      - platform: event
+        event_type: zwave_js_value_notification
+        event_data:
+          command_class_name: Central Scene
+          device_id: a5c1c236b6340ae8db83857c10e1bd8e
+    action:
+      - variables:
+          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.event.data.value_raw - 1}}"
+
+      - conditions: "{{direction == 'up' and count == 2}}"
+        sequence:
+          - action: script.first_floor_morning_on
+
+      - conditions: "{{direction == 'down' and count == 2}}"
+        sequence:
+          - action: script.first_floor_evening_off
