@@ -263,6 +263,7 @@ script:
 
       - action: script.multicast_light_set
         target:
+          entity_id:
             - light.island_lights
             - light.living_room_lights
             - light.sink_lights_2
@@ -286,6 +287,7 @@ script:
 
       - action: script.multicast_light_set
         target:
+          entity_id:
             - light.island_lights
             - light.living_room_lights
             - light.sink_lights_2
@@ -530,10 +532,10 @@ automation:
           count: "{{trigger.event.data.value_raw - 1}}"
 
       - choose:
-        - conditions: "{{direction == 'up' and count == 2}}"
-          sequence:
-            - action: script.first_floor_morning_on
+          - conditions: "{{direction == 'up' and count == 2}}"
+            sequence:
+              - action: script.first_floor_morning_on
 
-        - conditions: "{{direction == 'down' and count == 2}}"
-          sequence:
-            - action: script.first_floor_evening_off
+          - conditions: "{{direction == 'down' and count == 2}}"
+            sequence:
+              - action: script.first_floor_evening_off
