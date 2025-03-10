@@ -79,7 +79,7 @@ script:
           value: "{{ 'on' not in entity_id | map('states') }}"
 
   multicast_light_set:
-    alias: Multicast light On
+    alias: Multicast Light On
     description: Turn on a Group of ZWave lights via multicast
     mode: parallel
     fields:
@@ -109,7 +109,7 @@ script:
           value: "{{ value }}"
 
   multicast_light_toggle:
-    alias: Multicast light Toggle
+    alias: Multicast Light Toggle
     description: Toggle a group of zwave lights via multicast
     mode: parallel
     fields:
@@ -242,11 +242,52 @@ script:
             - light.kitchen_lights
             - light.dining_table_lights
 
+  first_floor_morning_on:
+    alais: First Floor Morning On
+    description: Turn all of the first floor on in the morning
+    mode: queued
+    sequence:
+      - action: script.multicast_switch_set
+        target:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+            - switch.under_cabinet_lights
+        data:
+          value: true
 
-  # ceiling_lights_on_33:
-  # ceiling_lights_on_66:
-  # ceiling_lights_on_100:
-  # ceiling_lights_toggle:
+      - action: script.multicast_light_set
+        target:
+            - light.island_lights
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+        data:
+          value: 99
+
+  first_floor_evening_off:
+    alais: First Floor Evening Off
+    description: Turn all of the first floor off in the evening
+    mode: queued
+    sequence:
+      - action: script.multicast_switch_set
+        target:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+        data:
+          value: false
+
+      - action: script.multicast_light_set
+        target:
+            - light.island_lights
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
+        data:
+          value: 0
 
 
 automation:
