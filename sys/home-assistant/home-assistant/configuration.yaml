@@ -248,7 +248,7 @@ script:
             - light.dining_table_lights
 
   first_floor_morning_on:
-    alais: First Floor Morning On
+    alias: First Floor Morning On
     description: Turn all of the first floor on in the morning
     mode: queued
     sequence:
@@ -272,7 +272,7 @@ script:
           value: 99
 
   first_floor_evening_off:
-    alais: First Floor Evening Off
+    alias: First Floor Evening Off
     description: Turn all of the first floor off in the evening
     mode: queued
     sequence:
@@ -529,10 +529,11 @@ automation:
           direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
           count: "{{trigger.event.data.value_raw - 1}}"
 
-      - conditions: "{{direction == 'up' and count == 2}}"
-        sequence:
-          - action: script.first_floor_morning_on
+      - choose:
+        - conditions: "{{direction == 'up' and count == 2}}"
+          sequence:
+            - action: script.first_floor_morning_on
 
-      - conditions: "{{direction == 'down' and count == 2}}"
-        sequence:
-          - action: script.first_floor_evening_off
+        - conditions: "{{direction == 'down' and count == 2}}"
+          sequence:
+            - action: script.first_floor_evening_off
