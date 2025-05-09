@@ -54,6 +54,7 @@ in {
     git
     tree
     jq
+    sbctl
   ];
 
   users.defaultUserShell = pkgs.zsh;
