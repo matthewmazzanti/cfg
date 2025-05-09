@@ -38,3 +38,18 @@ zpool create -f \
     -O acltype=posixacl \
     -O mountpoint=legacy \
     root-pool /dev/mapper/root-crypt
+
+# Open and mount
+cryptsetup open \
+    --type=plain \
+    --cipher=aes-xts-plain64 \
+    --key-size=256 \
+    --key-file=/dev/urandom \
+    "$part/swap" swap-crypt
+mkswap --label swap /dev/mapper/swap-crypt
+
+swapon /dev/mapper/swap-crypt
+mkdir --parents /mnt
+mount -t zfs root-pool /mnt
+mkdir --parents /mnt/boot
+mount "$part/ESP" /mnt/boot
