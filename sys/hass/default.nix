@@ -17,6 +17,7 @@ in {
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "hass";
+  networking.hostId = "224d13b2";
   networking.networkmanager.enable = true;
 
   # Time zone.
