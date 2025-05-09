@@ -11,7 +11,7 @@
   boot.extraModulePackages = [ ];
   boot.initrd.luks.devices.root-crypt = {
     device = "/dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35";
-    crypttabExtraOpts = ["tpm2-device=auto"];
+    preOpenCommands = "systemd-cryptsetup attach root-crypt /dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35 none tpm2-device=auto";
   };
 
   fileSystems."/" = {
