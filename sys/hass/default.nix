@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   keys = import ../../pkgs/keys;
 in {
@@ -13,11 +13,14 @@ in {
     ];
 
   # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.enable = false;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
 
   networking.hostName = "hass";
-  networking.hostId = "224d13b2";
+  networking.hostId = "224d13b2"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
 
   # Time zone.

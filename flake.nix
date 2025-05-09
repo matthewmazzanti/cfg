@@ -8,6 +8,9 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -136,7 +139,10 @@
           slider-entity-row = inputs.slider-entity-row;
           pyscript = inputs.pyscript;
         };
-        modules = [ ./sys/hass ];
+        modules = [
+          inputs.lanzaboote.nixosModule.lanzaboote
+          ./sys/hass
+        ];
       };
     };
   };
