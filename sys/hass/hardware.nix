@@ -5,17 +5,16 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
+  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
+
   systemd.tpm2.enable = true;
-  boot.initrd = {
-    availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
-    kernelModules = [ ];
-    systemd.tpm2.enable = true;
-    luks.devices.root-crypt = {
-      device = "/dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35";
-      preOpenCommands = "systemd-cryptsetup attach root-crypt /dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35 none tpm2-device=auto";
-    };
+  boot.initrd.systemd.tpm2.enable = true;
+  boot.initrd.luks.devices.root-crypt = {
+    device = "/dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35";
+    crypttabExtraOpts = [ "tpm2-device=auto" ];
   };
 
   fileSystems."/" = {
