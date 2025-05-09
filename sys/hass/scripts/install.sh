@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-SYSTEM="home-assistant2"
+SYSTEM="hass"
 
 if ! command -v git; then
     nix-env -iA nixpkgs.git

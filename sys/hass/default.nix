@@ -16,10 +16,10 @@ in {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "home-assistant";
+  networking.hostName = "hass";
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
+  # Time zone.
   time.timeZone = "America/New_York";
 
   # SSH
