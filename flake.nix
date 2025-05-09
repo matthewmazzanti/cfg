@@ -129,6 +129,15 @@
         };
         modules = [ ./sys/home-assistant ];
       };
+
+      home-assistant2 = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs.haDeps = {
+          slider-entity-row = inputs.slider-entity-row;
+          pyscript = inputs.pyscript;
+        };
+        modules = [ ./sys/home-assistant2 ];
+      };
     };
   };
 }
