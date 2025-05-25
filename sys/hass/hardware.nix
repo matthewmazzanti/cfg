@@ -1,9 +1,7 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
@@ -13,10 +11,13 @@
   systemd.tpm2.enable = true;
   boot.initrd.systemd.enable = true;
   boot.initrd.systemd.tpm2.enable = true;
+
   boot.initrd.luks.devices.root-crypt = {
-    device = "/dev/disk/by-uuid/519fd498-ffdf-45f7-bcd8-ff448eeee862";
-    keyFile = "/key-file:UUID=9892b672-1414-4ab9-9f31-5c4914c77cee";
+    device = "/dev/disk/by-uuid/a00ecc43-a330-4b40-bb1d-f5d2adb3a738";
+    keyFile = "/key-file:UUID=918e8304-57ac-408d-bb0c-835e895db539";
+    crypttabExtraOpts = ["discard"];
   };
+
   boot.initrd.systemd.services.rollback = {
     description = "Rollback root filesystem to blank state on boot";
     wantedBy = [ "initrd.target" ];
@@ -30,7 +31,7 @@
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/70f68119-3fd0-4021-853c-b579e2595c4a";
+      device = "/dev/disk/by-partuuid/cc86d193-c3c8-417c-9147-6067b0924b76";
       randomEncryption.enable = true;
     }
   ];
@@ -42,7 +43,7 @@
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/2D99-4A71";
+      device = "/dev/disk/by-uuid/CD37-C063";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362

@@ -5,16 +5,26 @@ KEYDEV="/dev/disk/by-path/pci-0000:00:14.0-usb-0:1:1.0-scsi-0:0:0:0"
 ROOTDEV="/dev/disk/by-path/pci-0000:02:00.0-nvme-1"
 part="$ROOTDEV-part/by-partlabel"
 
-# Clean up mounts/filesystems
+# Secure wipe, for final run
+# dd if=/dev/urandom of="$KEYDEV" bs=4K status=progress
+# dd if=/dev/urandom of="$ROOTDEV" bs=4K status=progress
+# blkdiscard -f "$ROOTDEV"
+
+# Clean up $KEYDEV
 umount /key-dev || true
+wipefs --all "$ROOTDEV" || true
+
+# Clean up $ROOTDEV
 umount /mnt/boot || true
+umount /mnt/nix || true
+umount /mnt/persist || true
+umount /mnt/home || true
 umount /mnt || true
 swapoff /dev/mapper/swap-crypt || true
 cryptsetup luksClose swap-crypt || true
 zpool destroy root-pool || true
 cryptsetup luksClose root-crypt || true
-wipefs --all "$KEYDEV"
-wipefs --all "$ROOTDEV"
+wipefs --all "$KEYDEV" || true
 
 # Create partition for primary disk
 sgdisk \
