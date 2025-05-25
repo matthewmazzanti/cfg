@@ -11,6 +11,9 @@
     lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
+    impermanence.url = "github:nix-community/impermanence";
+    impermanence.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -141,6 +144,7 @@
         };
         modules = [
           inputs.lanzaboote.nixosModules.lanzaboote
+          inputs.impermanence.nixosModules.impermanence
           ./sys/hass
         ];
       };
