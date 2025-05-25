@@ -79,6 +79,7 @@
     ];
     files = [
       "/etc/machine-id"
+      "/etc/shadow"
       "/etc/ssh/ssh_host_ecdsa_key"
       "/etc/ssh/ssh_host_ecdsa_key.pub"
       "/etc/ssh/ssh_host_ed25519_key"
