@@ -66,29 +66,6 @@
     };
   };
 
-  environment.persistence."/persist" = {
-    enable = true;
-    hideMounts = true;
-    directories = [
-      "/etc/NetworkManager/system-connections"
-      "/var/lib/bluetooth"
-      "/var/lib/nixos"
-      "/var/lib/sbctl"
-      "/var/lib/systemd/coredump"
-      "/var/log"
-    ];
-    files = [
-      "/etc/machine-id"
-      "/etc/shadow"
-      "/etc/ssh/ssh_host_ecdsa_key"
-      "/etc/ssh/ssh_host_ecdsa_key.pub"
-      "/etc/ssh/ssh_host_ed25519_key"
-      "/etc/ssh/ssh_host_ed25519_key.pub"
-      "/etc/ssh/ssh_host_rsa_key"
-      "/etc/ssh/ssh_host_rsa_key.pub"
-    ];
-  };
-
   # Enables DHCP on each ethernet and wireless interface. In case of scripted
   # networking (the default) this is the recommended approach. When using
   # systemd-networkd it's still possible to use this option, but it's

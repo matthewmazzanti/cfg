@@ -19,6 +19,32 @@ in {
     pkiBundle = "/var/lib/sbctl";
   };
 
+  # Impermanence
+  environment.persistence."/persist" = {
+    enable = true;
+    hideMounts = true;
+    directories = [
+      "/etc/NetworkManager/system-connections"
+      "/var/lib/bluetooth"
+      "/var/lib/nixos"
+      "/var/lib/sbctl"
+      "/var/lib/systemd/coredump"
+      "/var/log"
+    ];
+    files = [
+      "/etc/machine-id"
+      "/etc/ssh/ssh_host_ecdsa_key"
+      "/etc/ssh/ssh_host_ecdsa_key.pub"
+      "/etc/ssh/ssh_host_ed25519_key"
+      "/etc/ssh/ssh_host_ed25519_key.pub"
+      "/etc/ssh/ssh_host_rsa_key"
+      "/etc/ssh/ssh_host_rsa_key.pub"
+    ];
+  };
+  users.mutableUsers = false;
+  user.users.root.hashedPasswordFile = "/persist/passwd/root";
+
+  # Networking
   networking.hostName = "hass";
   networking.hostId = "224d13b2"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
@@ -66,6 +92,7 @@ in {
   programs.zsh.enable = true;
   users.users.mmazzanti = {
     isNormalUser = true;
+    hashedPasswordFile = "/persist/passwd/mmazzanti";
     extraGroups = [ "wheel" "podman" "dialout" ];
   };
 
