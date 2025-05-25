@@ -7,6 +7,11 @@ if ! command -v git; then
     nix-env -iA nixpkgs.git
 fi
 
-mkdir --parents ~/src/nix
-git clone https://github.com/matthewmazzanti/cfg.git ~/src/nix/cfg
-nixos-install --root /mnt --flake "~/src/nix/cfg#hass"
+if ! [ -e "$HOME/src/nix" ]; then
+    mkdir --parents "$HOME/src/nix"
+    git clone https://github.com/matthewmazzanti/cfg.git "$HOME/src/nix/cfg"
+else
+    git -C "$HOME/src/nix/cfg" pull
+fi
+
+nixos-install --root /mnt --flake "$HOME/src/nix/cfg#hass"

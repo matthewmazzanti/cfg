@@ -13,12 +13,19 @@
   systemd.tpm2.enable = true;
   boot.initrd.systemd.enable = true;
   boot.initrd.systemd.tpm2.enable = true;
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    zfs rollback -r root-pool/local/root@blank
-  '';
   boot.initrd.luks.devices.root-crypt = {
     device = "/dev/disk/by-uuid/519fd498-ffdf-45f7-bcd8-ff448eeee862";
     keyFile = "/key-file:UUID=9892b672-1414-4ab9-9f31-5c4914c77cee";
+  };
+  boot.initrd.systemd.services.rollback = {
+    description = "Rollback root filesystem to blank state on boot";
+    wantedBy = [ "initrd.target" ];
+    before = [ "sysroot.mount" ];
+    after = [ "zfs-import-root-pool.service" ];
+    path = with pkgs; [ zfs ];
+    unitConfig.DefaultDependencies = "no";
+    serviceConfig.Type = "oneshot";
+    script = "zfs rollback -r root-pool/local/root@blank";
   };
 
   swapDevices = [
@@ -50,6 +57,7 @@
     "/persist" = {
       device = "root-pool/state/persist";
       fsType = "zfs";
+      neededForBoot = true;
     };
 
     "/home" = {

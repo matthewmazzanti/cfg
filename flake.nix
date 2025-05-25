@@ -12,7 +12,6 @@
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
     impermanence.url = "github:nix-community/impermanence";
-    impermanence.inputs.nixpkgs.follows = "nixpkgs";
 
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
