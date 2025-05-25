@@ -70,11 +70,12 @@
     enable = true;
     hideMounts = true;
     directories = [
-      "/var/log"
+      "/etc/NetworkManager/system-connections"
       "/var/lib/bluetooth"
       "/var/lib/nixos"
+      "/var/lib/sbctl"
       "/var/lib/systemd/coredump"
-      "/etc/NetworkManager/system-connections"
+      "/var/log"
     ];
     files = [
       "/etc/machine-id"
