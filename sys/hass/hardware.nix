@@ -79,7 +79,6 @@
     ];
     files = [
       "/etc/machine-id"
-      "/etc/shadow"
       "/etc/ssh/ssh_host_ecdsa_key"
       "/etc/ssh/ssh_host_ecdsa_key.pub"
       "/etc/ssh/ssh_host_ed25519_key"
@@ -88,6 +87,7 @@
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
   };
+  environment.etc.shadow.source = "/persist/etc/shadow";
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted
   # networking (the default) this is the recommended approach. When using

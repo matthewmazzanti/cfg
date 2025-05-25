@@ -22,6 +22,3 @@ sbctl create-keys \
 mount --bind /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 nixos-install --root /mnt --flake "$HOME/src/nix/cfg#hass"
 umount /mnt/var/lib/sbctl
-if [ -e /mnt/etc/machine-id ]; then unlink /mnt/etc/machine-id; fi
-systemd-machine-id-setup --root /mnt/persist
-ssh-keygen -A -f /mnt/persist
