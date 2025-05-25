@@ -142,8 +142,8 @@
           pyscript = inputs.pyscript;
         };
         modules = [
-          inputs.lanzaboote.nixosModules.lanzaboote
           inputs.impermanence.nixosModules.impermanence
+          inputs.lanzaboote.nixosModules.lanzaboote
           ./sys/hass
         ];
       };
