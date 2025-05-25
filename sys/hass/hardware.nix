@@ -8,14 +8,13 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  systemd.tpm2.enable = true;
   boot.initrd.systemd.enable = true;
-  boot.initrd.systemd.tpm2.enable = true;
 
   boot.initrd.luks.devices.root-crypt = {
     device = "/dev/disk/by-uuid/a00ecc43-a330-4b40-bb1d-f5d2adb3a738";
     keyFile = "/key-file:UUID=918e8304-57ac-408d-bb0c-835e895db539";
-    crypttabExtraOpts = ["discard"];
+    keyFileTimeout = 10;
+    allowDiscards = true;
   };
 
   boot.initrd.systemd.services.rollback = {
@@ -80,10 +79,12 @@
     ];
     files = [
       "/etc/machine-id"
-      "/etc/ssh/ssh_host_rsa_key"
-      "/etc/ssh/ssh_host_rsa_key.pub"
+      "/etc/ssh/ssh_host_ecdsa_key"
+      "/etc/ssh/ssh_host_ecdsa_key.pub"
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_ed25519_key.pub"
+      "/etc/ssh/ssh_host_rsa_key"
+      "/etc/ssh/ssh_host_rsa_key.pub"
     ];
   };
 
