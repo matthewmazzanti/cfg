@@ -24,7 +24,7 @@ sgdisk \
     --new=0:0:0 --typecode=0:8300 --change-name=0:root \
     "$ROOTDEV"
 
-
+# Wait for partitions
 while [ ! -e "$part/ESP" ] || [ ! -e "$part/swap" ] || [ ! -e "$part/root" ]; do
     sleep 1
     echo "Waiting for partitions"

@@ -17,8 +17,8 @@
     zfs rollback -r root-pool/local/root@blank
   '';
   boot.initrd.luks.devices.root-crypt = {
-    device = "/dev/disk/by-partuuid/bf8a36d9-e872-42c6-8658-ce2439f29b35";
-    crypttabExtraOpts = [ "tpm2-device=auto" ];
+    device = "/dev/disk/by-uuid/8dd13a33-31ec-42d8-b389-2d6e0073829f";
+    keyFile = "/key-file:UUID=";
   };
 
   swapDevices = [
