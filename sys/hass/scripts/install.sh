@@ -4,7 +4,7 @@ set -xeuo pipefail
 make_password() {
     user="$1"
     echo "Enter $1 password"
-    touch /mnt/persist/passwd
+    touch "/mnt/persist/passwd/$user"
     chown root:shadow "/mnt/persist/passwd/$user"
     chmod 640 "/mnt/persist/passwd/$user"
     openssl passwd -6 > "/mnt/persist/passwd/$user"
@@ -38,6 +38,5 @@ nixos-install \
 umount /mnt/var/lib/sbctl
 
 mkdir --parents /mnt/persist/passwd
-
 make_password "root"
 make_password "mmazzanti"

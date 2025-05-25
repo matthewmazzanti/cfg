@@ -66,12 +66,12 @@ in {
     beta
   ];
 
-  # Select internationalisation properties.
+  # Select internationalization properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
     # vconsole failure: https://github.com/NixOS/nixpkgs/issues/257904
     # font = "Lat2-Terminus16";
-    font = "${pkgs.terminus_font}/share/consolefonts/ter-120n.psf.gz";
+    font = "${pkgs.kbd}/share/consolefonts/Lat2-Terminus16.psfu.gz";
     keyMap = "us";
   };
 
