@@ -42,7 +42,7 @@ in {
     ];
   };
   users.mutableUsers = false;
-  user.users.root.hashedPasswordFile = "/persist/passwd/root";
+  users.users.root.hashedPasswordFile = "/persist/passwd/root";
 
   # Networking
   networking.hostName = "hass";

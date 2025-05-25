@@ -14,7 +14,7 @@ else
     git -C "$HOME/src/nix/cfg" pull
 fi
 
-mkdir --parents /mnt/persist/var/lib/sbctl
+mkdir --parents /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 sbctl create-keys \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
