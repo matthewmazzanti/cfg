@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
+make_password() {
+    user="$1"
+    echo "Enter $1 password"
+    touch /mnt/persist/passwd
+    chown root:shadow "/mnt/persist/passwd/$user"
+    chmod 640 "/mnt/persist/passwd/$user"
+    openssl passwd -6 > "/mnt/persist/passwd/$user"
+}
+
 # NOTE: Not actually run, just notes
 
 if ! command -v git; then nix-env -iA nixpkgs.git; fi
@@ -29,7 +38,6 @@ nixos-install \
 umount /mnt/var/lib/sbctl
 
 mkdir --parents /mnt/persist/passwd
-echo "Enter root password"
-openssl passwd -6 > /mnt/persist/passwd/root
-echo "Enter user password"
-openssl passwd -6 > /mnt/persist/passwd/mmazzanti
+
+make_password "root"
+make_password "mmazzanti"
