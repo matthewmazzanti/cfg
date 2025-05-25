@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xeuo pipefail
+set -xeu
 
 KEYDEV="/dev/disk/by-path/pci-0000:00:14.0-usb-0:1:1.0-scsi-0:0:0:0"
 ROOTDEV="/dev/disk/by-path/pci-0000:02:00.0-nvme-1"
@@ -39,9 +39,8 @@ cryptsetup open \
     "$part/swap" swap-crypt
 
 # Create Keyfile
-KEYFILE="/key-dev/key-file"
 mkfs.ext4 -L key "$KEYDEV"
-mkdir /key-dev
+mkdir --parents /key-dev
 mount "$KEYDEV" /key-dev
 echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
@@ -70,23 +69,30 @@ zpool create -f \
     -O mountpoint=none \
     root-pool /dev/mapper/root-crypt
 
-zfs create -o mountpoint=none /local
-zfs create -o mountpoint=none /state
-zfs create -o mountpoint=legacy /local/root
-zfs create -o mountpoint=legacy /local/nix
-zfs create -o mountpoint=legacy /state/persist
-zfs create -o mountpoint=legacy /state/home
-zfs snapshot /local/root@blank
+zfs create -o mountpoint=none root-pool/local
+zfs create -o mountpoint=none root-pool/state
+zfs create -o mountpoint=legacy root-pool/local/root
+zfs create -o mountpoint=legacy root-pool/local/nix
+zfs create -o mountpoint=legacy root-pool/state/persist
+zfs create -o mountpoint=legacy root-pool/state/home
+zfs snapshot root-pool/local/root@blank
 
 # Mount all filesystems
 swapon /dev/mapper/swap-crypt
 mkdir --parents /mnt
-mkdir --parents /mnt/boot
-mkdir --parents /mnt/nix
-mkdir --parents /mnt/persist
-mkdir --parents /mnt/home
 mount -t zfs root-pool/local/root /mnt
+mkdir --parents /mnt/boot /mnt/nix /mnt/persist /mnt/home
 mount "$part/ESP" /mnt/boot
 mount -t zfs root-pool/local/nix /mnt/nix
 mount -t zfs root-pool/state/persist /mnt/persist
 mount -t zfs root-pool/state/home /mnt/home
+
+# Print filesystem ids
+cat <<EOF
+
+===Devices===
+root /dev/disk/by-uuid/$(blkid --match-tag UUID --output value "$part/root")
+key  /key-file:UUID=$(blkid --match-tag UUID --output value "$KEYDEV")
+swap /dev/disk/by-partuuid/$(blkid --match-tag PARTUUID --output value "$part/swap")
+boot /dev/disk/by-uuid/$(blkid --match-tag UUID --output value "$part/ESP")
+EOF

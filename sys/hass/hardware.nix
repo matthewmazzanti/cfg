@@ -17,13 +17,13 @@
     zfs rollback -r root-pool/local/root@blank
   '';
   boot.initrd.luks.devices.root-crypt = {
-    device = "/dev/disk/by-uuid/8dd13a33-31ec-42d8-b389-2d6e0073829f";
-    keyFile = "/key-file:UUID=";
+    device = "/dev/disk/by-uuid/519fd498-ffdf-45f7-bcd8-ff448eeee862";
+    keyFile = "/key-file:UUID=9892b672-1414-4ab9-9f31-5c4914c77cee";
   };
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/c26d9d8c-9285-4f3b-beeb-ed7084bcbe2b";
+      device = "/dev/disk/by-partuuid/70f68119-3fd0-4021-853c-b579e2595c4a";
       randomEncryption.enable = true;
     }
   ];
@@ -35,7 +35,7 @@
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/F46C-107C";
+      device = "/dev/disk/by-uuid/2D99-4A71";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
@@ -47,13 +47,13 @@
       fsType = "zfs";
     };
 
-    "/home" = {
-      device = "root-pool/state/home";
+    "/persist" = {
+      device = "root-pool/state/persist";
       fsType = "zfs";
     };
 
-    "/persist" = {
-      device = "root-pool/state/persist";
+    "/home" = {
+      device = "root-pool/state/home";
       fsType = "zfs";
     };
   };
