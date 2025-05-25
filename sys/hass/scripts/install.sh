@@ -13,12 +13,16 @@ else
     git -C "$HOME/src/nix/cfg" pull
 fi
 
-mkdir --parents /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
+mkdir --parents /mnt/persist/etc
+touch /etc/shadow /mnt/persist/etc/shadow
+mount --bind /mnt/persist/etc/shadow /etc/shadow
 
+mkdir --parents /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 sbctl create-keys \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
-
 mount --bind /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
+
 nixos-install --root /mnt --flake "$HOME/src/nix/cfg#hass"
 umount /mnt/var/lib/sbctl
+umount /mnt/etc/shadow
