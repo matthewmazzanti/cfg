@@ -3,7 +3,7 @@ set -xeuo pipefail
 
 make_password() {
     user="$1"
-    echo "Enter $1 password"
+    echo "Enter password for $1"
     touch "/mnt/persist/passwd/$user"
     chown root:shadow "/mnt/persist/passwd/$user"
     chmod 640 "/mnt/persist/passwd/$user"
@@ -43,10 +43,10 @@ nixos-install \
 # Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl
 
+# Create ssh host keys in persist
+ssh-keygen -A -f /mnt/persist
+
 
 # Create passwords
 mkdir -p /mnt/persist/passwd
 make_password "mmazzanti"
-
-# Create ssh host keys in persist
-ssh-keygen -A -f /mnt/persist
