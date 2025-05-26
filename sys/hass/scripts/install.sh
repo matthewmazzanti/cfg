@@ -7,7 +7,9 @@ make_password() {
     touch "/mnt/persist/passwd/$user"
     chown root:shadow "/mnt/persist/passwd/$user"
     chmod 640 "/mnt/persist/passwd/$user"
-    openssl passwd -6 > "/mnt/persist/passwd/$user"
+    until openssl passwd -6 > "/mnt/persist/passwd/$user"; do
+        echo "Try again"
+    done
 }
 
 # NOTE: Not actually run, just notes
@@ -17,14 +19,14 @@ if ! command -v sbctl; then nix-env -iA nixos.sbctl; fi
 if ! command -v openssl; then nix-env -iA nixos.openssl; fi
 
 if ! [ -e "$HOME/src/nix" ]; then
-    mkdir --parents "$HOME/src/nix"
+    mkdir -p "$HOME/src/nix"
     git clone https://github.com/matthewmazzanti/cfg.git "$HOME/src/nix/cfg"
 else
     git -C "$HOME/src/nix/cfg" pull
 fi
 
 # Create sbctl keys
-mkdir --parents /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
+mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 sbctl create-keys \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
@@ -43,8 +45,7 @@ umount /mnt/var/lib/sbctl
 
 
 # Create passwords
-mkdir --parents /mnt/persist/passwd
-make_password "root"
+mkdir -p /mnt/persist/passwd
 make_password "mmazzanti"
 
 # Create ssh host keys in persist

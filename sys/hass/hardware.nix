@@ -46,6 +46,7 @@
     "/" = {
       device = "root-pool/local/root";
       fsType = "zfs";
+      options = [ "noatime" ];
     };
 
     "/boot" = {
@@ -53,23 +54,26 @@
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
-      options = [ "fmask=0077" "dmask=0077" ];
+      options = [ "noatime" "fmask=0077" "dmask=0077" ];
     };
 
     "/nix" = {
       device = "root-pool/local/nix";
       fsType = "zfs";
+      options = [ "noatime" ];
     };
 
     "/persist" = {
       device = "root-pool/state/persist";
       fsType = "zfs";
+      options = [ "noatime" ];
       neededForBoot = true;
     };
 
     "/home" = {
       device = "root-pool/state/home";
       fsType = "zfs";
+      options = [ "noatime" ];
     };
   };
 

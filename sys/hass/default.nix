@@ -43,8 +43,6 @@ in {
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
   };
-  users.mutableUsers = false;
-  users.users.root.hashedPasswordFile = "/persist/passwd/root";
 
   # Networking
   networking.hostName = "hass";
@@ -87,6 +85,7 @@ in {
 
   users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
+  users.mutableUsers = false;
   users.users.mmazzanti = {
     isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
