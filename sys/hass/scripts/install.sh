@@ -23,22 +23,29 @@ else
     git -C "$HOME/src/nix/cfg" pull
 fi
 
+# Create sbctl keys
 mkdir --parents /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 sbctl create-keys \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
+# Mount into chroot
 mount --bind /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 
+# Install nixos
 nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
     --flake "$HOME/src/nix/cfg#hass"
 
+# Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl
 
+
+# Create passwords
 mkdir --parents /mnt/persist/passwd
 make_password "root"
 make_password "mmazzanti"
 
+# Create ssh host keys in persist
 ssh-keygen -A -f /mnt/persist

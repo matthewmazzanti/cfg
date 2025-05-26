@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-set -xeu
+set -xeuo pipefail
 
-KEYDEV="/dev/disk/by-path/pci-0000:00:14.0-usb-0:1:1.0-scsi-0:0:0:0"
+KEYDEV="/dev/disk/by-id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
 ROOTDEV="/dev/disk/by-path/pci-0000:02:00.0-nvme-1"
 part="$ROOTDEV-part/by-partlabel"
-
-# Secure wipe, for final run
-# dd if=/dev/urandom of="$KEYDEV" bs=4K status=progress
-# dd if=/dev/urandom of="$ROOTDEV" bs=4K status=progress
-# blkdiscard -f "$ROOTDEV"
 
 # Clean up $KEYDEV
 umount /key-dev || true
@@ -56,7 +51,7 @@ echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
 touch /key-dev/key-file
 chmod 400 /key-dev/key-file
-(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c256) > /key-dev/key-file
+head -c256 < /dev/urandom | base64 > /key-dev/key-file
 
 # Create luks filesystem on root partition
 cryptsetup luksFormat --type=luks2 --key-file=/key-dev/key-file "$part/root"

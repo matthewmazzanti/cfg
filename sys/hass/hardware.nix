@@ -24,7 +24,7 @@
     allowDiscards = true;
   };
 
-  boot.initrd.systemd.services.rollback = {
+  boot.initrd.systemd.services.rollback-root = {
     description = "Rollback root filesystem to blank state on boot";
     wantedBy = [ "initrd.target" ];
     before = [ "sysroot.mount" ];
