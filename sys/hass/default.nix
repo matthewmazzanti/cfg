@@ -80,15 +80,15 @@ in {
   # Packages
   environment.systemPackages = with pkgs; [
     neovim
-    wget
-    curl
-    httpie
-    ripgrep
-    fd
-    git
-    tree
-    jq
+    # Http stuff
+    wget curl httpie
+    # Misc utils
+    ripgrep fd git tree jq
+    # Secure boot
     sbctl
+
+    # Installation/debug utils
+    e2fsprogs gptfdisk usbutils
   ];
 
   # User config
