@@ -25,6 +25,8 @@ in {
     hideMounts = true;
     directories = [
       "/etc/NetworkManager/system-connections"
+      "/var/db/sudo/lectured"
+      "/var/lib/NetworkManager"
       "/var/lib/bluetooth"
       "/var/lib/nixos"
       "/var/lib/sbctl"
