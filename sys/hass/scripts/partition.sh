@@ -45,8 +45,7 @@ cryptsetup open \
 
 # Create Keyfile
 mkfs.ext4 -L key "$KEYDEV"
-mkdir -p /key-dev
-mount "$KEYDEV" /key-dev
+mount -p -t ext4 -o noatime "$KEYDEV" /key-dev
 echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
 touch /key-dev/key-file
@@ -86,13 +85,11 @@ zfs snapshot root-pool/local/root@blank
 
 # Mount all filesystems
 swapon /dev/mapper/swap-crypt
-mkdir -p /mnt
-mount -t zfs -o noatime root-pool/local/root /mnt
-mkdir -p /mnt/boot /mnt/nix /mnt/persist /mnt/home
-mount -t vfat -o noatime "$part/ESP" /mnt/boot
-mount -t zfs -o noatime root-pool/local/nix /mnt/nix
-mount -t zfs -o noatime root-pool/state/persist /mnt/persist
-mount -t zfs -o noatime root-pool/state/home /mnt/home
+mount -p -t zfs -o noatime root-pool/local/root /mnt
+mount -p -t vfat -o noatime "$part/ESP" /mnt/boot
+mount -p -t zfs -o noatime root-pool/local/nix /mnt/nix
+mount -p -t zfs -o noatime root-pool/state/persist /mnt/persist
+mount -p -t zfs -o noatime root-pool/state/home /mnt/home
 
 # Print filesystem ids
 cat <<EOF

@@ -49,6 +49,13 @@ in {
   networking.hostId = "224d13b2"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
 
+  # Auto cleanup
+  nix.gc.automatic = true;
+  nix.gc.options = "--delete-older-than 180d";
+  nix.optimise.automatic = true;
+  services.zfs.autoScrub.enable = true;
+  services.zfs.trim.enable = true;
+
   # Time zone.
   time.timeZone = "America/New_York";
 
@@ -66,10 +73,11 @@ in {
     beta
   ];
 
-  # Select internationalization properties.
+  # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "us";
 
+  # Packages
   environment.systemPackages = with pkgs; [
     neovim
     wget
@@ -83,9 +91,10 @@ in {
     sbctl
   ];
 
+  # User config
+  users.mutableUsers = false;
   users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
-  users.mutableUsers = false;
   users.users.mmazzanti = {
     isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
@@ -93,5 +102,6 @@ in {
   };
 
   security.pki.certificates = [ keys.ca.crt ];
+
   system.stateVersion = "24.11";
 }

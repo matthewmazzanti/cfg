@@ -12,8 +12,6 @@ make_password() {
     done
 }
 
-# NOTE: Not actually run, just notes
-
 if ! command -v git; then nix-env -iA nixpkgs.git; fi
 if ! command -v sbctl; then nix-env -iA nixos.sbctl; fi
 if ! command -v openssl; then nix-env -iA nixos.openssl; fi
