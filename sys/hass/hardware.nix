@@ -44,7 +44,7 @@
 
   fileSystems = {
     "/" = {
-      device = "root-pool";
+      device = "root-pool/local/root";
       fsType = "zfs";
     };
 

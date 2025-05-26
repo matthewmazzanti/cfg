@@ -40,3 +40,5 @@ umount /mnt/var/lib/sbctl
 mkdir --parents /mnt/persist/passwd
 make_password "root"
 make_password "mmazzanti"
+
+ssh-keygen -A -f /mnt/persist
