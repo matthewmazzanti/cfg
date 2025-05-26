@@ -9,9 +9,10 @@
     "usb_storage"
     "usbhid"
     "sd_mod"
-    "ext4"
   ];
+  boot.initrd.supportedFilesystems = ["ext4"];
   boot.initrd.kernelModules = [ ];
+  boot.supportedFilesystems = [ "ext4" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 

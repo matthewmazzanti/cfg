@@ -49,15 +49,19 @@ in {
   networking.hostId = "224d13b2"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
 
+  # Console stuff
+  i18n.defaultLocale = "en_US.UTF-8";
+  console.keyMap = "us";
+
+  # Time zone.
+  time.timeZone = "America/New_York";
+
   # Auto cleanup
   nix.gc.automatic = true;
   nix.gc.options = "--delete-older-than 180d";
   nix.optimise.automatic = true;
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
-
-  # Time zone.
-  time.timeZone = "America/New_York";
 
   # SSH
   services.openssh = {
@@ -73,10 +77,6 @@ in {
     beta
   ];
 
-  # Console stuff
-  i18n.defaultLocale = "en_US.UTF-8";
-  console.keyMap = "us";
-
   # Packages
   environment.systemPackages = with pkgs; [
     neovim
@@ -89,6 +89,9 @@ in {
 
     # Installation/debug utils
     e2fsprogs gptfdisk usbutils
+
+    # Compression
+    unzip zip
   ];
 
   # User config
