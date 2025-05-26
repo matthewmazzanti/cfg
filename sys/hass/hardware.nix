@@ -84,7 +84,7 @@
     ''ATTRS{idProduct}=="5583"''
     ''ATTRS{idVendor}=="0781"''
     ''ATTRS{serial}=="010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e"''
-    ''RUN+="/bin/echo 'hello' > /tmp/udev-remove.log"''
+    ''RUN+="${pkgs.coreutils}/bin/echo 'hello' > /tmp/udev-remove.log"''
   ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted
