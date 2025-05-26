@@ -56,7 +56,9 @@ head -c256 < /dev/urandom | base64 > /key-dev/key-file
 # Create luks filesystem on root partition
 cryptsetup luksFormat --type=luks2 --key-file=/key-dev/key-file "$part/root"
 cryptsetup luksAddKey --key-file=/key-dev/key-file --new-key-slot=31 "$part/root"
-cryptsetup open --key-file=/key-dev/key-file "$part/root" root-crypt
+until cryptsetup open --key-file=/key-dev/key-file "$part/root" root-crypt; do
+    echo "Try again"
+done
 
 # Create esp partition
 mkfs.fat -F 32 -n ESP "$part/ESP"

@@ -18,8 +18,8 @@
   boot.initrd.systemd.enable = true;
 
   boot.initrd.luks.devices.root-crypt = {
-    device = "/dev/disk/by-uuid/8039de4e-62d8-48e6-947a-0595c3113b4e";
-    keyFile = "/key-file:UUID=99bafd25-76c5-4eaf-9704-6e96ddf68c47";
+    device = "/dev/disk/by-uuid/547d874f-c18a-4519-b52b-0969dc999cc3";
+    keyFile = "/key-file:UUID=e96b6967-aacd-4f25-8256-664ae143646f";
     keyFileTimeout = 10;
     allowDiscards = true;
   };
@@ -37,7 +37,7 @@
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/1a5b27ae-dece-4988-9ca5-a9c06ad5201d";
+      device = "/dev/disk/by-partuuid/8d065161-122d-4919-af6b-95a15b2954a4";
       randomEncryption.enable = true;
     }
   ];
@@ -50,7 +50,7 @@
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/4A36-E229";
+      device = "/dev/disk/by-uuid/E745-7031";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
