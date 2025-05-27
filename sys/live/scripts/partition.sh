@@ -5,7 +5,7 @@ find_uuid() {
     blkid --match-tag UUID --output value "$1"
 }
 
-ROOTDEV="usb-Samsung_Flash_Drive_0358123090004561-0:0"
+ROOTDEV="/dev/disk/by-id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
 part="$ROOTDEV-part/by-partlabel"
 
 # Clean up $ROOTDEV
