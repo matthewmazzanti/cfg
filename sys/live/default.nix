@@ -73,6 +73,8 @@ in {
     wget curl
     # Misc utils
     ripgrep fd git tree jq
+    # My installer stuff
+    openssl sbctl
   ];
 
   # User config
