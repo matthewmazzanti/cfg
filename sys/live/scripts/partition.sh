@@ -5,13 +5,13 @@ find_uuid() {
     blkid --match-tag UUID --output value "$1"
 }
 
-ROOTDEV=""
+ROOTDEV="usb-Samsung_Flash_Drive_0358123090004561-0:0"
 part="$ROOTDEV-part/by-partlabel"
 
 # Clean up $ROOTDEV
 umount /mnt/boot || true
 umount /mnt || true
-cryptsetup luksClose root-crypt || true
+cryptsetup luksClose root-live-crypt || true
 wipefs --all "$ROOTDEV" || true
 
 # Create partition for primary disk
@@ -28,8 +28,12 @@ while [ ! -e "$part/ESPLIVE" ] || [ ! -e "$part/root-live" ]; do
 done
 
 # Encrypt root filesystem
-cryptsetup luksFormat --type=luks2 "$part/root-live"
-cryptsetup luksOpen --type=luks2 "$part/root-live" root-live-crypt
+until cryptsetup luksFormat --type=luks2 "$part/root-live"; do
+    echo "Try again"
+done
+until cryptsetup luksOpen --type=luks2 "$part/root-live" root-live-crypt; do
+    echo "Try again"
+done
 
 # Make filesystems
 mkfs -t ext4 -L root-live "/dev/mapper/root-live-crypt"
