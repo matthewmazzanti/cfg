@@ -147,6 +147,11 @@
           ./sys/hass
         ];
       };
+
+      live = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [ ./sys/live ];
+      };
     };
   };
 }
