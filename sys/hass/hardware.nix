@@ -18,7 +18,7 @@
 
   boot.initrd.systemd.enable = true;
 
-  boot.initrd.luks.devices.root-crypt = {
+  boot.initrd.luks.devices."root-crypt" = {
     device = "/dev/disk/by-uuid/547d874f-c18a-4519-b52b-0969dc999cc3";
     keyFile = "/key-file:UUID=e96b6967-aacd-4f25-8256-664ae143646f";
     keyFileTimeout = 10;
