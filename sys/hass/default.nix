@@ -96,15 +96,21 @@ in {
 
   # User config
   users.mutableUsers = false;
-  users.defaultUserShell = pkgs.zsh;
-  programs.zsh.enable = true;
   users.users.mmazzanti = {
     isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
-    extraGroups = [ "wheel" "podman" "dialout" ];
+    extraGroups = [ "wheel" "networkmanager" "podman" "dialout" ];
   };
 
+  # Enable zsh
+  users.defaultUserShell = pkgs.zsh;
+  programs.zsh.enable = true;
+
+  # Trust my CA
   security.pki.certificates = [ keys.ca.crt ];
+
+  # Nix configuration
+  nix.extraOptions = "experimental-features = nix-command flakes";
 
   system.stateVersion = "24.11";
 }

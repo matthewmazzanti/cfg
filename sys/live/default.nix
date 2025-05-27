@@ -88,11 +88,14 @@ in {
   services.getty.autologinUser = "mmazzanti";
 
   # Enable zsh
-  users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
+  users.defaultUserShell = pkgs.zsh;
 
   # Trust my CA
   security.pki.certificates = [ keys.ca.crt ];
+
+  # Nix configuration
+  nix.extraOptions = "experimental-features = nix-command flakes";
 
   system.stateVersion = "25.05";
 }
