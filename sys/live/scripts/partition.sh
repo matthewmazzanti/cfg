@@ -8,7 +8,9 @@ find_by_path() {
             echo "$file"
             return 0
         fi
-    if
+    done
+
+    return 1
 }
 
 find_uuid() {
