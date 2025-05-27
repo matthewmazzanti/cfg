@@ -52,8 +52,10 @@ mkfs -t ext4 -L root-live "/dev/mapper/root-live-crypt"
 mkfs -t fat -F 32 -n ESPLIVE "$part/ESPLIVE"
 
 # Mount filesystems
-mount -p -t ext4 -o noatime "/dev/mapper/root-live-crypt" /mnt
-mount -p -t vfat -o noatime "$part/ESPLIVE" /mnt/boot
+mkdir -p /mnt
+mount -t ext4 -o noatime "/dev/mapper/root-live-crypt" /mnt
+mkdir -p /mnt/boot
+mount -t vfat -o noatime "$part/ESPLIVE" /mnt/boot
 
 # Print filesystem ids
 cat <<EOF

@@ -85,11 +85,13 @@ zfs snapshot root-pool/local/root@blank
 
 # Mount all filesystems
 swapon /dev/mapper/swap-crypt
-mount -p -t zfs -o noatime root-pool/local/root /mnt
-mount -p -t vfat -o noatime "$part/ESP" /mnt/boot
-mount -p -t zfs -o noatime root-pool/local/nix /mnt/nix
-mount -p -t zfs -o noatime root-pool/state/persist /mnt/persist
-mount -p -t zfs -o noatime root-pool/state/home /mnt/home
+mkdir -p /mnt
+mount -t zfs -o noatime root-pool/local/root /mnt
+mkdir -p /mnt/boot /mnt/nix /mnt/persist /mnt/home
+mount -t vfat -o noatime "$part/ESP" /mnt/boot
+mount -t zfs -o noatime root-pool/local/nix /mnt/nix
+mount -t zfs -o noatime root-pool/state/persist /mnt/persist
+mount -t zfs -o noatime root-pool/state/home /mnt/home
 
 # Print filesystem ids
 cat <<EOF
