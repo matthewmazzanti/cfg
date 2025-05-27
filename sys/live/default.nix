@@ -88,6 +88,9 @@ in {
     extraGroups = [ "wheel" "networkmanager" "video"];
   };
 
+  # Disable password for sudo
+  security.sudo.wheelNeedsPassword = false;
+
   # Auto login as mmazzanti
   services.getty.autologinUser = "mmazzanti";
 
