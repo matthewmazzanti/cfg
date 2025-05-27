@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
+find_by_path() {
+    local drive="$(readlink -f "$1")"
+    for file in /dev/disk/by-path/*; do
+        if [[ -L "$file" ]] && [[ "$(readlink -f "$file")" == "$drive" ]]; then
+            echo "$file"
+            return 0
+        fi
+    if
+}
+
 find_uuid() {
     blkid --match-tag UUID --output value "$1"
 }
 
-ROOTDEV="/dev/disk/by-id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
+ROOTDEV="$(find_by_path /dev/disk/by-id/usb-Samsung_Flash_Drive_0358123090004561-0:0)"
 part="$ROOTDEV-part/by-partlabel"
 
 # Clean up $ROOTDEV
