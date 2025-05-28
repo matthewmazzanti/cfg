@@ -92,7 +92,7 @@ in {
 
     # Compression
     unzip zip
-  ]) + [
+  ]) ++ [
     flake.disko
   ];
 
