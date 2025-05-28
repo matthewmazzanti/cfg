@@ -12,7 +12,7 @@
           content = {
             type = "filesystem";
             format = "vfat";
-            extraArgs = [ "-i" "53776b66" ];
+            # extraArgs = [ "-i" "53776b66" ];
             mountpoint = "/boot";
             mountOptions = [ "noatime" "fmask=0077" "umask=0077" ];
           };
@@ -24,11 +24,11 @@
           content = {
             type = "luks";
             name = "root-live-crypt";
-            extraFormatArgs = [ "--uuid" "360d3dbf-af21-4ae8-87e5-40607f141bfa" ];
+            # extraFormatArgs = [ "--uuid" "360d3dbf-af21-4ae8-87e5-40607f141bfa" ];
             content = {
               type = "filesystem";
               format = "ext4";
-              extraArgs = [ "-U" "578d9057-5e0e-4652-9979-ca5c7de6ae92" ];
+              # extraArgs = [ "-U" "578d9057-5e0e-4652-9979-ca5c7de6ae92" ];
               mountpoint = "/";
               mountOptions = [ "noatime" ];
             };
