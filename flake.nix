@@ -146,7 +146,6 @@
           disko = inputs.disko.packages.x86_64-linux.disko;
         };
         modules = [
-          inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
           inputs.lanzaboote.nixosModules.lanzaboote
           ./sys/hass
@@ -155,8 +154,13 @@
 
       live = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs.inputs = inputs;
-        modules = [ ./sys/live ];
+        specialArgs.flake = {
+          disko = inputs.disko.packages.x86_64-linux.disko;
+        };
+        modules = [
+          inputs.disko.nixosModules.disko
+          ./sys/live
+        ];
       };
     };
   };

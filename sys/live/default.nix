@@ -1,5 +1,5 @@
 # https://github.com/NixOS/nixpkgs/blob/8c00e8f75283bf91e5bfb2939ab9aa876e2cf461/nixos/modules/profiles/base.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, flake, ... }:
 let
   keys = import ../../pkgs/keys;
 in {
@@ -52,7 +52,7 @@ in {
 
   # Include some utilities that are useful for installing or repairing
   # the system.
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = (with pkgs; [
     testdisk # useful for repairing boot problems
     ms-sys # for writing Microsoft boot sectors / MBRs
     efibootmgr
@@ -80,6 +80,8 @@ in {
     ripgrep fd git tree jq
     # My installer stuff
     openssl sbctl
+  ]) ++ [
+    flake.disko
   ];
 
   # User config
