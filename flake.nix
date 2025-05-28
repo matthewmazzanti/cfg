@@ -146,6 +146,7 @@
           disko = inputs.disko.packages.x86_64-linux.disko;
         };
         modules = [
+          inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
           inputs.lanzaboote.nixosModules.lanzaboote
           ./sys/hass

@@ -3,7 +3,10 @@
 let
   keys = import ../../pkgs/keys;
 in {
-  imports = [ ./hardware.nix ];
+  imports = [
+    ./disko.nix
+    ./hardware.nix
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.initrd.systemd.enable = true;
