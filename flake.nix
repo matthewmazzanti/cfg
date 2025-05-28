@@ -13,6 +13,9 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -137,9 +140,10 @@
 
       hass = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs.haDeps = {
+        specialArgs.flake = {
           slider-entity-row = inputs.slider-entity-row;
           pyscript = inputs.pyscript;
+          disko = inputs.disko.packages.x86_64-linux.disko;
         };
         modules = [
           inputs.impermanence.nixosModules.impermanence
@@ -150,6 +154,7 @@
 
       live = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs.inputs = inputs;
         modules = [ ./sys/live ];
       };
     };

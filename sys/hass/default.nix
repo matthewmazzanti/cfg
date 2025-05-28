@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ pkgs, lib, ... }:
+{ pkgs, lib, flake, ... }:
 let
   keys = import ../../pkgs/keys;
 in {
@@ -78,7 +78,7 @@ in {
   ];
 
   # Packages
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = (with pkgs; [
     neovim
     # Http stuff
     wget curl httpie
@@ -92,6 +92,8 @@ in {
 
     # Compression
     unzip zip
+  ]) + [
+    flake.disko
   ];
 
   # User config
