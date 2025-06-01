@@ -38,7 +38,7 @@ fi
 
 DEV="$by_id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
 ESP_PART="77fcf4e6-f15f-43a6-a3c5-b30fdfd9a39c"
-ESP_FS="f71667b8"
+ESP_FS="F716-67B8"
 ROOT_PART="807c816a-cec5-4e2a-b7e1-e3034af7b6c7"
 ROOT_CRYPT="90581c5c-2e2b-4c0e-81fe-1310536bd256"
 ROOT_FS="f56ebe71-95cc-4e1c-b532-ffb24db99cb9"
@@ -58,12 +58,10 @@ sgdisk \
     --partition-guid=0:"$ROOT_PART" \
     "$DEV"
 
-sleep 10
-# Wait for partitions
-# while [[ ! -e "$by_partuuid/$ESP_PART" ]] || [[ ! -e "$by_partuuid/$ROOT_PART" ]]; do
-#     sleep 1
-#     echo "Waiting for partitions"
-# done
+udevadm settle \
+    --timeout=10 \
+    --exit-if-exists="$by_partuuid/$ESP_PART" \
+    --exit-if-exists="$by_partuuid/$ROOT_PART"
 
 # Encrypt root filesystem
 cryptsetup luksFormat \
