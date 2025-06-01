@@ -68,7 +68,7 @@ cryptsetup luksFormat \
     --type=luks2 \
     --uuid="$ROOT_CRYPT" \
     "$by_partuuid/$ROOT_PART" \
-    <<<"$PASSWORD"
+    --key-file "-" <<<"$PASSWORD"
 
 cryptsetup luksOpen \
     --type=luks2 \
@@ -78,7 +78,7 @@ cryptsetup luksOpen \
     --perf-no_write_workqueue \
     "$by_partuuid/$ROOT_PART" \
     root-live-crypt \
-    <<<"$PASSWORD"
+    --key-file "-" <<<"$PASSWORD"
 
 # Make filesystems
 mkfs.ext4 \
