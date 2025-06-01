@@ -1,17 +1,15 @@
 # https://github.com/NixOS/nixpkgs/blob/8c00e8f75283bf91e5bfb2939ab9aa876e2cf461/nixos/modules/profiles/base.nix
-{ config, lib, pkgs, flake, ... }:
+{ config, lib, pkgs, ... }:
 let
   keys = import ../../pkgs/keys;
 in {
-  imports = [
-    ./disko.nix
-    ./hardware.nix
-  ];
+  imports = [ ./hardware.nix ];
 
   boot.loader.systemd-boot.enable = true;
   boot.initrd.systemd.enable = true;
 
-  # Include support for various filesystems and tools to create / manipulate them.
+  # Include support for various filesystems and tools to create / manipulate
+  # them.
   boot.supportedFilesystems = [
     "ext3"
     "ext4"
@@ -52,7 +50,7 @@ in {
 
   # Include some utilities that are useful for installing or repairing
   # the system.
-  environment.systemPackages = (with pkgs; [
+  environment.systemPackages = with pkgs; [
     testdisk # useful for repairing boot problems
     ms-sys # for writing Microsoft boot sectors / MBRs
     efibootmgr
@@ -80,8 +78,6 @@ in {
     ripgrep fd git tree jq
     # My installer stuff
     openssl sbctl
-  ]) ++ [
-    flake.disko
   ];
 
   # User config

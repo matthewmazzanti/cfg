@@ -106,13 +106,13 @@
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [./sys/beta];
+        modules = [ ./sys/beta ];
       };
 
       delta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [./sys/delta];
+        modules = [ ./sys/delta ];
       };
     };
 
@@ -143,7 +143,6 @@
         specialArgs.flake = {
           slider-entity-row = inputs.slider-entity-row;
           pyscript = inputs.pyscript;
-          disko = inputs.disko.packages.x86_64-linux.disko;
         };
         modules = [
           inputs.impermanence.nixosModules.impermanence
@@ -154,13 +153,8 @@
 
       live = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs.flake = {
-          disko = inputs.disko.packages.x86_64-linux.disko;
-        };
-        modules = [
-          inputs.disko.nixosModules.disko
-          ./sys/live
-        ];
+        specialArgs.flake = {};
+        modules = [ ./sys/live ];
       };
     };
   };

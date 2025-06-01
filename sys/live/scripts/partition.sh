@@ -73,7 +73,6 @@ cryptsetup luksFormat \
 cryptsetup luksOpen \
     --type=luks2 \
     --persistent \
-    --allow-discards \
     --perf-no_read_workqueue \
     --perf-no_write_workqueue \
     "$by_partuuid/$ROOT_PART" \

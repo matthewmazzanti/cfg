@@ -10,28 +10,23 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  boot.initrd.luks.devices."root-live-crypt" = {
-    device = "/dev/disk/by-uuid/95144d96-470c-472b-8a18-8fca2685e0dc";
+  boot.initrd.luks.devices."90581c5c-2e2b-4c0e-81fe-1310536bd256" = {
+    device = "/dev/disk/by-uuid/807c816a-cec5-4e2a-b7e1-e3034af7b6c7";
+    bypassWorkqueues = true;
   };
 
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-uuid/7bd176f1-2235-4296-8c41-dc1ee0b83a5e";
-      fsType = "ext4";
-      options = [ "noatime" ];
-    };
-
-    "/boot" = {
-      device = "/dev/disk/by-uuid/7781-A117";
-      fsType = "vfat";
-      options = [ "noatime" "fmask=0022" "dmask=0022" ];
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/f56ebe71-95cc-4e1c-b532-ffb24db99cb9";
+    fsType = "ext4";
+    options = [ "noatime" ];
   };
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/F716-67B8";
+    fsType = "vfat";
+    options = [ "noatime" "fmask=0022" "dmask=0022" ];
+  };
+
   networking.useDHCP = lib.mkDefault true;
   # networking.interfaces.enp1s0.useDHCP = lib.mkDefault true;
   # networking.interfaces.wlo1.useDHCP = lib.mkDefault true;
