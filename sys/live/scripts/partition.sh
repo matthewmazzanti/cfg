@@ -58,7 +58,7 @@ sgdisk \
     "$DEV"
 
 # Wait for partitions
-until [[ -e "$by_partuuid/$ESP_PART" && -e "$by_partuuid/$ROOT_PART" ]]; do
+while [[ ! -e "$by_partuuid/$ESP_PART" || ! -e "$by_partuuid/$ROOT_PART" ]]; do
     sleep 1
     echo "Waiting for partitions"
 done
