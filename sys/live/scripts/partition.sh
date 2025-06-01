@@ -95,4 +95,6 @@ mkfs.fat \
 mkdir -p /mnt
 mount -t ext4 -o noatime "$by_uuid/$ROOT_FS" /mnt
 mkdir -p /mnt/boot
-mount -t vfat -o noatime "$by_uuid/$ESP_FS" /mnt/boot
+mount -t vfat \
+    -o noatime -o fmask=0022 -o dmask=0022 \
+    "$by_uuid/$ESP_FS" /mnt/boot
