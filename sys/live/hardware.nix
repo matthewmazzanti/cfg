@@ -11,7 +11,7 @@
   boot.extraModulePackages = [ ];
 
   boot.initrd.luks.devices."90581c5c-2e2b-4c0e-81fe-1310536bd256" = {
-    device = "/dev/disk/by-uuid/807c816a-cec5-4e2a-b7e1-e3034af7b6c7";
+    device = "/dev/disk/by-uuid/90581c5c-2e2b-4c0e-81fe-1310536bd256";
     bypassWorkqueues = true;
   };
 
