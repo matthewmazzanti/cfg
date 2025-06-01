@@ -5,6 +5,7 @@ by_id="/dev/disk/by-id"
 by_uuid="/dev/disk/by-uuid"
 by_partuuid="/dev/disk/by-partuuid"
 by_path="/dev/disk/by-path"
+mapper="/dev/mapper"
 
 get_password() {
     local password confirm_password
@@ -78,14 +79,14 @@ cryptsetup luksOpen \
     --perf-no_read_workqueue \
     --perf-no_write_workqueue \
     "$by_partuuid/$ROOT_PART" \
-    root-live-crypt \
+    "$ROOT_CRYPT" \
     --key-file "-" <<<"$PASSWORD"
 
 # Make filesystems
 mkfs.ext4 \
     -L root-live \
     -U "$ROOT_FS" \
-    "$by_uuid/$ROOT_CRYPT"
+    "$mapper/$ROOT_CRYPT"
 
 mkfs.fat \
     -F 32 \
