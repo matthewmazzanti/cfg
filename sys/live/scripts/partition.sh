@@ -1,42 +1,9 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-by_id="/dev/disk/by-id"
-by_uuid="/dev/disk/by-uuid"
-by_partuuid="/dev/disk/by-partuuid"
-by_path="/dev/disk/by-path"
-mapper="/dev/mapper"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
-get_password() {
-    set +x
-    local password confirm_password
-
-    while true; do
-        read -rsp "Enter password: " password
-        echo
-        read -rsp "Confirm password: " confirm_password
-        echo
-
-        if [[ -z "$password" ]]; then
-            echo "Password cannot be empty." >&2
-        elif [[ "$password" != "$confirm_password" ]]; then
-            echo "Passwords do not match. Please try again." >&2
-        else
-            break
-        fi
-    done
-
-    PASSWORD="$password"
-    set -x
-}
-
-# Call the function
-if get_password; then
-    echo "Password has been securely read."
-    # Use $PASSWORD as needed
-else
-    exit 1
-fi
+get_password
 
 DEV="$by_id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
 ESP_PART="77fcf4e6-f15f-43a6-a3c5-b30fdfd9a39c"
@@ -44,7 +11,6 @@ ESP_FS="F716-67B8"
 ROOT_PART="807c816a-cec5-4e2a-b7e1-e3034af7b6c7"
 ROOT_CRYPT="90581c5c-2e2b-4c0e-81fe-1310536bd256"
 ROOT_FS="f56ebe71-95cc-4e1c-b532-ffb24db99cb9"
-
 
 # Clean up $DEV
 umount -R /mnt || true
@@ -67,17 +33,16 @@ udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ROOT_PART"
 cryptsetup luksFormat \
     --type=luks2 \
     --uuid="$ROOT_CRYPT" \
-    "$by_partuuid/$ROOT_PART" \
-    --key-file <(tr -d '\n' <<<"$PASSWORD")
+    --key-file <(tr -d '\n' <<<"$PASSWORD") \
+    "$by_partuuid/$ROOT_PART"
 
-cryptsetup luksOpen \
-    --type=luks2 \
+cryptsetup open \
     --persistent \
     --perf-no_read_workqueue \
     --perf-no_write_workqueue \
+    --key-file <(tr -d '\n' <<<"$PASSWORD") \
     "$by_partuuid/$ROOT_PART" \
-    "$ROOT_CRYPT" \
-    --key-file <(tr -d '\n' <<<"$PASSWORD")
+    "$ROOT_CRYPT"
 
 # Make filesystems
 mkfs.ext4 \

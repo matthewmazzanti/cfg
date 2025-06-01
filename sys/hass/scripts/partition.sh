@@ -1,39 +1,48 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-KEYDEV="/dev/disk/by-id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
-ROOTDEV="/dev/disk/by-path/pci-0000:02:00.0-nvme-1"
-part="$ROOTDEV-part/by-partlabel"
+source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
-# Clean up $KEYDEV
+get_password
+
+KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
+KEY_FS="50c62c57-be39-4958-98fd-baab3d3b6d15"
+
+DEV="$by_id/nvme-Samsung_SSD_990_EVO_Plus_1TB_S7U5NJ0Y246737K"
+ESP_PART="9576e63c-16e9-476c-a83e-3f49b539898d"
+ESP_FS="CD23-F450"
+SWAP_PART="000b890e-d62c-4678-a4a6-ea8f43b727a9"
+SWAP_CRYPT="d7472648-6e61-409c-b7c9-903155901615"
+ROOT_PART="dd27ca90-fa6b-4aa1-9e98-f1401e0e3dea"
+ROOT_CRYPT="aa7f83ca-dfd0-47e1-981a-66740de64eb7"
+ROOT_FS="3365f70d-8620-4d65-8612-11f34048ad37"
+
+# Clean up $KEY_DEV
 umount /key-dev || true
-wipefs --all "$ROOTDEV" || true
+wipefs --all "$KEY_DEV" || true
 
-# Clean up $ROOTDEV
-umount /mnt/boot || true
-umount /mnt/nix || true
-umount /mnt/persist || true
-umount /mnt/home || true
-umount /mnt || true
-swapoff /dev/mapper/swap-crypt || true
-cryptsetup luksClose swap-crypt || true
+# Clean up $DEV
+umount -R /mnt || true
+swapoff "$mapper/$ROOT_CRYPT" || true
+cryptsetup luksClose "$ROOT_CRYPT" || true
 zpool destroy root-pool || true
 cryptsetup luksClose root-crypt || true
-wipefs --all "$KEYDEV" || true
+wipefs --all "$DEV" || true
 
 # Create partition for primary disk
 sgdisk \
     --clear \
     --new=0:0:+10G --typecode=0:EF00 --change-name=0:ESP \
+    --partition-guid=0:"$ESP_PART" \
     --new=0:0:+16G --typecode=0:8200 --change-name=0:swap \
+    --partition-guid=0:"$SWAP_PART" \
     --new=0:0:0 --typecode=0:8300 --change-name=0:root \
-    "$ROOTDEV"
+    --partition-guid=0:"$ROOT_PART" \
+    "$DEV"
 
-# Wait for partitions
-while [ ! -e "$part/ESP" ] || [ ! -e "$part/swap" ] || [ ! -e "$part/root" ]; do
-    sleep 1
-    echo "Waiting for partitions"
-done
+udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ESP_PART"
+udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$SWAP_PART"
+udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ROOT_PART"
 
 # Open and mount
 cryptsetup open \
@@ -41,11 +50,12 @@ cryptsetup open \
     --cipher=aes-xts-plain64 \
     --key-size=256 \
     --key-file=/dev/urandom \
-    "$part/swap" swap-crypt
+    "$by_partuuid/$SWAP_PART" "$SWAP_CRYPT"
 
 # Create Keyfile
-mkfs.ext4 -L key "$KEYDEV"
-mount -p -t ext4 -o noatime "$KEYDEV" /key-dev
+mkfs.ext4 -L key -U "$KEY_FS" "$KEY_DEV"
+mkdir /key-dev
+mount -t ext4 -o noatime "$by_uuid/$KEY_DEV" /key-dev
 echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
 touch /key-dev/key-file
@@ -53,27 +63,46 @@ chmod 400 /key-dev/key-file
 head -c256 < /dev/urandom | base64 > /key-dev/key-file
 
 # Create luks filesystem on root partition
-cryptsetup luksFormat --type=luks2 --key-file=/key-dev/key-file "$part/root"
-cryptsetup luksAddKey --key-file=/key-dev/key-file --new-key-slot=31 "$part/root"
-until cryptsetup open --key-file=/key-dev/key-file "$part/root" root-crypt; do
-    echo "Try again"
-done
+cryptsetup luksFormat \
+    --type=luks2 \
+    --uuid="$ROOT_CRYPT" \
+    --sector-size="4096" \
+    --key-file=/key-dev/key-file \
+    "$by_partuuid/$ROOT_PART"
+
+cryptsetup luksAddKey \
+    --key-file=/key-dev/key-file \
+    --new-key-slot=31 \
+    --new-keyfile=<(tr -d '\n' <<<"$PASSWORD") \
+    "$by_partuuid/$ROOT_PART"
+
+cryptsetup open \
+    --key-file=/key-dev/key-file \
+    --persistent \
+    --perf-no_read_workqueue \
+    --perf-no_write_workqueue \
+    "$by_partuuid/$ROOT_PART" \
+    "$ROOT_PART"
 
 # Create esp partition
-mkfs.fat -F 32 -n ESP "$part/ESP"
+mkfs.fat \
+    -F 32 \
+    -n ESP \
+    -i "$(tr -d '-' <<<"$ESP_FS")" \
+    "$by_partuuid/$ESP_PART"
 
 # Create swap
-mkswap --label swap /dev/mapper/swap-crypt
+mkswap --label=swap "$mapper/$SWAP_CRYPT"
 
 # Create zfs/impermanence filesystems
 zpool create -f \
-    -o ashift=9 \
+    -o ashift=12 \
     -O compression=lz4 \
     -O atime=off \
     -O xattr=sa \
     -O acltype=posixacl \
     -O mountpoint=none \
-    root-pool /dev/mapper/root-crypt
+    root-pool "$mapper/$ROOT_CRYPT"
 
 zfs create -o mountpoint=none root-pool/local
 zfs create -o mountpoint=none root-pool/state
@@ -84,21 +113,11 @@ zfs create -o mountpoint=legacy root-pool/state/home
 zfs snapshot root-pool/local/root@blank
 
 # Mount all filesystems
-swapon /dev/mapper/swap-crypt
+swapon "$mapper/$SWAP_CRYPT"
 mkdir -p /mnt
 mount -t zfs -o noatime root-pool/local/root /mnt
 mkdir -p /mnt/boot /mnt/nix /mnt/persist /mnt/home
-mount -t vfat -o noatime "$part/ESP" /mnt/boot
+mount -t vfat -o noatime "$by_uuid/$ESP_FS" /mnt/boot
 mount -t zfs -o noatime root-pool/local/nix /mnt/nix
 mount -t zfs -o noatime root-pool/state/persist /mnt/persist
 mount -t zfs -o noatime root-pool/state/home /mnt/home
-
-# Print filesystem ids
-cat <<EOF
-
-===Devices===
-root /dev/disk/by-uuid/$(blkid --match-tag UUID --output value "$part/root")
-key  /key-file:UUID=$(blkid --match-tag UUID --output value "$KEYDEV")
-swap /dev/disk/by-partuuid/$(blkid --match-tag PARTUUID --output value "$part/swap")
-boot /dev/disk/by-uuid/$(blkid --match-tag UUID --output value "$part/ESP")
-EOF
