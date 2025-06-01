@@ -1,67 +1,97 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-find_by_path() {
-    local drive="$(readlink -f "$1")"
-    for file in /dev/disk/by-path/*; do
-        if [[ -L "$file" ]] && [[ "$(readlink -f "$file")" == "$drive" ]]; then
-            echo "$file"
-            return 0
+by_id="/dev/disk/by-id"
+by_uuid="/dev/disk/by-uuid"
+by_partuuid="/dev/disk/by-partuuid"
+by_path="/dev/disk/by-path"
+
+get_password() {
+    local password confirm_password
+
+    while true; do
+        read -rsp "Enter password: " password
+        echo
+        read -rsp "Confirm password: " confirm_password
+        echo
+
+        if [[ -z "$password" ]]; then
+            echo "Password cannot be empty." >&2
+        elif [[ "$password" != "$confirm_password" ]]; then
+            echo "Passwords do not match. Please try again." >&2
+        else
+            break
         fi
     done
 
-    return 1
+    PASSWORD="$password"
 }
 
-find_uuid() {
-    blkid --match-tag UUID --output value "$1"
-}
+# Call the function
+if get_password; then
+    echo "Password has been securely read."
+    # Use $PASSWORD as needed
+else
+    exit 1
+fi
 
-ROOTDEV="$(find_by_path /dev/disk/by-id/usb-Samsung_Flash_Drive_0358123090004561-0:0)"
-part="$ROOTDEV-part/by-partlabel"
+DEV="$by_id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
+ESP_PART="11cb24df-80bb-4e4b-bd22-1c64bbd6833a"
+ESP_FS="2af7fb24-7823-4791-9191-e86ee1a98b6a"
+ROOT_PART="63ee84c3-7612-4838-8487-38b82ff3df82"
+ROOT_CRYPT="a8cfc593-d57c-4d46-9fbb-6b90982e5a02"
+ROOT_FS="d8d1d6d8-4bb1-4505-80ea-cf9426864b8f"
 
-# Clean up $ROOTDEV
-umount /mnt/boot || true
-umount /mnt || true
+
+# Clean up $DEV
+umount -R /mnt || true
 cryptsetup luksClose root-live-crypt || true
-wipefs --all "$ROOTDEV" || true
+wipefs --all "$DEV" || true
 
 # Create partition for primary disk
 sgdisk \
     --clear \
     --new=0:0:+1G --typecode=0:EF00 --change-name=0:ESPLIVE \
+    --partition-guid=0:"$ESP_PART" \
     --new=0:0:0 --typecode=0:8300 --change-name=0:root-live \
-    "$ROOTDEV"
+    --partition-guid=0:"$ROOT_PART" \
+    "$DEV"
 
 # Wait for partitions
-while [ ! -e "$part/ESPLIVE" ] || [ ! -e "$part/root-live" ]; do
+until [[ -e "$by_partuuid/$ESP_PART" && -e "$by_partuuid/$ROOT_PART" ]]; do
     sleep 1
     echo "Waiting for partitions"
 done
 
 # Encrypt root filesystem
-until cryptsetup luksFormat --type=luks2 "$part/root-live"; do
-    echo "Try again"
-done
-until cryptsetup luksOpen --type=luks2 "$part/root-live" root-live-crypt; do
-    echo "Try again"
-done
+cryptsetup luksFormat --type=luks2 \
+    --uuid="$ROOT_CRYPT" \
+    "$by_partuuid/$ROOT_PART" \
+    <<<"$PASSWORD"
+
+cryptsetup luksOpen --type=luks2 \
+    --persistent \
+    --allow-discards \
+    --perf-no_read_workqueue \
+    --perf-no_write_workqueue \
+    "$by_partuuid/$ROOT_PART" \
+    root-live-crypt \
+    <<<"$PASSWORD"
 
 # Make filesystems
-mkfs -t ext4 -L root-live "/dev/mapper/root-live-crypt"
-mkfs -t fat -F 32 -n ESPLIVE "$part/ESPLIVE"
+mkfs.ext4 \
+    -L root-live \
+    -U "$ROOT_FS" \
+    "$by_uuid/$ROOT_CRYPT"
+
+mkfs.fat \
+    -F 32 \
+    -n ESPLIVE \
+    -i "$ESP_FS" \
+    "$by_partuuid/$ESP_PART"
 
 # Mount filesystems
 mkdir -p /mnt
-mount -t ext4 -o noatime "/dev/mapper/root-live-crypt" /mnt
+mount -t ext4 -o noatime "$by_uuid/$ROOT_FS" /mnt
 mkdir -p /mnt/boot
-mount -t vfat -o noatime "$part/ESPLIVE" /mnt/boot
-
-# Print filesystem ids
-cat <<EOF
-
-===Devices===
-root-live       /dev/disk/by-uuid/$(find_uuid "$part/root-live")
-root-live-crypt /dev/disk/by-uuid/$(find_uuid "/dev/mapper/root-live-crypt")
-ESPLIVE         /dev/disk/by-uuid/$(find_uuid "$part/ESPLIVE")
-EOF
+mount -t vfat -o noatime "$by_uuid/$ESP_FS" /mnt/boot
