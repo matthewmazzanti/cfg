@@ -37,7 +37,7 @@ fi
 
 DEV="$by_id/usb-Samsung_Flash_Drive_0358123090004561-0:0"
 ESP_PART="11cb24df-80bb-4e4b-bd22-1c64bbd6833a"
-ESP_FS="2af7fb24-7823-4791-9191-e86ee1a98b6a"
+ESP_FS="2af7fb24"
 ROOT_PART="63ee84c3-7612-4838-8487-38b82ff3df82"
 ROOT_CRYPT="a8cfc593-d57c-4d46-9fbb-6b90982e5a02"
 ROOT_FS="d8d1d6d8-4bb1-4505-80ea-cf9426864b8f"
@@ -45,7 +45,7 @@ ROOT_FS="d8d1d6d8-4bb1-4505-80ea-cf9426864b8f"
 
 # Clean up $DEV
 umount -R /mnt || true
-cryptsetup luksClose root-live-crypt || true
+cryptsetup luksClose "$by_uuid/$ROOT_CRYPT" || true
 wipefs --all "$DEV" || true
 
 # Create partition for primary disk
