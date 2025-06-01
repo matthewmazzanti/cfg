@@ -8,6 +8,7 @@ by_path="/dev/disk/by-path"
 mapper="/dev/mapper"
 
 get_password() {
+    set +x
     local password confirm_password
 
     while true; do
@@ -26,6 +27,7 @@ get_password() {
     done
 
     PASSWORD="$password"
+    set -x
 }
 
 # Call the function
