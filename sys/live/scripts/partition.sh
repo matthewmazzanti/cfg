@@ -60,17 +60,15 @@ sgdisk \
     --partition-guid=0:"$ROOT_PART" \
     "$DEV"
 
-udevadm settle \
-    --timeout=10 \
-    --exit-if-exists="$by_partuuid/$ESP_PART" \
-    --exit-if-exists="$by_partuuid/$ROOT_PART"
+udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ESP_PART"
+udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ROOT_PART"
 
 # Encrypt root filesystem
 cryptsetup luksFormat \
     --type=luks2 \
     --uuid="$ROOT_CRYPT" \
     "$by_partuuid/$ROOT_PART" \
-    --key-file "-" <<<"$PASSWORD"
+    --key-file <(tr -d '\n' <<<"$PASSWORD")
 
 cryptsetup luksOpen \
     --type=luks2 \
@@ -79,7 +77,7 @@ cryptsetup luksOpen \
     --perf-no_write_workqueue \
     "$by_partuuid/$ROOT_PART" \
     "$ROOT_CRYPT" \
-    --key-file "-" <<<"$PASSWORD"
+    --key-file <(tr -d '\n' <<<"$PASSWORD")
 
 # Make filesystems
 mkfs.ext4 \
