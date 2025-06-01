@@ -89,7 +89,7 @@ mkfs.ext4 \
 mkfs.fat \
     -F 32 \
     -n ESPLIVE \
-    -i "$ESP_FS" \
+    -i "$(tr -d '-' <<<"$ESP_FS")" \
     "$by_partuuid/$ESP_PART"
 
 # Mount filesystems
