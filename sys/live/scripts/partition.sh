@@ -46,7 +46,7 @@ ROOT_FS="f56ebe71-95cc-4e1c-b532-ffb24db99cb9"
 
 # Clean up $DEV
 umount -R /mnt || true
-cryptsetup luksClose "$by_uuid/$ROOT_CRYPT" || true
+cryptsetup luksClose "$mapper/$ROOT_CRYPT" || true
 wipefs --all "$DEV" || true
 
 # Create partition for primary disk
