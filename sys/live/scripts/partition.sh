@@ -57,11 +57,12 @@ sgdisk \
     --partition-guid=0:"$ROOT_PART" \
     "$DEV"
 
+sleep 10
 # Wait for partitions
-while [[ ! -e "$by_partuuid/$ESP_PART" ]] || [[ ! -e "$by_partuuid/$ROOT_PART" ]]; do
-    sleep 1
-    echo "Waiting for partitions"
-done
+# while [[ ! -e "$by_partuuid/$ESP_PART" ]] || [[ ! -e "$by_partuuid/$ROOT_PART" ]]; do
+#     sleep 1
+#     echo "Waiting for partitions"
+# done
 
 # Encrypt root filesystem
 cryptsetup luksFormat \
