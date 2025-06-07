@@ -55,32 +55,8 @@
     ...
   } @ inputs: let
     lib = (import ./lib nixpkgs);
-
-    base = { pkgs, ... }: {
-      imports = [ home-manager.nixosModules.home-manager ];
-
-      nix.extraOptions = "experimental-features = nix-command flakes";
-
-      home-manager = {
-        useGlobalPkgs = true;
-        useUserPackages = true;
-        extraSpecialArgs.custom = self.packages.${pkgs.system};
-      };
-    };
-
-    base-old = { pkgs, ... }: {
-      imports = [ home-manager-old.nixosModules.home-manager ];
-
-      nix.extraOptions = "experimental-features = nix-command flakes";
-
-      home-manager = {
-        useGlobalPkgs = true;
-        useUserPackages = true;
-        extraSpecialArgs.custom = self.packages.${pkgs.system};
-      };
-    };
   in {
-    packages = lib.eachSystemFlattenFlakes {
+    packages = lib.eachSystem ({pkgs, ...}: {
       # Workaround for subflake UX
       # Ideally I'd be able to reference a flake in the pkgs/ dir with a URL
       # in the inputs - something like path:/pkgs/nvim or
@@ -97,7 +73,7 @@
       short-pwd = (import ./pkgs/short-pwd/fake.nix).outputs inputs;
       direnv = (import ./pkgs/direnv/fake.nix).outputs inputs;
       less = (import ./pkgs/less/fake.nix).outputs inputs;
-    };
+    });
 
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
@@ -127,13 +103,39 @@
       lambda = inputs.nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base ./sys/lambda ];
+        modules = [
+          ({ pkgs, ... }: {
+            imports = [ home-manager.nixosModules.home-manager ];
+
+            nix.extraOptions = "experimental-features = nix-command flakes";
+
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs.custom = self.packages.${pkgs.system};
+            };
+          })
+          ./sys/lambda
+        ];
       };
 
       omega = inputs.nixpkgs-old.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
-        modules = [ base-old ./sys/omega ];
+        modules = [
+          ({ pkgs, ... }: {
+            imports = [ home-manager-old.nixosModules.home-manager ];
+
+            nix.extraOptions = "experimental-features = nix-command flakes";
+
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs.custom = self.packages.${pkgs.system};
+            };
+          })
+          ./sys/omega
+        ];
       };
 
       home-assistant = inputs.nixpkgs.lib.nixosSystem {

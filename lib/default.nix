@@ -29,7 +29,7 @@ in rec {
 
   # Create a simple dev shell for each system
   # TODOS
-  #   - Make the callpacakge and other calls simpler, pull out into other things
+  #   - Make the callpackage and other calls simpler, pull out into other things
   #   - Document here and in the nix script purpose and stuff
   eachSystemShell = inputs:
     eachSystem (
