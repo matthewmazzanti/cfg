@@ -2,8 +2,6 @@
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
 local lspconfig = require("lspconfig")
 
-require("lspconfig.ui.windows").default_options.border = "rounded"
-
 local defaults = {
     capabilities = require("cmp_nvim_lsp").default_capabilities(),
     on_attach = function(_client, bufnr)
@@ -27,23 +25,6 @@ local defaults = {
         set("n", "<leader>a", vim.lsp.buf.code_action)
         set("n", "<leader>r", vim.lsp.buf.rename)
     end,
-    -- Add the border on hover and on signature help popup window
-    handlers = {
-        ["textDocument/hover"] = vim.lsp.with(
-            vim.lsp.handlers.hover,
-            {
-                border = "rounded",
-                wrap = false,
-            }
-        ),
-        ["textDocument/signatureHelp"] = vim.lsp.with(
-            vim.lsp.handlers.signature_help,
-            {
-                border = "rounded",
-                wrap = false,
-            }
-        ),
-    },
 }
 
 -- Check that server binary exists
@@ -134,18 +115,18 @@ if find_ls("lua_ls") then
     lspconfig.lua_ls.setup(vim.tbl_extend("force", defaults, settings))
 end
 
-local signs = { Error = "e", Warn = "w", Hint = "h", Info = "i" }
-for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl })
-end
-
-require("lsp_lines").setup()
-
 vim.diagnostic.config({
     virtual_text = true,
     virtual_lines = false,
     severity_sort = true,
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = "e",
+            [vim.diagnostic.severity.WARN] = "w",
+            [vim.diagnostic.severity.HINT] = "h",
+            [vim.diagnostic.severity.INFO] = "i",
+        }
+    }
 })
 
 vim.keymap.set(
@@ -153,6 +134,9 @@ vim.keymap.set(
     "<Leader>d",
     function()
         local diagnostic = vim.diagnostic.config()
+        if diagnostic == nil then
+            return
+        end
         vim.diagnostic.config({
             virtual_text = not diagnostic.virtual_text,
             virtual_lines = not diagnostic.virtual_lines,

@@ -1,6 +1,9 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs";
+    # Old system compat
+    nixpkgs-old.url = "nixpkgs/nixos-24.05";
 
     darwin.url = "github:lnl7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -8,6 +11,11 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Build systems
+    gomod2nix.url = "github:nix-community/gomod2nix";
+    gomod2nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # NixOS modules
     lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -22,9 +30,8 @@
 
     direnv-patched.url = "github:matthewmazzanti/direnv/master";
     direnv-patched.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Old system compat
-    nixpkgs-old.url = "nixpkgs/nixos-24.05";
+    # Fixing a bug where gomod2nix was selecting go1.22 after deprecation
+    direnv-patched.inputs.gomod2nix.follows = "gomod2nix";
 
     home-manager-old.url = "github:nix-community/home-manager/release-24.05";
     home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";

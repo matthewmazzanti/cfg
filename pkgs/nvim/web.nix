@@ -52,7 +52,7 @@
 
     # Language servers
     nvim-lspconfig
-    lsp_lines-nvim
+    # lsp_lines-nvim
 
     # Treesitter
     (nvim-treesitter.withPlugins (plugins:

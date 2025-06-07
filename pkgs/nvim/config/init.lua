@@ -116,10 +116,5 @@ vim.api.nvim_create_autocmd({"VimEnter"}, {
     end
 })
 
-vim.api.nvim_create_user_command(
-    "Share",
-    function()
-        vim.opt.relativenumber = not vim.opt.relativenumber
-    end,
-    { nargs = 0 }
-)
+-- Use rounded borders around windows
+vim.opt.winborder = "rounded"

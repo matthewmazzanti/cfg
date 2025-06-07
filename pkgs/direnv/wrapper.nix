@@ -5,22 +5,21 @@
   makeWrapper,
 }: let
   mkConfigDir = {direnvrc ? ""} @ args:
-    stdenvNoCC.mkDerivation (args
-      // {
-        name = "direnv-config";
-        passAsFile = builtins.attrNames args;
-        # $passAsFile in builder seems to ignore empty strings/files
-        buildCommand = ''
-          mkdir -p "$out"
-          for var in $passAsFile; do
-              varPath="''${var}Path"
-              varPath="''${!varPath}"
+    stdenvNoCC.mkDerivation (args // {
+      name = "direnv-config";
+      passAsFile = builtins.attrNames args;
+      # $passAsFile in builder seems to ignore empty strings/files
+      buildCommand = ''
+        mkdir -p "$out"
+        for var in $passAsFile; do
+            varPath="''${var}Path"
+            varPath="''${!varPath}"
 
-              outPath="$out/$var"
-              cp "$varPath" "$outPath"
-          done
-        '';
-      });
+            outPath="$out/$var"
+            cp "$varPath" "$outPath"
+        done
+      '';
+    });
 
   wrapper = {
     direnv,

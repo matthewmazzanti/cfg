@@ -15,6 +15,7 @@
   '';
 in {
   # environment.systemPackages = [];
+  system.primaryUser = "mmazzanti";
   users.users.mmazzanti.packages =
     (with pkgs; [
       # Terminal utilities
@@ -39,7 +40,7 @@ in {
       cargo
       go
       ruby
-      python312
+      python3
       poetry
 
       # Misc
@@ -119,27 +120,12 @@ in {
   environment.darwinConfig = "$HOME/src/nix/cfg";
 
   # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
-  # nix.package = pkgs.nix;
-  nix.buildMachines = [
-    {
-      sshUser = "build";
-      hostName = "192.168.65.2";
-      systems = ["x86_64-linux" "aarch64-linux"];
-      protocol = "ssh-ng";
-      maxJobs = 8;
-      publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFzRzU1Q1hYeDFTczh4dlRYRk8ycnJpejh6SlVRZ0dhMXZ2ZDVhZUhHRE4K";
-    }
-  ];
-  nix.distributedBuilds = true;
   # optional, useful when the builder has a faster internet connection than yours
   nix.extraOptions = ''
     builders-use-substitutes = true
     experimental-features = nix-command flakes
   '';
   nix.settings.trusted-users = ["mmazzanti"];
-  # nix.settings.trusted-substituters = ["http://192.168.65.2"];
-  # nix.settings.trusted-public-keys = ["192.168.65.2:+Mp9NqYcoUvsKMtds81iGD2mHsv19F9kkQa9I9mBhdY="];
 
   programs.zsh = {
     enable = true;

@@ -7,6 +7,9 @@ local utils = require("telescope.utils")
 
 telescope.setup({
     defaults = {
+        -- TODO: Workaround for vim.o.winborder
+        -- https://github.com/nvim-telescope/telescope.nvim/issues/3436
+        border = false,
         layout_strategy = "vertical",
         layout_config = {
             vertical = {
@@ -14,8 +17,6 @@ telescope.setup({
             }
         },
         sorting_strategy = "ascending",
-        prompt_title = false,
-        results_title = false,
         path_display = { "truncate" },
         mappings = {
             i = {
@@ -39,7 +40,7 @@ telescope.setup({
             override_file_sorter = true,
             override_generic_sorter = true
         }
-    }
+    },
 })
 
 local function dir_files()
@@ -72,12 +73,3 @@ vim.api.nvim_set_hl(0, "TelescopeBorder", { link = "GruvboxGray" })
 vim.api.nvim_set_hl(0, "TelescopePromptBorder", { link = "GruvboxGray" })
 vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { link = "GruvboxGray" })
 vim.api.nvim_set_hl(0, "telescopepreviewborder", { link = "gruvboxgray" })
-
--- {
---     lsp = {
---         defs = builtin.lsp_definitions,
---         impls = builtin.lsp_implementations,
---         refs = builtin.lsp_references,
---         types = builtin.lsp_type_definitions,
---     }
--- }

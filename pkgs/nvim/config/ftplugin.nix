@@ -31,6 +31,8 @@
     # Two-space languages
     javascript = two-space;
     typescript = two-space;
+    javascriptreact = two-space;
+    typescriptreact = two-space;
     html = two-space;
     htmldjango = two-space;
     css = two-space;
@@ -44,6 +46,8 @@
     markdown = ''
       ${two-space}
       vim.opt_local.spell = true
+      vim.opt_local.colorcolumn = "89"
+      vim.opt_local.textwidth = 88
     '';
   };
 in

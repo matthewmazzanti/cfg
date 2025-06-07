@@ -2,8 +2,10 @@
 - Write generic symlinkJoin/makeWrapper system
 - Understand what https://github.com/nix-systems/nix-systems is doing
   (dependency of flake-utils)
+- Remove fake.nix things
 
 ## Neovim
+- Create "Share" mode, unset relative numbers
 - Flesh out picker with more flexible behavior (https://github.com/nvim-telescope/telescope-file-browser.nvim)
 - Path autocompletion for cmp
 - Tweak cmp auto-selection and enter behavior
@@ -37,3 +39,6 @@ require("lspconfig.ui.windows").default_options.border = border
 - Figure out how to get plist property loading to work
     - Don't overwrite existing properties, if possible
     - Filter non-relevant properties, like update times
+
+## Direnv
+- Upstream wrapper changes
