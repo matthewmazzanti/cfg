@@ -52,7 +52,15 @@
       };
     })
     ({ config, grammars, ... }: {
-      options.langs.c.enable = lib.options.mkEnableOption "c";
+      options.langs.c = {
+        enable = lib.options.mkEnableOption "c";
+        treesitter = lib.options.mkOption {
+          default = lib.mkDefault config.treesitter;
+        };
+        langServer = lib.options.mkOption {
+          default = lib.mkDefault config.langs;
+        };
+      };
       config.args = lib.mkIf config.langs.c.enable {
         languageServers = [ pkgs.ccls ];
         grammars = [ grammars.c grammars.cpp ];

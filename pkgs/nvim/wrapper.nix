@@ -4,7 +4,6 @@
 , plugins
 , ftplugin
 , init
-, ...
 }: let
   pathPkg = pkgs.buildEnv {
     name = "nvim-path";

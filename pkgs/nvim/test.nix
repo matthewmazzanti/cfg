@@ -1,7 +1,6 @@
 { pkgs
 , lib
 , options? {}
-, ...
 }: let
   inherit (lib) optionals;
 
@@ -14,8 +13,8 @@
       data = false;
       docs = false;
       go = false;
-      # haskell = false;
-      javascript = false;
+      haskell = false;
+      web = false;
       lua = false;
       nix = false;
       python = false;
@@ -29,35 +28,33 @@
   paths = with pkgs; (
     [ fd ] ++
     optionals (opts.plugins && opts.lsp) (
-      optionals opts.langs.c      [ ccls ] ++
-      optionals opts.langs.go     [ gopls ] ++
-      # optionals opts.langs.hakell [ haskell-language-server ] ++
-      optionals opts.langs.web    [ nodePackages.typescript-language-server ] ++
-      optionals opts.langs.lua    [ lua-language-server ] ++
-      optionals opts.langs.nix    [ nil ] ++
-      optionals opts.langs.python [ pyright ] ++
-      optionals opts.langs.rust   [ rust-analyzer ] ++
-      optionals opts.langs.shell  [ bash-language-server ]
+      optionals opts.langs.c       [ ccls ] ++
+      optionals opts.langs.go      [ gopls ] ++
+      optionals opts.langs.haskell [ haskell-language-server ] ++
+      optionals opts.langs.web     [ nodePackages.typescript-language-server ] ++
+      optionals opts.langs.lua     [ lua-language-server ] ++
+      optionals opts.langs.nix     [ nil ] ++
+      optionals opts.langs.python  [ pyright ] ++
+      optionals opts.langs.rust    [ rust-analyzer ] ++
+      optionals opts.langs.shell   [ bash-language-server ]
     )
   );
 
-  grammars = (grammars: with grammars; (
-    optionals opts.langs.c       [ c cpp ] ++
-    optionals opts.langs.data    [ json xml yaml tsv csv ] ++
-    optionals opts.langs.docs    [ markdown vimdoc rst ] ++
-    optionals opts.langs.go      [ go ] ++
-    # optionals opts.langs.haskell [ haskell ] ++
-    optionals opts.langs.web     [
-      html html htmldjango
-      javascript typescript tsx
-      css
-    ] ++
-    optionals opts.langs.lua     [ lua ] ++
-    optionals opts.langs.nix     [ nix ] ++
-    optionals opts.langs.python  [ python ] ++
-    optionals opts.langs.shell   [ bash ] ++
-    optionals opts.langs.rust    [ rust ]
-  ));
+  grammars = grammars: with grammars; [
+    c cpp
+    json xml yaml tsv csv
+    markdown vimdoc rst
+    go
+    haskell
+    html html htmldjango
+    javascript typescript tsx
+    css
+    lua
+    nix
+    python
+    bash
+    rust
+  ];
 
   plugins = (with pkgs.vimPlugins; [
     gruvbox-nvim
@@ -82,15 +79,15 @@
       telescope-fzf-native-nvim
     ] ++
     optionals opts.lsp [
+      # Language server configurations
+      nvim-lspconfig
+
       # Completion
       nvim-cmp
       cmp-nvim-lsp
       cmp-buffer
       luasnip
       cmp_luasnip
-
-      # Language servers
-      nvim-lspconfig
     ] ++
     optionals opts.treesitter [
       # Treesitter
@@ -153,26 +150,26 @@
     '';
 
     # Two-space languages
-    javascript = two-space;
-    typescript = two-space;
-    javascriptreact = two-space;
-    typescriptreact = two-space;
+    cpp = two-space;
+    css = two-space;
+    h = two-space;
+    hcl = two-space;
     html = two-space;
     htmldjango = two-space;
-    css = two-space;
+    javascript = two-space;
+    javascriptreact = two-space;
     json = two-space;
-    yaml = two-space;
-    nix = two-space;
-    cpp = two-space;
-    h = two-space;
-    terraform = two-space;
-    hcl = two-space;
     markdown = ''
       ${two-space}
       vim.opt_local.spell = true
       vim.opt_local.colorcolumn = "89"
       vim.opt_local.textwidth = 88
     '';
+    nix = two-space;
+    terraform = two-space;
+    typescript = two-space;
+    typescriptreact = two-space;
+    yaml = two-space;
   };
 in pkgs.callPackage ./wrapper.nix {
   inherit paths init plugins ftplugin;
