@@ -60,6 +60,7 @@ in {
       # cloud
       awscli2
       gh
+      gh-copilot
       nodejs
       # qemu
       tmux

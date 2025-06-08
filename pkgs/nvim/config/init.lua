@@ -10,16 +10,16 @@ vim.opt.relativenumber = true
 vim.opt.mouse = "a"
 -- Increase speed of mouse scrolling
 vim.keymap.set(
-    {"n", "v", "i"},
-    "<ScrollWheelUp>",
-    "5<C-Y>",
-    { silent = true }
+  {"n", "v", "i"},
+  "<ScrollWheelUp>",
+  "5<C-Y>",
+  { silent = true }
 )
 vim.keymap.set(
-    { "n", "v", "i" },
-    "<ScrollWheelDown>",
-    "5<C-E>",
-    { silent = true }
+  { "n", "v", "i" },
+  "<ScrollWheelDown>",
+  "5<C-E>",
+  { silent = true }
 )
 -- Remember cursor position during buffer switch
 vim.opt.startofline = false
@@ -32,12 +32,12 @@ vim.opt.colorcolumn = "81"
 vim.opt.textwidth = 80
 -- May be more options to explore here
 vim.opt.formatoptions:append({
-    c = true, -- Auto wrap comments
-    r = true, -- Add comment leader on <CR> in insert mode
-    o = true, -- Add comment leader when hitting "O" or "o"
-    j = true, -- Remove comment leader when joining lines
-    q = true, -- Format comments with gq
-    l = true, -- Don't format long lines by default
+  c = true, -- Auto wrap comments
+  r = true, -- Add comment leader on <CR> in insert mode
+  o = true, -- Add comment leader when hitting "O" or "o"
+  j = true, -- Remove comment leader when joining lines
+  q = true, -- Format comments with gq
+  l = true, -- Don't format long lines by default
 })
 vim.opt.linebreak = true
 vim.opt.wrap = false
@@ -65,11 +65,11 @@ vim.opt.spellfile = vim.fn.expand("~/.local/share/nvim/spell/en.utf-8.add")
 -- Nice visualization of trailing space/tabs
 vim.opt.list = true
 vim.opt.listchars = {
-    tab = "» ",
-    extends = "›",
-    precedes = "‹",
-    nbsp = "␣",
-    trail = "•",
+  tab = "» ",
+  extends = "›",
+  precedes = "‹",
+  nbsp = "␣",
+  trail = "•",
 }
 
 -- Persistent undo
@@ -82,8 +82,8 @@ vim.opt.autoread = true
 vim.opt.signcolumn = "yes"
 
 vim.opt.shortmess:append({
-    c = true, -- Ignore insert completion messages
-    I = true, -- Skip startup message
+  c = true, -- Ignore insert completion messages
+  I = true, -- Skip startup message
 })
 
 -- Set leader key for other commands
@@ -91,29 +91,29 @@ vim.g.mapleader = ";"
 
 -- Reset search highlighing
 vim.keymap.set("n", "<leader>n", function()
-    vim.cmd("nohlsearch")
+  vim.cmd("nohlsearch")
 end)
 
 -- Copy to system clipboard where available
 vim.opt.clipboard = "unnamedplus"
 
 vim.filetype.add({
-    filename = {
-        [".envrc"] = "sh",
-        ["Tiltfile"] = "starlark",
-    },
-    pattern = {
-        ["*.conf"] = "conf",
-    },
+  filename = {
+    [".envrc"] = "sh",
+    ["Tiltfile"] = "starlark",
+  },
+  pattern = {
+    ["*.conf"] = "conf",
+  },
 })
 
 -- Stack like jump options, refresh on startup
 vim.opt.jumpoptions = "stack"
 vim.api.nvim_create_autocmd({"VimEnter"}, {
-    pattern = {"*"},
-    callback = function ()
-        vim.cmd("clearjumps")
-    end
+  pattern = {"*"},
+  callback = function ()
+    vim.cmd("clearjumps")
+  end
 })
 
 -- Use rounded borders around windows

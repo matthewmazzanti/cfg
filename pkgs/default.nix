@@ -22,6 +22,7 @@ in {
       plugins = true;
       lsp = true;
       treesitter = true;
+      copilot = false;
       langs = {
         c = false;
         data = true;
@@ -38,7 +39,7 @@ in {
     };
   };
   "zsh/dev" = pkgs.callPackage ./zsh {};
-  "short-pwd" = pkgs.callPackage ./short-pwd {};
+  "short-pwd/default" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv {
     direnv = inputs.direnv-patched.packages.${system}.default;
   };

@@ -34,7 +34,7 @@
     zprofile ? "",
     zshrc ? "",
     zlogin ? "",
-    zlogout ? "",
+    zlogout ? ""
   }: let
     zdotdir = mkZdotdir {
       inherit zshenv zprofile zshrc zlogin zlogout;

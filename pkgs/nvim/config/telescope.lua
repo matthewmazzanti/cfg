@@ -6,60 +6,60 @@ local builtin = require("telescope.builtin")
 local utils = require("telescope.utils")
 
 telescope.setup({
-    defaults = {
-        -- TODO: Workaround for vim.o.winborder
-        -- https://github.com/nvim-telescope/telescope.nvim/issues/3436
-        border = false,
-        layout_strategy = "vertical",
-        layout_config = {
-            vertical = {
-                prompt_position = "top"
-            }
-        },
-        sorting_strategy = "ascending",
-        path_display = { "truncate" },
-        mappings = {
-            i = {
-                ["<esc>"] = actions.close
-            }
-        }
+  defaults = {
+    -- TODO: Workaround for vim.o.winborder
+    -- https://github.com/nvim-telescope/telescope.nvim/issues/3436
+    border = false,
+    layout_strategy = "vertical",
+    layout_config = {
+      vertical = {
+        prompt_position = "top"
+      }
     },
-    pickers = {
-        find_files = {
-            find_command = {
-                "fd",
-                "--type", "f",
-                "--hidden",
-                "--exclude", ".git",
-                "--strip-cwd-prefix"
-            }
-        }
-    },
-    extensions = {
-        fzf = {
-            override_file_sorter = true,
-            override_generic_sorter = true
-        }
-    },
+    sorting_strategy = "ascending",
+    path_display = { "truncate" },
+    mappings = {
+      i = {
+        ["<esc>"] = actions.close
+      }
+    }
+  },
+  pickers = {
+    find_files = {
+      find_command = {
+        "fd",
+        "--type", "f",
+        "--hidden",
+        "--exclude", ".git",
+        "--strip-cwd-prefix"
+      }
+    }
+  },
+  extensions = {
+    fzf = {
+      override_file_sorter = true,
+      override_generic_sorter = true
+    }
+  },
 })
 
 local function dir_files()
-    return builtin.find_files({
-        cwd = utils.buffer_dir(),
-        prompt_title = "Local Files"
-    })
+  return builtin.find_files({
+    cwd = utils.buffer_dir(),
+    prompt_title = "Local Files"
+  })
 end
 
 local function spell()
-    return builtin.spell_suggest({
-        layout_strategy = "cursor",
-        layout_config = {
-            height = 10,
-            width = 35,
-        },
-        prompt_title = "Spell",
-        sorting_strategy = "ascending",
-    })
+  return builtin.spell_suggest({
+    layout_strategy = "cursor",
+    layout_config = {
+      height = 10,
+      width = 35,
+    },
+    prompt_title = "Spell",
+    sorting_strategy = "ascending",
+  })
 end
 
 vim.keymap.set("n", "<leader>f", builtin.find_files)

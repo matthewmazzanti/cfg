@@ -7,8 +7,9 @@
 
   baseOptions = {
     plugins = false;
-    lsp = false;
     treesitter = false;
+    lsp = false;
+    copilot = false;
     langs = {
       c = false;
       data = false;
@@ -43,30 +44,37 @@
 
   grammars = grammars:
     with grammars; [
+      # Seem interesting, but not that useful
+      # git-config git-rebase gitattributes gitcommit gitignore
+      bash
       c
       cpp
-      json
-      xml
-      yaml
-      tsv
+      css
       csv
-      markdown
-      vimdoc
-      rst
+      diff
       go
       haskell
       html
       html
       htmldjango
+      ini
       javascript
-      typescript
-      tsx
-      css
+      json
+      json5
       lua
+      markdown
       nix
       python
-      bash
+      rst
       rust
+      sql
+      toml
+      tsv
+      tsx
+      typescript
+      vimdoc
+      xml
+      yaml
     ];
 
   plugins = with pkgs.vimPlugins;
@@ -86,22 +94,12 @@
         vim-wordmotion # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
         vim-sandwich # Surround
+        # readline-vim # cli keybinds
         # hop-nvim # Visual interactive jumps using treesitter
 
         # Telescope
         telescope-nvim
         telescope-fzf-native-nvim
-      ]
-      ++ optionals opts.lsp [
-        # Language server configurations
-        nvim-lspconfig
-
-        # Completion
-        nvim-cmp
-        cmp-nvim-lsp
-        cmp-buffer
-        luasnip
-        cmp_luasnip
       ]
       ++ optionals opts.treesitter [
         # Treesitter
@@ -109,6 +107,18 @@
         nvim-treesitter-textobjects # Treesitter powered textobjects
         nvim-ts-autotag # Auto XML/HTML tag closing
         treesj # Split/Join list structures
+      ]
+      ++ optionals opts.lsp [
+        # Language server configurations
+        nvim-lspconfig
+
+        # Completion
+        # nvim-cmp cmp-nvim-lsp cmp-buffer luasnip cmp_luasnip
+        blink-cmp
+      ]
+      ++ optionals (opts.lsp && opts.copilot) [
+        copilot-lua
+        blink-copilot
       ]
     );
 
@@ -124,13 +134,14 @@
         ./config/telescope.lua
         ./config/easyclip.lua
       ]
-      ++ optionals opts.lsp [
-        ./config/lspconfig.lua
-        ./config/cmp.lua
-      ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
         ./config/treesj.lua
+      ]
+      ++ optionals opts.lsp [
+        ./config/lspconfig.lua
+        # ./config/cmp.lua
+        ./config/blink.lua
       ]
     );
 
@@ -158,10 +169,6 @@
       vim.opt_local.colorcolumn = "89"
       vim.opt_local.textwidth = 88
     '';
-    # Use vim :help for Lua files
-    lua = ''
-      vim.opt_local.keywordprg = ""
-    '';
 
     # Two-space languages
     cpp = two-space;
@@ -173,11 +180,16 @@
     javascript = two-space;
     javascriptreact = two-space;
     json = two-space;
+    # Use vim :help for Lua files
+    lua = ''
+      ${two-space}
+      vim.opt_local.keywordprg = ""
+    '';
     markdown = ''
       ${two-space}
-      vim.opt_local.spell = true
-      vim.opt_local.colorcolumn = "89"
-      vim.opt_local.textwidth = 88
+      -- vim.opt_local.spell = true
+      -- vim.opt_local.colorcolumn = "89"
+      -- vim.opt_local.textwidth = 88
     '';
     nix = two-space;
     terraform = two-space;

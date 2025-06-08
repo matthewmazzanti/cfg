@@ -1,6 +1,5 @@
 nixpkgs: let
-  inherit (nixpkgs.lib) genAttrs nameValuePair concatMapAttrs;
-  inherit (builtins) attrNames listToAttrs;
+  inherit (nixpkgs.lib) genAttrs;
 in rec {
   # List of nixpkgs systems identifiers for flakes
   systems = ["aarch64-linux" "aarch64-darwin" "x86_64-linux"];

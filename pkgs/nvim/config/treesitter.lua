@@ -3,35 +3,35 @@
 local treesitter = require("nvim-treesitter.configs")
 
 treesitter.setup({
-    -- Modules and its options go here
-    modules = {},
-    ensure_installed = {},
-    ignore_install = {},
-    sync_install = false,
-    auto_install = false,
-    highlight = { enable = true },
-    indent = {
-        -- TODO: Indentation doesn't seem to work in many languages, at least 
-        -- nix possibly go.
-        enable = true,
-    },
-    textobjects = {
-        enable = true,
-        select = {
-            enable = true,
+  -- Modules and its options go here
+  modules = {},
+  ensure_installed = {},
+  ignore_install = {},
+  sync_install = false,
+  auto_install = false,
+  highlight = { enable = true },
+  indent = {
+    -- TODO: Indentation doesn't seem to work in many languages, at least 
+    -- nix possibly go.
+    enable = true,
+  },
+  textobjects = {
+    enable = true,
+    select = {
+      enable = true,
 
-            keymaps = {
-                -- You can use the capture groups defined in textobjects.scm
-                -- TODO: More textobjects? These don't seem to work everywhere
-                ["af"] = "@function.outer",
-                ["if"] = "@function.inner",
-                ["ac"] = "@comment.outer",
-                ["ic"] = "@comment.inner",
-                ["al"] = "@loop.outer",
-                ["il"] = "@loop.inner",
-            }
-        }
-    },
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        -- TODO: More textobjects? These don't seem to work everywhere
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@comment.outer",
+        ["ic"] = "@comment.inner",
+        ["al"] = "@loop.outer",
+        ["il"] = "@loop.inner",
+      }
+    }
+  },
 })
 
 require("nvim-ts-autotag").setup()
