@@ -1,9 +1,9 @@
 {
-  pkgs,
+  callPackage,
   less,
-  ...
-}: let
-  wrapper = pkgs.callPackage ./wrapper.nix {};
+}:
+callPackage ./wrapper.nix {
+  inherit less;
   lesskey = builtins.readFile ./lesskey;
   wrapperArgs = [
     "--add-flags"
@@ -21,6 +21,4 @@
     "--add-flags"
     "--prompt=%lb/%L"
   ];
-in wrapper {
-  inherit less lesskey wrapperArgs;
 }

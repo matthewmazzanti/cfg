@@ -36,5 +36,5 @@ in {
   "direnv/dev" = pkgs.callPackage ./direnv {
     direnv  = inputs.direnv-patched.packages.${system}.default;
   };
-  "less/dev" = pkgs.callPackage ./less/dev.nix {};
+  "less/dev" = pkgs.callPackage ./less {};
 }
