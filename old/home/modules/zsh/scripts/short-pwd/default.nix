@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.buildGoModule {
   pname = "short-pwd";
   version = "0.0.3";

@@ -1,13 +1,19 @@
-{ pkgs, system, inputs }: let
+{
+  pkgs,
+  system,
+  inputs,
+}: let
   nvimOverlay = pkgs.extend (self: super: {
-    vimPlugins = super.vimPlugins // {
-      vim-easyclip = super.vimUtils.buildVimPlugin {
-        pname = "vim-easyclip";
-        version = builtins.toString inputs.vim-easyclip.lastModified;
-        src = inputs.vim-easyclip;
-        dependencies = with super.vimPlugins; [vim-repeat];
+    vimPlugins =
+      super.vimPlugins
+      // {
+        vim-easyclip = super.vimUtils.buildVimPlugin {
+          pname = "vim-easyclip";
+          version = builtins.toString inputs.vim-easyclip.lastModified;
+          src = inputs.vim-easyclip;
+          dependencies = with super.vimPlugins; [vim-repeat];
+        };
       };
-    };
   });
 in {
   "nvim/root" = nvimOverlay.callPackage ./nvim {};
@@ -34,7 +40,7 @@ in {
   "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv {
-    direnv  = inputs.direnv-patched.packages.${system}.default;
+    direnv = inputs.direnv-patched.packages.${system}.default;
   };
   "less/dev" = pkgs.callPackage ./less {};
 }

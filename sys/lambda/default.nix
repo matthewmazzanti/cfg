@@ -1,11 +1,16 @@
-{ pkgs, lib, config, custom, ... }:
-let
+{
+  pkgs,
+  lib,
+  config,
+  custom,
+  ...
+}: let
   keys = import ../../pkgs/keys;
 in {
-  imports = [ ./hardware.nix ];
+  imports = [./hardware.nix];
 
   # === BOOT ===
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
   boot.binfmt.emulatedSystems = ["aarch64-linux"];
   boot.tmp.cleanOnBoot = true;
   boot.loader = {
@@ -31,7 +36,7 @@ in {
   # Enable and set zsh as default
   programs.zsh.enable = true;
   # Not sure what this is for
-  environment.pathsToLink = [ "/share/zsh" ];
+  environment.pathsToLink = ["/share/zsh"];
   users.defaultUserShell = pkgs.zsh;
   # Set vi mode in global inputrc
   environment.etc = {
@@ -151,17 +156,16 @@ in {
   ];
 
   # PKI - trust ca root.
-  security.pki.certificates = [ keys.ca.crt ];
+  security.pki.certificates = [keys.ca.crt];
 
   # Gaming things
   nixpkgs.config.allowUnfree = true;
   programs.steam.enable = true;
-  services.udev.packages = [ pkgs.dolphin-emu ];
+  services.udev.packages = [pkgs.dolphin-emu];
 
   # Not sure what this is for
   programs.dconf.enable = true;
   services.dbus.enable = true;
-
 
   # === PACKAGES ===
   environment.systemPackages = with pkgs; [
@@ -208,7 +212,7 @@ in {
   ];
 
   home-manager.users.mmazzanti = {
-    imports = [ ../../old/home/modules ];
+    imports = [../../old/home/modules];
 
     home.stateVersion = "18.09";
 

@@ -1,15 +1,20 @@
-{ config, pkgs, ... }:
-let
+{
+  config,
+  pkgs,
+  ...
+}: let
   hostName = "omega";
 in {
-  imports = [ ./hardware.nix ../../old/modules ];
+  imports = [./hardware.nix ../../old/modules];
 
   nixpkgs.config.allowUnfree = true;
   # TODO: nix 2.4 broke nix-serve. Use this until this
   # https://github.com/NixOS/nix/pull/5635 backport lands on nixpkgs
-  nixpkgs.overlays = [(_: super: {
-    nix-serve = super.nix-serve.override { nix = super.nix_2_3; };
-  })];
+  nixpkgs.overlays = [
+    (_: super: {
+      nix-serve = super.nix-serve.override {nix = super.nix_2_3;};
+    })
+  ];
 
   boot = {
     tmp.cleanOnBoot = true;
@@ -26,8 +31,8 @@ in {
     hostName = hostName;
     useDHCP = true;
     firewall = {
-      allowedTCPPorts = [ 80 443 3005 8324 32400 32469 ];
-      allowedUDPPorts = [ 1900 5353 32410 32412 32413 32414 40000 ];
+      allowedTCPPorts = [80 443 3005 8324 32400 32469];
+      allowedUDPPorts = [1900 5353 32410 32412 32413 32414 40000];
     };
     interfaces.enp7s0.wakeOnLan.enable = true;
   };
@@ -117,8 +122,8 @@ in {
 
   systemd = {
     timers.shutdown-timer = {
-      wantedBy = [ "timers.target" ];
-      partOf = [ "shutdown-timer.service" ];
+      wantedBy = ["timers.target"];
+      partOf = ["shutdown-timer.service"];
       timerConfig.OnCalendar = "*-*-* 22:30:00";
     };
 

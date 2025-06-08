@@ -1,12 +1,14 @@
-{ pkgs, config, ... }:
-let
+{
+  pkgs,
+  config,
+  ...
+}: let
   font = config.theme.font;
   color = config.theme.color;
   transparency = "A0";
-in
-{
+in {
   config.home = {
-    packages = [ pkgs.dunst ];
+    packages = [pkgs.dunst];
     file.".config/dunstrc" = {
       text = ''
         [global]

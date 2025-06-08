@@ -1,3 +1,3 @@
-{ pkgs }: {
-  fira-code = pkgs.callPackage ./fira-code { };
+{pkgs}: {
+  fira-code = pkgs.callPackage ./fira-code {};
 }

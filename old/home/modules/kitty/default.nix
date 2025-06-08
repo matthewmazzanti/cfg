@@ -1,10 +1,13 @@
-{ pkgs, lib, config, ... }:
-with lib;
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   font = config.theme.font;
   color = config.theme.color;
-in
-{
+in {
   options = {
     theme = mkOption {
       type = types.attrs;
@@ -12,7 +15,7 @@ in
   };
 
   config.home = {
-    packages = [ pkgs.kitty ];
+    packages = [pkgs.kitty];
     file.".config/kitty/kitty.conf" = {
       text = ''
         background #${color.bg}

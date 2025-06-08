@@ -1,6 +1,10 @@
-{ pkgs, lib, ... }: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   modules = [
-    ({ config, ... }: {
+    ({config, ...}: {
       options = {
         plugins.enable = lib.options.mkEnableOption "plugins";
         lsp.enable = lib.options.mkEnableOption "lsp";
@@ -51,7 +55,11 @@
         };
       };
     })
-    ({ config, grammars, ... }: {
+    ({
+      config,
+      grammars,
+      ...
+    }: {
       options.langs.c = {
         enable = lib.options.mkEnableOption "c";
         treesitter = lib.options.mkOption {
@@ -62,34 +70,42 @@
         };
       };
       config.args = lib.mkIf config.langs.c.enable {
-        languageServers = [ pkgs.ccls ];
-        grammars = [ grammars.c grammars.cpp ];
-      };
-    })
-    ({ config, grammars, ... }: {
-      options.langs.go.enable = lib.options.mkEnableOption "go";
-      config.args = lib.mkIf config.langs.go.enable {
-        languageServers = [ pkgs.gopls ];
-        grammars = [ grammars.go ];
-      };
-    })
-    ({ config, grammars, ... }: {
-      options.langs.nix.enable = lib.options.mkEnableOption "nix";
-      config.args = lib.mkIf config.langs.nix.enable {
-        languageServers = [ pkgs.nil ];
-        grammars = [ grammars.nix ];
+        languageServers = [pkgs.ccls];
+        grammars = [grammars.c grammars.cpp];
       };
     })
     ({
+      config,
+      grammars,
+      ...
+    }: {
+      options.langs.go.enable = lib.options.mkEnableOption "go";
+      config.args = lib.mkIf config.langs.go.enable {
+        languageServers = [pkgs.gopls];
+        grammars = [grammars.go];
+      };
+    })
+    ({
+      config,
+      grammars,
+      ...
+    }: {
+      options.langs.nix.enable = lib.options.mkEnableOption "nix";
+      config.args = lib.mkIf config.langs.nix.enable {
+        languageServers = [pkgs.nil];
+        grammars = [grammars.nix];
+      };
+    })
+    {
       plugins.enable = true;
       lsp.enable = true;
       treesitter.enable = true;
       langs.c.enable = true;
       langs.nix.enable = true;
-    })
+    }
   ];
-
-in (lib.evalModules {
-  inherit modules;
-  specialArgs.grammars = pkgs.vimPlugins.nvim-treesitter.builtGrammars;
-}).config.args
+in
+  (lib.evalModules {
+    inherit modules;
+    specialArgs.grammars = pkgs.vimPlugins.nvim-treesitter.builtGrammars;
+  }).config.args

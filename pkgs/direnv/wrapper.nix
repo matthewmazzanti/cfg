@@ -3,7 +3,7 @@
   symlinkJoin,
   makeWrapper,
   direnv,
-  direnvrc ? ""
+  direnvrc ? "",
 }: let
   configDir = stdenvNoCC.mkDerivation {
     name = "direnv-config";
@@ -14,18 +14,19 @@
       cp "$direnvrcPath" "$out/direnvrc"
     '';
   };
-in symlinkJoin {
-  name = "direnv";
-  paths = [direnv];
-  buildInputs = [makeWrapper];
-  postBuild = ''
-    name="direnv"
-    wrapped="$out/bin/$name"
-    unwrapped="$out/bin/$name-unwrapped"
-    mv "$wrapped" "$unwrapped"
-    makeWrapper \
-      "$(readlink -f "$unwrapped")" "$wrapped" \
-      --set DIRENV_SELF_PATH "$wrapped" \
-      --set DIRENV_CONFIG '${configDir}'
-  '';
-}
+in
+  symlinkJoin {
+    name = "direnv";
+    paths = [direnv];
+    buildInputs = [makeWrapper];
+    postBuild = ''
+      name="direnv"
+      wrapped="$out/bin/$name"
+      unwrapped="$out/bin/$name-unwrapped"
+      mv "$wrapped" "$unwrapped"
+      makeWrapper \
+        "$(readlink -f "$unwrapped")" "$wrapped" \
+        --set DIRENV_SELF_PATH "$wrapped" \
+        --set DIRENV_CONFIG '${configDir}'
+    '';
+  }

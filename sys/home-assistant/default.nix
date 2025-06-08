@@ -1,16 +1,14 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   keys = import ../../pkgs/keys;
 in {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware.nix
-      ./home-automation.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware.nix
+    ./home-automation.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -59,10 +57,10 @@ in {
   programs.zsh.enable = true;
   users.users.mmazzanti = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "podman" "dialout" ];
+    extraGroups = ["wheel" "podman" "dialout"];
   };
 
-  security.pki.certificates = [ keys.ca.crt ];
+  security.pki.certificates = [keys.ca.crt];
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
@@ -82,5 +80,4 @@ in {
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }

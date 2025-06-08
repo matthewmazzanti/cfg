@@ -1,9 +1,11 @@
 # TODO: Module used anywhere?
-{ pkgs, lib, config,... }:
-
-with lib;
-
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   cfg = config.usage.git-server;
 
   hostName = config.networking.hostName;
@@ -17,7 +19,6 @@ let
   };
 
   staticUrlPath = "/static";
-
 in {
   options.usage.git-server = {
     enable = mkEnableOption "gitea server";
@@ -30,7 +31,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = [ 80 ];
+    networking.firewall.allowedTCPPorts = [80];
 
     services = {
       nginx = {

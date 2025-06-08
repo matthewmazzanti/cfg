@@ -1,4 +1,8 @@
-{ config, haDeps, ... }:
+{
+  config,
+  haDeps,
+  ...
+}:
 # TODOS:
 # - Run containers as non-root
 # - More complex configuration/ui-lovelace configuration reloads
@@ -33,7 +37,7 @@ in {
       "${haDeps.slider-entity-row}:/config/www/slider-entity-row:ro"
       "${haDeps.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
-    extraOptions = [ "--network=host" ];
+    extraOptions = ["--network=host"];
   };
   services.nginx.virtualHosts."home-assistant.iot" = {
     forceSSL = true;
@@ -62,9 +66,9 @@ in {
     environment = {
       TZ = config.time.timeZone;
     };
-    environmentFiles = [ "${zwave-data}/env.secret" ];
-    ports = [ "127.0.0.1:8091:8091" "127.0.0.1:3000:3000" ];
-    volumes = [ "${zwave-data}/store:/usr/src/app/store" ];
+    environmentFiles = ["${zwave-data}/env.secret"];
+    ports = ["127.0.0.1:8091:8091" "127.0.0.1:3000:3000"];
+    volumes = ["${zwave-data}/store:/usr/src/app/store"];
     extraOptions = [
       "--device=/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"
     ];

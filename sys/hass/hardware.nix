@@ -1,7 +1,11 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
-  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
+  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
   boot.initrd.availableKernelModules = [
     "xhci_pci"
@@ -11,10 +15,10 @@
     "sd_mod"
   ];
   boot.initrd.supportedFilesystems = ["ext4"];
-  boot.initrd.kernelModules = [ ];
-  boot.supportedFilesystems = [ "ext4" ];
-  boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.kernelModules = [];
+  boot.supportedFilesystems = ["ext4"];
+  boot.kernelModules = ["kvm-intel"];
+  boot.extraModulePackages = [];
 
   boot.initrd.systemd.enable = true;
 
@@ -27,10 +31,10 @@
 
   boot.initrd.systemd.services.rollback-root = {
     description = "Rollback root filesystem to blank state on boot";
-    wantedBy = [ "initrd.target" ];
-    before = [ "sysroot.mount" ];
-    after = [ "zfs-import-root-pool.service" ];
-    path = with pkgs; [ zfs ];
+    wantedBy = ["initrd.target"];
+    before = ["sysroot.mount"];
+    after = ["zfs-import-root-pool.service"];
+    path = with pkgs; [zfs];
     unitConfig.DefaultDependencies = "no";
     serviceConfig.Type = "oneshot";
     script = "zfs rollback -r root-pool/local/root@blank";
@@ -47,7 +51,7 @@
     "/" = {
       device = "root-pool/local/root";
       fsType = "zfs";
-      options = [ "noatime" ];
+      options = ["noatime"];
     };
 
     "/boot" = {
@@ -55,26 +59,26 @@
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
-      options = [ "noatime" "fmask=0077" "dmask=0077" ];
+      options = ["noatime" "fmask=0077" "dmask=0077"];
     };
 
     "/nix" = {
       device = "root-pool/local/nix";
       fsType = "zfs";
-      options = [ "noatime" ];
+      options = ["noatime"];
     };
 
     "/persist" = {
       device = "root-pool/state/persist";
       fsType = "zfs";
-      options = [ "noatime" ];
+      options = ["noatime"];
       neededForBoot = true;
     };
 
     "/home" = {
       device = "root-pool/state/home";
       fsType = "zfs";
-      options = [ "noatime" ];
+      options = ["noatime"];
     };
   };
 

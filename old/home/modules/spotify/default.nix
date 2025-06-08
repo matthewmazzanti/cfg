@@ -1,12 +1,14 @@
-{ pkgs, config, ... }:
-let
+{
+  pkgs,
+  config,
+  ...
+}: let
   dirs = config.home.xdg.dirs;
 
-  spotifyd = (pkgs.spotifyd.override (attrs: {
+  spotifyd = pkgs.spotifyd.override (attrs: {
     withMpris = true;
-  }));
-in
-{
+  });
+in {
   config = {
     home.packages = with pkgs; [
       spotifyd

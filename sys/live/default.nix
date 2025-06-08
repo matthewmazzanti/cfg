@@ -1,9 +1,13 @@
 # https://github.com/NixOS/nixpkgs/blob/8c00e8f75283bf91e5bfb2939ab9aa876e2cf461/nixos/modules/profiles/base.nix
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   keys = import ../../pkgs/keys;
 in {
-  imports = [ ./hardware.nix ];
+  imports = [./hardware.nix];
 
   boot.loader.systemd-boot.enable = true;
   boot.initrd.systemd.enable = true;
@@ -64,20 +68,37 @@ in {
     neovim
 
     # Some networking tools.
-    fuse fuse3 sshfs-fuse socat screen tcpdump
+    fuse
+    fuse3
+    sshfs-fuse
+    socat
+    screen
+    tcpdump
 
     # Hardware-related tools.
-    sdparm hdparm smartmontools pciutils usbutils nvme-cli
+    sdparm
+    hdparm
+    smartmontools
+    pciutils
+    usbutils
+    nvme-cli
 
     # Some compression/archiver tools.
-    unzip zip
+    unzip
+    zip
 
     # Http stuff
-    wget curl
+    wget
+    curl
     # Misc utils
-    ripgrep fd git tree jq
+    ripgrep
+    fd
+    git
+    tree
+    jq
     # My installer stuff
-    openssl sbctl
+    openssl
+    sbctl
   ];
 
   # User config
@@ -86,7 +107,7 @@ in {
   users.users.mmazzanti = {
     isNormalUser = true;
     initialHashedPassword = ""; # Allow mmazzanti without a password
-    extraGroups = [ "wheel" "networkmanager" "video"];
+    extraGroups = ["wheel" "networkmanager" "video"];
   };
 
   # Disable password for sudo
@@ -100,7 +121,7 @@ in {
   users.defaultUserShell = pkgs.zsh;
 
   # Trust my CA
-  security.pki.certificates = [ keys.ca.crt ];
+  security.pki.certificates = [keys.ca.crt];
 
   # Nix configuration
   nix.extraOptions = "experimental-features = nix-command flakes";

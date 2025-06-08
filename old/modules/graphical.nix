@@ -1,8 +1,10 @@
-{ pkgs, lib, config,... }:
-
-with lib;
-
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   cfg = config.usage.graphical;
 in {
   options.usage.graphical = {
@@ -16,7 +18,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    users.users.mmazzanti.extraGroups = [ "video" "audio" ];
+    users.users.mmazzanti.extraGroups = ["video" "audio"];
 
     services = {
       xserver = {
@@ -29,7 +31,6 @@ in {
       };
 
       dbus.enable = true;
-
     };
 
     programs.dconf.enable = true;
@@ -47,7 +48,7 @@ in {
 
     hardware.graphics = {
       enable = true;
-      extraPackages = [ pkgs.libva ];
+      extraPackages = [pkgs.libva];
     };
   };
 }

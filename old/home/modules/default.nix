@@ -1,9 +1,13 @@
-{ pkgs, lib, config, custom, ... }:
-
-with lib;
-let
+{
+  pkgs,
+  lib,
+  config,
+  custom,
+  ...
+}:
+with lib; let
   dirs = config.home.xdg.dirs;
-  home-pkgs = import ../pkgs { pkgs = pkgs; };
+  home-pkgs = import ../pkgs {pkgs = pkgs;};
 in {
   imports = [
     ./sets
@@ -27,7 +31,7 @@ in {
     programs = {
       git = {
         enable = true;
-        userName  = "Matthew Mazzanti";
+        userName = "Matthew Mazzanti";
         userEmail = "matthew.mazzanti@gmail.com";
         extraConfig = {
           init.defaultBranch = "dev";
@@ -82,9 +86,9 @@ in {
       xdg = {
         enable = true;
         dirs = rec {
-          cache  = "~/.cache";
+          cache = "~/.cache";
           config = "~/.config";
-          data   = "~/.local/share";
+          data = "~/.local/share";
 
           templates = "${data}/templates";
           desktop = "${data}/desktop";
@@ -147,7 +151,6 @@ in {
           editMode: Vi
         '';
       };
-
     };
 
     systemd.user = {

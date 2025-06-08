@@ -1,13 +1,12 @@
 # Adapted from https://github.com/rycee/home-manager/blob/master/modules/services/redshift.nix
-
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.myServices.redshift;
-
 in {
   options.myServices.redshift = {
     enable = mkOption {
@@ -41,7 +40,7 @@ in {
     };
 
     provider = mkOption {
-      type = types.enum [ "manual" "geoclue2" ];
+      type = types.enum ["manual" "geoclue2"];
       default = "manual";
       description = ''
         The location provider to use for determining your location. If set to
@@ -109,8 +108,8 @@ in {
 
     extraOptions = mkOption {
       type = types.listOf types.str;
-      default = [ ];
-      example = [ "-v" "-m randr" ];
+      default = [];
+      example = ["-v" "-m randr"];
       description = ''
         Additional command-line arguments to pass to
         <command>redshift</command>.
@@ -127,38 +126,50 @@ in {
   };
 
   config = mkIf cfg.enable {
-    assertions = [{
-      assertion = cfg.provider == "manual" -> cfg.latitude != null
-        && cfg.longitude != null;
-      message = "Must provide services.redshift.latitude and"
-        + " services.redshift.latitude when"
-        + " services.redshift.provider is set to \"manual\".";
-    }];
+    assertions = [
+      {
+        assertion =
+          cfg.provider
+          == "manual"
+          -> cfg.latitude
+          != null
+          && cfg.longitude != null;
+        message =
+          "Must provide services.redshift.latitude and"
+          + " services.redshift.latitude when"
+          + " services.redshift.provider is set to \"manual\".";
+      }
+    ];
 
     systemd.user.services.redshift = {
       Unit = {
         Description = "Redshift colour temperature adjuster";
-        PartOf = [ cfg.systemdTarget ];
+        PartOf = [cfg.systemdTarget];
       };
 
-      Install = { WantedBy = [ cfg.systemdTarget ]; };
+      Install = {WantedBy = [cfg.systemdTarget];};
 
       Service = {
         ExecStart = let
-          providerString = if cfg.provider == "manual" then
-            "${cfg.latitude}:${cfg.longitude}"
-          else
-            cfg.provider;
+          providerString =
+            if cfg.provider == "manual"
+            then "${cfg.latitude}:${cfg.longitude}"
+            else cfg.provider;
 
-          args = [
-            "-l ${providerString}"
-            "-t ${toString cfg.temperature.day}:${
-              toString cfg.temperature.night
-            }"
-            "-b ${toString cfg.brightness.day}:${toString cfg.brightness.night}"
-          ] ++ cfg.extraOptions;
+          args =
+            [
+              "-l ${providerString}"
+              "-t ${toString cfg.temperature.day}:${
+                toString cfg.temperature.night
+              }"
+              "-b ${toString cfg.brightness.day}:${toString cfg.brightness.night}"
+            ]
+            ++ cfg.extraOptions;
 
-          command = if cfg.tray then "redshift-gtk" else "redshift";
+          command =
+            if cfg.tray
+            then "redshift-gtk"
+            else "redshift";
         in "${cfg.package}/bin/${command} ${concatStringsSep " " args}";
         RestartSec = 3;
         Restart = "always";

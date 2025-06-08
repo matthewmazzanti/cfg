@@ -1,8 +1,9 @@
-{ config, lib, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  ...
+}:
+with lib; let
   cfg = config.usage.virt;
 in {
   options.usage.virt.host = mkEnableOption "virtualisation host machine";
@@ -15,6 +16,6 @@ in {
       };
       libvirtd.enable = true;
     };
-    users.users.mmazzanti.extraGroups = [ "docker" "libvirtd" ];
+    users.users.mmazzanti.extraGroups = ["docker" "libvirtd"];
   };
 }

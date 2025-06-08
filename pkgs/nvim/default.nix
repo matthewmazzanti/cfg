@@ -1,6 +1,7 @@
-{ pkgs
-, lib
-, options? {}
+{
+  pkgs,
+  lib,
+  options ? {},
 }: let
   inherit (lib) optionals;
 
@@ -26,98 +27,112 @@
   opts = lib.attrsets.recursiveUpdate baseOptions options;
 
   paths = with pkgs; (
-    [ fd ] ++
-    optionals (opts.plugins && opts.lsp) (
-      optionals opts.langs.c       [ ccls ] ++
-      optionals opts.langs.go      [ gopls ] ++
-      optionals opts.langs.haskell [ haskell-language-server ] ++
-      optionals opts.langs.web     [ nodePackages.typescript-language-server ] ++
-      optionals opts.langs.lua     [ lua-language-server ] ++
-      optionals opts.langs.nix     [ nil ] ++
-      optionals opts.langs.python  [ pyright ] ++
-      optionals opts.langs.rust    [ rust-analyzer ] ++
-      optionals opts.langs.shell   [ bash-language-server ]
+    [fd]
+    ++ optionals (opts.plugins && opts.lsp) (
+      optionals opts.langs.c [ccls]
+      ++ optionals opts.langs.go [gopls]
+      ++ optionals opts.langs.haskell [haskell-language-server]
+      ++ optionals opts.langs.web [nodePackages.typescript-language-server]
+      ++ optionals opts.langs.lua [lua-language-server]
+      ++ optionals opts.langs.nix [nil]
+      ++ optionals opts.langs.python [pyright]
+      ++ optionals opts.langs.rust [rust-analyzer]
+      ++ optionals opts.langs.shell [bash-language-server]
     )
   );
 
-  grammars = grammars: with grammars; [
-    c cpp
-    json xml yaml tsv csv
-    markdown vimdoc rst
-    go
-    haskell
-    html html htmldjango
-    javascript typescript tsx
-    css
-    lua
-    nix
-    python
-    bash
-    rust
-  ];
+  grammars = grammars:
+    with grammars; [
+      c
+      cpp
+      json
+      xml
+      yaml
+      tsv
+      csv
+      markdown
+      vimdoc
+      rst
+      go
+      haskell
+      html
+      html
+      htmldjango
+      javascript
+      typescript
+      tsx
+      css
+      lua
+      nix
+      python
+      bash
+      rust
+    ];
 
-  plugins = (with pkgs.vimPlugins; [
-    gruvbox-nvim
-  ] ++
-  optionals opts.plugins (
+  plugins = with pkgs.vimPlugins;
     [
-      vim-python-pep8-indent # Better python indent handling
-      vim-nix # Basic nix stuff
-
-      # Visual enhancements
-      lualine-nvim
-
-      vim-fugitive # Git management
-      vim-signature # Show marks
-      vim-wordmotion # CamelCase and other motions
-      vim-easyclip # Improved yank/delete buffer better
-      vim-sandwich # Surround
-      # hop-nvim # Visual interactive jumps using treesitter
-
-      # Telescope
-      telescope-nvim
-      telescope-fzf-native-nvim
-    ] ++
-    optionals opts.lsp [
-      # Language server configurations
-      nvim-lspconfig
-
-      # Completion
-      nvim-cmp
-      cmp-nvim-lsp
-      cmp-buffer
-      luasnip
-      cmp_luasnip
-    ] ++
-    optionals opts.treesitter [
-      # Treesitter
-      (nvim-treesitter.withPlugins grammars)
-      nvim-treesitter-textobjects # Treesitter powered textobjects
-      nvim-ts-autotag # Auto XML/HTML tag closing
-      treesj # Split/Join list structures
+      gruvbox-nvim
     ]
-  ));
+    ++ optionals opts.plugins (
+      [
+        vim-python-pep8-indent # Better python indent handling
+        vim-nix # Basic nix stuff
 
-  init = ([
-    ./config/init.lua
-    ./config/gruvbox.lua
-  ] ++
-  optionals opts.plugins (
+        # Visual enhancements
+        lualine-nvim
+
+        vim-fugitive # Git management
+        vim-signature # Show marks
+        vim-wordmotion # CamelCase and other motions
+        vim-easyclip # Improved yank/delete buffer better
+        vim-sandwich # Surround
+        # hop-nvim # Visual interactive jumps using treesitter
+
+        # Telescope
+        telescope-nvim
+        telescope-fzf-native-nvim
+      ]
+      ++ optionals opts.lsp [
+        # Language server configurations
+        nvim-lspconfig
+
+        # Completion
+        nvim-cmp
+        cmp-nvim-lsp
+        cmp-buffer
+        luasnip
+        cmp_luasnip
+      ]
+      ++ optionals opts.treesitter [
+        # Treesitter
+        (nvim-treesitter.withPlugins grammars)
+        nvim-treesitter-textobjects # Treesitter powered textobjects
+        nvim-ts-autotag # Auto XML/HTML tag closing
+        treesj # Split/Join list structures
+      ]
+    );
+
+  init =
     [
-      ./config/lualine.lua
-      ./config/sandwich.lua
-      ./config/telescope.lua
-      ./config/easyclip.lua
-    ] ++
-    optionals opts.lsp [
-      ./config/lspconfig.lua
-      ./config/cmp.lua
-    ] ++
-    optionals opts.treesitter [
-      ./config/treesitter.lua
-      ./config/treesj.lua
+      ./config/init.lua
+      ./config/gruvbox.lua
     ]
-  ));
+    ++ optionals opts.plugins (
+      [
+        ./config/lualine.lua
+        ./config/sandwich.lua
+        ./config/telescope.lua
+        ./config/easyclip.lua
+      ]
+      ++ optionals opts.lsp [
+        ./config/lspconfig.lua
+        ./config/cmp.lua
+      ]
+      ++ optionals opts.treesitter [
+        ./config/treesitter.lua
+        ./config/treesj.lua
+      ]
+    );
 
   ftplugin = let
     two-space = ''
@@ -133,7 +148,6 @@
       vim.opt_local.softtabstop = 0
       vim.opt_local.expandtab = false
     '';
-
   in {
     # Tab based languages
     go = tab;
@@ -171,6 +185,7 @@
     typescriptreact = two-space;
     yaml = two-space;
   };
-in pkgs.callPackage ./wrapper.nix {
-  inherit paths init plugins ftplugin;
-}
+in
+  pkgs.callPackage ./wrapper.nix {
+    inherit paths init plugins ftplugin;
+  }

@@ -1,6 +1,10 @@
-{ pkgs, lib, config, ... }:
-with lib;
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   dirs = config.home.xdg.dirs;
   color = config.theme.color;
   xcfg = {
@@ -9,13 +13,13 @@ let
     autoRepeatInterval = 40;
   };
 
-  xargs
-    = optional (xcfg.dpi != null)
-      "-dpi ${toString xcfg.dpi}"
+  xargs =
+    optional (xcfg.dpi != null)
+    "-dpi ${toString xcfg.dpi}"
     ++ optional (xcfg.autoRepeatDelay != null)
-      "-ardelay ${toString xcfg.autoRepeatDelay}"
+    "-ardelay ${toString xcfg.autoRepeatDelay}"
     ++ optional (xcfg.autoRepeatInterval != null)
-      "-arinterval ${toString xcfg.autoRepeatInterval}";
+    "-arinterval ${toString xcfg.autoRepeatInterval}";
 
   xargs-string = builtins.concatStringsSep " " xargs;
 
@@ -68,19 +72,18 @@ let
   # Stolen with love:
   # https://www.reddit.com/r/bspwm/comments/fkgc94/monocle_true_transparency_hiding_not_focused_node/
   monocle-hide = pkgs.writeShellScriptBin "monocle-hide" ''
-      set -e
-      PATH="${mkPath (with pkgs; [bspwm xorg.xprop findutils])}"
-      HINT="_PICOM_MONOCLE"
-      ${builtins.readFile ./monocle-hide.sh}
+    set -e
+    PATH="${mkPath (with pkgs; [bspwm xorg.xprop findutils])}"
+    HINT="_PICOM_MONOCLE"
+    ${builtins.readFile ./monocle-hide.sh}
   '';
 
   node-transparency = pkgs.writeShellScriptBin "node-transparency" ''
-      set -e
-      PATH="${mkPath (with pkgs; [bspwm xorg.xprop findutils jq.bin])}"
-      HINT="_PICOM_MONOCLE"
-      ${builtins.readFile ./node-transparency.sh}
+    set -e
+    PATH="${mkPath (with pkgs; [bspwm xorg.xprop findutils jq.bin])}"
+    HINT="_PICOM_MONOCLE"
+    ${builtins.readFile ./node-transparency.sh}
   '';
-
   # hass-notify = (pkgs.callPackage ~/src/home/room/hass-notify {});
 in {
   config = {
@@ -146,7 +149,7 @@ in {
       longitude = "-77.266667";
       provider = "manual";
       temperature.night = 3500;
-      extraOptions = [ "-r" "-m randr" ];
+      extraOptions = ["-r" "-m randr"];
       systemdTarget = "bspwm.target";
     };
 
@@ -160,7 +163,7 @@ in {
           Unit = {
             Description = "simple X hotkey daemon";
             Documentation = "man:sxhkd(1)";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -170,14 +173,14 @@ in {
             Restart = "always";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         picom = {
           Unit = {
             Description = "xorg compositing service";
             Documentation = "man:picom(1)";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -186,13 +189,13 @@ in {
             Restart = "always";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         monocle-hide = {
           Unit = {
             Description = "Adjust props for monocle mode";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -201,13 +204,13 @@ in {
             Restart = "always";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         node-transparency = {
           Unit = {
             Description = "Update props on focus change";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -216,13 +219,13 @@ in {
             Restart = "always";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         numlock = {
           Unit = {
             Description = "xorg numlock";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -231,13 +234,13 @@ in {
             ExecStop = "${pkgs.numlockx}/bin/numlockx off";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         background = {
           Unit = {
             Description = "xorg background";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -245,13 +248,13 @@ in {
             ExecStart = "${pkgs.hsetroot}/bin/hsetroot -fill /home/mmazzanti/media/img/backgrounds/joey-kyber-sFLVTqNzG2I-unsplash.jpg";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
 
         unclutter = {
           Unit = {
             Description = "unclutter cursor";
-            PartOf = [ "bspwm.target" ];
+            PartOf = ["bspwm.target"];
           };
 
           Service = {
@@ -259,7 +262,7 @@ in {
             ExecStart = "${pkgs.unclutter-xfixes}/bin/unclutter";
           };
 
-          Install.WantedBy = [ "bspwm.target" ];
+          Install.WantedBy = ["bspwm.target"];
         };
       };
     };

@@ -54,10 +54,13 @@
     nixos-hardware,
     ...
   } @ inputs: let
-    lib = (import ./lib nixpkgs);
+    lib = import ./lib nixpkgs;
   in {
-    packages = lib.eachSystem ({pkgs, system}: (
-      import ./pkgs { inherit pkgs system inputs; }
+    packages = lib.eachSystem ({
+      pkgs,
+      system,
+    }: (
+      import ./pkgs {inherit pkgs system inputs;}
     ));
 
     devShell = lib.eachSystemShell ({pkgs, ...}: {
@@ -65,6 +68,7 @@
         nix-tree
         go
         uv
+        alejandra
       ];
     });
 
@@ -72,13 +76,13 @@
       beta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [ ./sys/beta ];
+        modules = [./sys/beta];
       };
 
       delta = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         specialArgs.custom = self.packages.${system};
-        modules = [ ./sys/delta ];
+        modules = [./sys/delta];
       };
     };
 
@@ -87,8 +91,8 @@
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
         modules = [
-          ({ pkgs, ... }: {
-            imports = [ home-manager.nixosModules.home-manager ];
+          ({pkgs, ...}: {
+            imports = [home-manager.nixosModules.home-manager];
 
             nix.extraOptions = "experimental-features = nix-command flakes";
 
@@ -106,8 +110,8 @@
         system = "x86_64-linux";
         specialArgs.custom = self.packages.${system};
         modules = [
-          ({ pkgs, ... }: {
-            imports = [ home-manager-old.nixosModules.home-manager ];
+          ({pkgs, ...}: {
+            imports = [home-manager-old.nixosModules.home-manager];
 
             nix.extraOptions = "experimental-features = nix-command flakes";
 
@@ -127,7 +131,7 @@
           slider-entity-row = inputs.slider-entity-row;
           pyscript = inputs.pyscript;
         };
-        modules = [ ./sys/home-assistant ];
+        modules = [./sys/home-assistant];
       };
 
       hass = inputs.nixpkgs.lib.nixosSystem {
@@ -146,7 +150,7 @@
       live = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs.flake = {};
-        modules = [ ./sys/live ];
+        modules = [./sys/live];
       };
     };
   };

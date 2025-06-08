@@ -1,6 +1,10 @@
-{ pkgs, lib, config, ... }:
-with lib;
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   font = config.theme.font;
   color = config.theme.color;
   short-pwd = pkgs.callPackage ./scripts/short-pwd {};
@@ -17,8 +21,7 @@ let
       --prompt=%lb/%L \
       $@
   '';
-in
-{
+in {
   options = {
     theme = mkOption {
       type = types.attrs;
@@ -62,9 +65,9 @@ in
         SYSTEMD_PAGER = "${pager}";
         SYSTEMD_LESS = "-SRF";
         MANPAGER = "sh -c 'col -bx | bat -l man -p'";
-        MANLESS="";
+        MANLESS = "";
         GIT_PAGER = "${pager}";
-        LESS="";
+        LESS = "";
         LESSHIST = "${xdg.dirs.history}/less";
         EDITOR = "vim";
 
@@ -78,9 +81,9 @@ in
       };
 
       shellAliases = {
-        grep="grep --color=auto";
-        egrep="egrep --color=auto";
-        fgrep="fgrep --color=auto";
+        grep = "grep --color=auto";
+        egrep = "egrep --color=auto";
+        fgrep = "fgrep --color=auto";
 
         ls = "ls --color=auto --group-directories-first";
         ll = "ls -l";

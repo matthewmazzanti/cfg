@@ -1,6 +1,10 @@
-{ pkgs, lib, config, ... }:
-with lib;
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   color = config.theme.color;
 
   font = config.theme.font;
@@ -9,8 +13,7 @@ let
 
   mkFont = x: "c.fonts." + x + " = \"${fontString}\"";
   mkFonts = concatMapStringsSep "\n" mkFont;
-in
-{
+in {
   options = {
     theme = mkOption {
       type = types.attrs;
@@ -19,7 +22,7 @@ in
 
   config.home = {
     # TODO: undo this
-    packages = [ pkgs.qutebrowser ];
+    packages = [pkgs.qutebrowser];
     file = {
       ".config/qutebrowser/config.py" = {
         text = ''

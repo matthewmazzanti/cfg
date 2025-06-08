@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   config.home.packages = with pkgs; [
     # Misc replacements for unix tools
     htop

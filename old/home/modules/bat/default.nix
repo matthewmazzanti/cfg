@@ -1,8 +1,10 @@
-{ pkgs, lib, config, ... }:
-
-with lib;
-
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+with lib; let
   font = config.theme.font;
   color = config.theme.color;
   dirs = config.home.xdg.dirs;
@@ -14,7 +16,7 @@ in {
   };
 
   config.home = {
-    packages = with pkgs; [ bat ];
+    packages = with pkgs; [bat];
     file = {
       "${dirs.config}/bat/config".text = ''
         --theme="gruvbox-dark"

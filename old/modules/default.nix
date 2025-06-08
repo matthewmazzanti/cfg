@@ -1,10 +1,13 @@
-{ pkgs, lib, config, custom, ... }:
-
-with lib;
-
-let
+{
+  pkgs,
+  lib,
+  config,
+  custom,
+  ...
+}:
+with lib; let
   cfg = config.usage;
-  keys = (import ./keys);
+  keys = import ./keys;
 in {
   imports = [
     ./git-server.nix
@@ -18,7 +21,8 @@ in {
     i18n.defaultLocale = "en_US.UTF-8";
 
     console = {
-      font = if cfg.graphical.hidpi
+      font =
+        if cfg.graphical.hidpi
         then "${pkgs.terminus_font}/share/consolefonts/ter-v32n.psf.gz"
         else "${pkgs.terminus_font}/share/consolefonts/ter-v16n.psf.gz";
       keyMap = "us";
@@ -43,7 +47,7 @@ in {
         custom."nvim/root"
       ];
 
-      pathsToLink = [ "/share/zsh" ];
+      pathsToLink = ["/share/zsh"];
 
       etc = {
         "inputrc".text = ''
@@ -58,7 +62,10 @@ in {
       gnupg.agent = {
         enable = true;
         enableSSHSupport = true;
-        pinentryPackage = if cfg.graphical.enable then pkgs.pinentry-qt else pinentry-curses;
+        pinentryPackage =
+          if cfg.graphical.enable
+          then pkgs.pinentry-qt
+          else pinentry-curses;
       };
     };
 
@@ -86,7 +93,7 @@ in {
       defaultUserShell = pkgs.zsh;
       users.mmazzanti = {
         isNormalUser = true;
-        extraGroups = [ "wheel" ];
+        extraGroups = ["wheel"];
         openssh.authorizedKeys.keys = with keys.mmazzanti; [
           lambda
           iota

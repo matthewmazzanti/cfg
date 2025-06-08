@@ -1,6 +1,8 @@
-{ pkgs,  config, ... }:
-
-let
+{
+  pkgs,
+  config,
+  ...
+}: let
   dirs = config.home.xdg.dirs;
   lesskey = "${dirs.config}/less/lesskey";
 

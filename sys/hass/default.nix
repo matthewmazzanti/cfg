@@ -1,16 +1,19 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ pkgs, lib, flake, ... }:
-let
+{
+  pkgs,
+  lib,
+  flake,
+  ...
+}: let
   keys = import ../../pkgs/keys;
 in {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware.nix
-      # ./home-automation.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware.nix
+    # ./home-automation.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = false;
@@ -78,30 +81,41 @@ in {
   ];
 
   # Packages
-  environment.systemPackages = (with pkgs; [
-    neovim
-    # Http stuff
-    wget curl httpie
-    # Misc utils
-    ripgrep fd git tree jq
-    # Secure boot
-    sbctl
+  environment.systemPackages =
+    (with pkgs; [
+      neovim
+      # Http stuff
+      wget
+      curl
+      httpie
+      # Misc utils
+      ripgrep
+      fd
+      git
+      tree
+      jq
+      # Secure boot
+      sbctl
 
-    # Installation/debug utils
-    e2fsprogs gptfdisk usbutils
+      # Installation/debug utils
+      e2fsprogs
+      gptfdisk
+      usbutils
 
-    # Compression
-    unzip zip
-  ]) ++ [
-    flake.disko
-  ];
+      # Compression
+      unzip
+      zip
+    ])
+    ++ [
+      flake.disko
+    ];
 
   # User config
   users.mutableUsers = false;
   users.users.mmazzanti = {
     isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
-    extraGroups = [ "wheel" "networkmanager" "podman" "dialout" ];
+    extraGroups = ["wheel" "networkmanager" "podman" "dialout"];
   };
 
   # Enable zsh
@@ -109,7 +123,7 @@ in {
   programs.zsh.enable = true;
 
   # Trust my CA
-  security.pki.certificates = [ keys.ca.crt ];
+  security.pki.certificates = [keys.ca.crt];
 
   # Nix configuration
   nix.extraOptions = "experimental-features = nix-command flakes";
