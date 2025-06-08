@@ -31,7 +31,7 @@ in {
       };
     };
   };
-  "zsh/dev" = pkgs.callPackage ./zsh/dev.nix {};
+  "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv/dev.nix {};
   "less/dev" = pkgs.callPackage ./less/dev.nix {};
