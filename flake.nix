@@ -56,8 +56,8 @@
   } @ inputs: let
     lib = (import ./lib nixpkgs);
   in {
-    packages = lib.eachSystem ({pkgs, ...}: (
-      import ./pkgs { inherit pkgs inputs; }
+    packages = lib.eachSystem ({pkgs, system}: (
+      import ./pkgs { inherit pkgs system inputs; }
     ));
 
     devShell = lib.eachSystemShell ({pkgs, ...}: {

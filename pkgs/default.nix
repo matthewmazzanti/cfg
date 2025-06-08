@@ -1,4 +1,4 @@
-{ pkgs, inputs }: let
+{ pkgs, system, inputs }: let
   nvimOverlay = pkgs.extend (self: super: {
     vimPlugins = super.vimPlugins // {
       vim-easyclip = super.vimUtils.buildVimPlugin {
@@ -33,6 +33,8 @@ in {
   };
   "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd" = pkgs.callPackage ./short-pwd {};
-  "direnv/dev" = pkgs.callPackage ./direnv/dev.nix {};
+  "direnv/dev" = pkgs.callPackage ./direnv {
+    direnv  = inputs.direnv-patched.packages.${system}.default;
+  };
   "less/dev" = pkgs.callPackage ./less/dev.nix {};
 }
