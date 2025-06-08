@@ -16,17 +16,6 @@ in rec {
         }
     );
 
-  eachSystemOverlay = overlay: f:
-    eachSystem (
-      {pkgs, ...} @ inputs:
-        f (
-          inputs
-          // {
-            pkgs = pkgs.extend overlay;
-          }
-        )
-    );
-
   # Create a simple dev shell for each system
   # TODOS
   #   - Make the callpackage and other calls simpler, pull out into other things
@@ -40,36 +29,4 @@ in rec {
       } @ systemInputs:
         (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
     );
-
-  # Map over attribute names (only)
-  # dict[str, a] -> (str -> str) -> dict[str, a]
-  mapAttrNames = f: set:
-    listToAttrs (
-      map
-      (name: nameValuePair (f name) set.${name})
-      (attrNames set)
-    );
-
-  # Given a prefix, and a system, flatten packages from the flake into a
-  # "nested" attribute set separated by slashes. Non-recursive, only works at a
-  # single level
-  flattenFlake = {
-    prefix,
-    system,
-    flake,
-  }:
-    mapAttrNames (name: "${prefix}/${name}") flake.packages.${system};
-
-  # Given a system an an attrset of flakes, flatten each flake into a single
-  # attrset, with "nested" keys
-  flattenFlakes = system: flakes:
-    concatMapAttrs (
-      prefix: flake:
-        flattenFlake {inherit system prefix flake;}
-    )
-    flakes;
-
-  # Run a flattenFlakes, but auto-route the system parameter
-  eachSystemFlattenFlakes = flakes:
-    eachSystem ({system, ...}: flattenFlakes system flakes);
 }
