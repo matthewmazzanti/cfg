@@ -7,12 +7,12 @@ in {
   beta = darwin.lib.darwinSystem {
     inherit system;
     specialArgs.custom = packages;
-    modules = [./sys/beta];
+    modules = [./beta];
   };
 
   delta = darwin.lib.darwinSystem {
     inherit system;
     specialArgs.custom = packages;
-    modules = [./sys/delta];
+    modules = [./delta];
   };
 }

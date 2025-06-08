@@ -19,7 +19,7 @@ in {
           extraSpecialArgs.custom = self.packages.${pkgs.system};
         };
       })
-      ./sys/lambda
+      ./lambda
     ];
   };
 
@@ -38,7 +38,7 @@ in {
           extraSpecialArgs.custom = self.packages.${pkgs.system};
         };
       })
-      ./sys/omega
+      ./omega
     ];
   };
 
@@ -48,7 +48,7 @@ in {
       slider-entity-row = inputs.slider-entity-row;
       pyscript = inputs.pyscript;
     };
-    modules = [./sys/home-assistant];
+    modules = [./home-assistant];
   };
 
   hass = inputs.nixpkgs.lib.nixosSystem {
@@ -60,13 +60,13 @@ in {
     modules = [
       inputs.impermanence.nixosModules.impermanence
       inputs.lanzaboote.nixosModules.lanzaboote
-      ./sys/hass
+      ./hass
     ];
   };
 
   live = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     specialArgs.flake = {};
-    modules = [./sys/live];
+    modules = [./live];
   };
 }
