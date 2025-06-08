@@ -1,9 +1,11 @@
 {
   self,
   inputs,
-}: {
+}: let
+  system = "x86_64-linux";
+in {
   lambda = inputs.nixpkgs.lib.nixosSystem rec {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs.custom = self.packages.${system};
     modules = [
       ({pkgs, ...}: {
@@ -22,7 +24,7 @@
   };
 
   omega = inputs.nixpkgs-old.lib.nixosSystem rec {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs.custom = self.packages.${system};
     modules = [
       ({pkgs, ...}: {
@@ -41,7 +43,7 @@
   };
 
   home-assistant = inputs.nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs.haDeps = {
       slider-entity-row = inputs.slider-entity-row;
       pyscript = inputs.pyscript;
@@ -50,7 +52,7 @@
   };
 
   hass = inputs.nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs.flake = {
       slider-entity-row = inputs.slider-entity-row;
       pyscript = inputs.pyscript;
@@ -63,7 +65,7 @@
   };
 
   live = inputs.nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs.flake = {};
     modules = [./sys/live];
   };
