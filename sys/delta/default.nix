@@ -36,7 +36,7 @@ in {
     ])
     ++ [
       updateScript
-      custom."nvim/web"
+      custom."nvim/dev"
       custom."short-pwd/default"
       custom."zsh/dev"
       custom."direnv/dev"
