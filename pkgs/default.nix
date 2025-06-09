@@ -22,7 +22,28 @@ in {
       plugins = true;
       lsp = true;
       treesitter = true;
-      copilot = false;
+      ai = true;
+      langs = {
+        c = false;
+        data = true;
+        docs = true;
+        go = true;
+        haskell = false;
+        web = true;
+        lua = true;
+        nix = true;
+        python = true;
+        rust = false;
+        shell = true;
+      };
+    };
+  };
+  "nvim/test" = nvimOverlay.callPackage ./nvim {
+    options = {
+      plugins = true;
+      lsp = true;
+      treesitter = true;
+      ai = true;
       langs = {
         c = false;
         data = true;

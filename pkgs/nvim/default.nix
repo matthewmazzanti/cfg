@@ -9,7 +9,7 @@
     plugins = false;
     treesitter = false;
     lsp = false;
-    copilot = false;
+    ai = false;
     langs = {
       c = false;
       data = false;
@@ -116,7 +116,11 @@
         # nvim-cmp cmp-nvim-lsp cmp-buffer luasnip cmp_luasnip
         blink-cmp
       ]
-      ++ optionals (opts.lsp && opts.copilot) [
+      ++ optionals opts.ai [
+        codecompanion-nvim
+        mini-diff
+      ]
+      ++ optionals (opts.lsp && opts.ai) [
         copilot-lua
         blink-copilot
       ]
@@ -142,6 +146,9 @@
         ./config/lspconfig.lua
         # ./config/cmp.lua
         ./config/blink.lua
+      ]
+      ++ optionals opts.ai [
+        ./config/codecompanion.lua
       ]
     );
 
