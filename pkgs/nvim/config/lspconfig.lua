@@ -10,19 +10,20 @@ local defaults = {
     end
 
     -- See `:help vim.lsp.*` for documentation on any of the below functions
-    set("n", "gD", vim.lsp.buf.declaration)
-    local ok, telescope = pcall(require, "telescope.builtin")
+    local ok, fzf = pcall(require, "fzf-lua")
     if ok then
-      set("n", "gd", telescope.lsp_definitions)
-      set("n", "gi", telescope.lsp_implementations)
-      set("n", "gr", telescope.lsp_references)
-      set("n", "gD", telescope.lsp_type_definitions)
+      set("n", "gd", fzf.lsp_definitions)
+      set("n", "gD", fzf.lsp_typedefs)
+      set("n", "gi", fzf.lsp_implementations)
+      set("n", "gr", fzf.lsp_references)
+      set("n", "ga", fzf.lsp_code_actions)
+    else
+      set("n", "gD", vim.lsp.buf.declaration)
     end
 
     -- TODO: For lua, would be nicer to have K open the help document
     set("n", "K", vim.lsp.buf.hover)
     set("n", "<C-k>", vim.lsp.buf.signature_help)
-    set("n", "<leader>a", vim.lsp.buf.code_action)
     set("n", "<leader>r", vim.lsp.buf.rename)
   end,
 }

@@ -42,7 +42,6 @@ vim.opt.formatoptions:append({
 vim.opt.linebreak = true
 vim.opt.wrap = false
 
-
 -- Indentation stuff
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4

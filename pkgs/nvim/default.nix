@@ -203,7 +203,8 @@
       [
         ./config/lualine.lua
         ./config/sandwich.lua
-        ./config/telescope.lua
+        # ./config/telescope.lua
+        ./config/fzf.lua
         ./config/easyclip.lua
       ]
       ++ optionals opts.treesitter [
