@@ -43,7 +43,6 @@ fzf.setup({
 })
 
 local function resolve_project(buf_dir)
-  local rel_buf_dir
   local default = { cwd = buf_dir, query = "" }
 
   -- Find if we're in a project
@@ -54,14 +53,17 @@ local function resolve_project(buf_dir)
     return default
   end
 
-  rel_buf_dir = vim.fs.relpath(project_dir, buf_dir)
+  -- Get the relative buffer path within the project
+  local rel_buf_dir = vim.fs.relpath(project_dir, buf_dir)
   if rel_buf_dir == nil then
     return default
   end
 
-  -- Fixup for query
+  -- Fixup query for usability
   if rel_buf_dir == "." then
     rel_buf_dir = ""
+  else
+    rel_buf_dir = rel_buf_dir.."/"
   end
   return { cwd = project_dir, query = rel_buf_dir }
 end
