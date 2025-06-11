@@ -220,7 +220,7 @@
       ]
     );
 in
-  pkgs.callPackage ./wrapper2.nix {
+  pkgs.callPackage ./wrapper.nix {
     packages = packages;
     plugins = plugins;
     init = lib.strings.concatMapStringsSep "\n" (f: ''dofile("${f}")'') init;
