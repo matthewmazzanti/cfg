@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  stdenvNoCC,
   options ? {},
 }: let
   inherit (lib) optionals;
@@ -27,7 +28,7 @@
 
   opts = lib.attrsets.recursiveUpdate baseOptions options;
 
-  paths = with pkgs; (
+  packages = with pkgs; (
     [fd]
     ++ optionals (opts.plugins && opts.lsp) (
       optionals opts.langs.c [ccls]
@@ -41,116 +42,6 @@
       ++ optionals opts.langs.shell [bash-language-server]
     )
   );
-
-  grammars = grammars:
-    with grammars; [
-      # Seem interesting, but not that useful
-      # git-config git-rebase gitattributes gitcommit gitignore
-      bash
-      c
-      cpp
-      css
-      csv
-      diff
-      go
-      haskell
-      html
-      html
-      htmldjango
-      ini
-      javascript
-      json
-      json5
-      lua
-      markdown
-      nix
-      python
-      rst
-      rust
-      sql
-      toml
-      tsv
-      tsx
-      typescript
-      vimdoc
-      xml
-      yaml
-    ];
-
-  plugins = with pkgs.vimPlugins;
-    [
-      gruvbox-nvim
-    ]
-    ++ optionals opts.plugins (
-      [
-        vim-python-pep8-indent # Better python indent handling
-        vim-nix # Basic nix stuff
-
-        # Visual enhancements
-        lualine-nvim
-
-        vim-fugitive # Git management
-        vim-signature # Show marks
-        vim-wordmotion # CamelCase and other motions
-        vim-easyclip # Improved yank/delete buffer better
-        vim-sandwich # Surround
-        # readline-vim # cli keybinds
-        # hop-nvim # Visual interactive jumps using treesitter
-
-        # Telescope
-        telescope-nvim
-        telescope-fzf-native-nvim
-      ]
-      ++ optionals opts.treesitter [
-        # Treesitter
-        (nvim-treesitter.withPlugins grammars)
-        nvim-treesitter-textobjects # Treesitter powered textobjects
-        nvim-ts-autotag # Auto XML/HTML tag closing
-        treesj # Split/Join list structures
-      ]
-      ++ optionals opts.lsp [
-        # Language server configurations
-        nvim-lspconfig
-
-        # Completion
-        # nvim-cmp cmp-nvim-lsp cmp-buffer luasnip cmp_luasnip
-        blink-cmp
-      ]
-      ++ optionals opts.ai [
-        codecompanion-nvim
-        mini-diff
-      ]
-      ++ optionals (opts.lsp && opts.ai) [
-        copilot-lua
-        blink-copilot
-      ]
-    );
-
-  init =
-    [
-      ./config/init.lua
-      ./config/gruvbox.lua
-    ]
-    ++ optionals opts.plugins (
-      [
-        ./config/lualine.lua
-        ./config/sandwich.lua
-        ./config/telescope.lua
-        ./config/easyclip.lua
-      ]
-      ++ optionals opts.treesitter [
-        ./config/treesitter.lua
-        ./config/treesj.lua
-      ]
-      ++ optionals opts.lsp [
-        ./config/lspconfig.lua
-        # ./config/cmp.lua
-        ./config/blink.lua
-      ]
-      ++ optionals opts.ai [
-        ./config/codecompanion.lua
-      ]
-    );
 
   ftplugin = let
     two-space = ''
@@ -204,7 +95,133 @@
     typescriptreact = two-space;
     yaml = two-space;
   };
+
+  grammars = grammars: with grammars; [
+    # Seem interesting, but not that useful
+    # git-config git-rebase gitattributes gitcommit gitignore
+    bash
+    c
+    cpp
+    css
+    csv
+    diff
+    go
+    haskell
+    html
+    html
+    htmldjango
+    ini
+    javascript
+    json
+    json5
+    lua
+    markdown
+    nix
+    python
+    rst
+    rust
+    sql
+    toml
+    tsv
+    tsx
+    typescript
+    vimdoc
+    xml
+    yaml
+  ];
+
+  plugins = with pkgs.vimPlugins;
+    [
+      gruvbox-nvim
+    ]
+    ++ optionals opts.plugins (
+      [
+        vim-python-pep8-indent # Better python indent handling
+        vim-nix # Basic nix stuff
+
+        # Visual enhancements
+        lualine-nvim
+
+        vim-fugitive # Git management
+        vim-signature # Show marks
+        vim-wordmotion # CamelCase and other motions
+        vim-easyclip # Improved yank/delete buffer better
+        vim-sandwich # Surround
+        # readline-vim # cli keybinds
+        # hop-nvim # Visual interactive jumps using treesitter
+
+        # Telescope
+        telescope-nvim
+        telescope-fzf-native-nvim
+
+        snacks-nvim
+        fzf-lua
+
+        (stdenvNoCC.mkDerivation (ftplugin // {
+          name = "ftplugin";
+          passAsFile = builtins.attrNames ftplugin;
+          buildCommand = ''
+            mkdir -p "$out/ftplugin"
+            for var in $passAsFile; do
+              pathVar="''${var}Path"
+              cp "''${!pathVar}" "$out/ftplugin/$var.lua"
+            done
+          '';
+        }))
+      ]
+      ++ optionals opts.treesitter [
+        # Treesitter
+        (nvim-treesitter.withPlugins grammars)
+        nvim-treesitter-textobjects # Treesitter powered textobjects
+        nvim-ts-autotag # Auto XML/HTML tag closing
+        treesj # Split/Join list structures
+      ]
+      ++ optionals opts.lsp [
+        # Language server configurations
+        nvim-lspconfig
+
+        # Completion
+        # nvim-cmp cmp-nvim-lsp cmp-buffer luasnip cmp_luasnip
+        blink-cmp
+      ]
+      ++ optionals opts.ai [
+        codecompanion-nvim
+        mini-diff
+      ]
+      ++ optionals (opts.lsp && opts.ai) [
+        copilot-lua
+        blink-copilot
+      ]
+    );
+
+  init =
+    [
+      ./config/init.lua
+      ./config/gruvbox.lua
+    ]
+    ++ optionals opts.plugins (
+      [
+        ./config/lualine.lua
+        ./config/sandwich.lua
+        ./config/telescope.lua
+        ./config/easyclip.lua
+      ]
+      ++ optionals opts.treesitter [
+        ./config/treesitter.lua
+        ./config/treesj.lua
+      ]
+      ++ optionals opts.lsp [
+        ./config/lspconfig.lua
+        # ./config/cmp.lua
+        ./config/blink.lua
+      ]
+      ++ optionals opts.ai [
+        ./config/codecompanion.lua
+      ]
+    );
 in
-  pkgs.callPackage ./wrapper.nix {
-    inherit paths init plugins ftplugin;
+  pkgs.callPackage ./wrapper2.nix {
+    packages = packages;
+    plugins = plugins;
+    init = lib.strings.concatMapStringsSep "\n" (f: ''dofile("${f}")'') init;
   }
