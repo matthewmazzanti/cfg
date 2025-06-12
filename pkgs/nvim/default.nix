@@ -5,6 +5,7 @@
   options ? {},
 }: let
   inherit (lib) optionals;
+  inherit (lib.strings) concatMapStringsSep;
 
   baseOptions = {
     plugins = false;
@@ -143,15 +144,16 @@
         # Visual enhancements
         lualine-nvim
 
+        # Picker
+        fzf-lua
+
+        # Misc
         vim-fugitive # Git management
         vim-signature # Show marks
         vim-wordmotion # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
         vim-sandwich # Surround
         readline-vim # cli keybinds
-
-        # snacks-nvim
-        fzf-lua
 
         (stdenvNoCC.mkDerivation (ftplugin // {
           name = "ftplugin";
@@ -217,5 +219,13 @@ in
   pkgs.callPackage ./wrapper.nix {
     packages = packages;
     plugins = plugins;
-    init = lib.strings.concatMapStringsSep "\n" (f: ''dofile("${f}")'') init;
+    init = ''
+      local function safe_dofile(file)
+        local ok, err = pcall(dofile, file)
+        if not ok then
+          vim.print(err)
+        end
+      end
+    ''
+    + (concatMapStringsSep "\n" (f: ''safe_dofile("${f}")'') init);
   }
