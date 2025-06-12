@@ -121,6 +121,7 @@
     rst
     rust
     sql
+    starlark
     toml
     tsv
     tsx
@@ -147,14 +148,9 @@
         vim-wordmotion # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
         vim-sandwich # Surround
-        # readline-vim # cli keybinds
-        # hop-nvim # Visual interactive jumps using treesitter
+        readline-vim # cli keybinds
 
-        # Telescope
-        telescope-nvim
-        telescope-fzf-native-nvim
-
-        snacks-nvim
+        # snacks-nvim
         fzf-lua
 
         (stdenvNoCC.mkDerivation (ftplugin // {
@@ -175,13 +171,13 @@
         nvim-treesitter-textobjects # Treesitter powered textobjects
         nvim-ts-autotag # Auto XML/HTML tag closing
         treesj # Split/Join list structures
+        # hop-nvim # Visual interactive jumps using treesitter
       ]
       ++ optionals opts.lsp [
         # Language server configurations
         nvim-lspconfig
 
         # Completion
-        # nvim-cmp cmp-nvim-lsp cmp-buffer luasnip cmp_luasnip
         blink-cmp
       ]
       ++ optionals opts.ai [
@@ -203,17 +199,14 @@
       [
         ./config/lualine.lua
         ./config/sandwich.lua
-        # ./config/telescope.lua
         ./config/fzf.lua
         ./config/easyclip.lua
       ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
-        ./config/treesj.lua
       ]
       ++ optionals opts.lsp [
         ./config/lspconfig.lua
-        # ./config/cmp.lua
         ./config/blink.lua
       ]
       ++ optionals opts.ai [

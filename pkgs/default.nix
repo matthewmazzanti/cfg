@@ -58,13 +58,6 @@ in {
         shell = true;
       };
     };
-  }).overrideAttrs (final: prev: {
-      # dontFixup = true;
-      dontStrip = true;
-      dontGzipMan = true;
-      dontPatchELF = true;
-      dontRewriteSymlinks = true;
-      dontPatchShebangs = true;
   });
   "nvim/wrapper" = (nvimOverlay.callPackage ./nvim/wrapper2.nix {
     vimAlias = true;

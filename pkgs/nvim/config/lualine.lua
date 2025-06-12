@@ -13,7 +13,8 @@ lualine.setup({
       left = "",
       right = ""
     },
-    globalstatus = true
+    globalstatus = true,
+    always_show_tabline = true,
   },
   sections = {
     lualine_a = {"mode"},
