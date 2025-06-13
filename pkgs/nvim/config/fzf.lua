@@ -3,6 +3,7 @@ local actions = fzf.actions
 
 fzf.setup({
   winopts = {
+    backdrop = 100,
     preview = {
       vertical = "up:45%",
       horizontal = "right:50%",

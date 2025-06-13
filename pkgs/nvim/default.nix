@@ -85,11 +85,19 @@
       vim.opt_local.keywordprg = ""
     '';
     markdown = ''
-      vim.g.markdown_recommended_style = 0
       ${two-space}
-      vim.opt_local.spell = true
-      vim.opt_local.colorcolumn = "89"
-      vim.opt_local.textwidth = 88
+
+      -- Skip vim's overrides for 4 spaces indent, breaks list formatting
+      vim.g.markdown_recommended_style = 0
+
+      -- Try to detect floating LSP windows
+      -- May be a better option if https://github.com/neovim/neovim/issues/31206
+      -- makes any progress
+      if vim.bo.bufhidden ~= "wipe" then
+        vim.opt_local.spell = true
+        vim.opt_local.colorcolumn = "89"
+        vim.opt_local.textwidth = 88
+      end
       vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
@@ -198,6 +206,7 @@
     [
       ./config/init.lua
       ./config/gruvbox.lua
+      ./config/input.lua
     ]
     ++ optionals opts.plugins (
       [
