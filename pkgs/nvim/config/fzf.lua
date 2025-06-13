@@ -11,7 +11,7 @@ fzf.setup({
       winopts = { number = false },
     }
   },
-  keymap     = {
+  keymap = {
     builtin = {
       true,
       ["<C-d>"] = "preview-page-down",
@@ -22,7 +22,7 @@ fzf.setup({
       ["ctrl-q"] = "select-all+accept",
     },
   },
-  actions    = {
+  actions = {
     files = {
       ["enter"] = actions.file_edit_or_qf,
       ["ctrl-x"] = actions.file_split,
@@ -38,8 +38,11 @@ fzf.setup({
     cwd_prompt = false;
     header = false;
   },
-  defaults   = {
+  defaults = {
     git_icons = false,
+  },
+  fzf_opts = {
+    ["--cycle"] = true,
   },
 })
 

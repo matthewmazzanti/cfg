@@ -164,6 +164,7 @@
         vim-easyclip # Improved yank/delete buffer better
         vim-sandwich # Surround
         readline-vim # cli keybinds
+        fidget-nvim
 
         (stdenvNoCC.mkDerivation (ftplugin // {
           name = "ftplugin";
@@ -207,6 +208,7 @@
       ./config/init.lua
       ./config/gruvbox.lua
       ./config/input.lua
+      ./config/fidget.lua
     ]
     ++ optionals opts.plugins (
       [
