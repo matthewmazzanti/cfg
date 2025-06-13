@@ -25,7 +25,6 @@ in {
       git
       ripgrep
       tree
-      vim
       jq
       yq
       visidata

@@ -59,33 +59,6 @@ in {
       };
     };
   });
-  "nvim/wrapper" = (nvimOverlay.callPackage ./nvim/wrapper2.nix {
-    vimAlias = true;
-    plugins = with nvimOverlay.pkgs.vimPlugins; [
-      gruvbox-nvim
-
-      vim-python-pep8-indent # Better python indent handling
-      vim-nix # Basic nix stuff
-
-      # Visual enhancements
-      lualine-nvim
-
-      vim-fugitive # Git management
-      vim-signature # Show marks
-      vim-wordmotion # CamelCase and other motions
-      vim-easyclip # Improved yank/delete buffer better
-      vim-sandwich # Surround
-      # readline-vim # cli keybinds
-      # hop-nvim # Visual interactive jumps using treesitter
-
-      # Telescope
-      telescope-nvim
-      telescope-fzf-native-nvim
-
-      snacks-nvim
-      fzf-lua
-    ];
-  });
   "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd/default" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv {
