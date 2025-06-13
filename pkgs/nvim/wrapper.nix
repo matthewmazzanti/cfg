@@ -29,6 +29,10 @@
   initLua = writeText "init.lua" ''
     vim.opt.packpath:prepend("${finalPackdir}")
     vim.opt.runtimepath:prepend("${finalPackdir}")
+    vim.g.loaded_python3_provider = 0
+    vim.g.loaded_ruby_provider = 0
+    vim.g.loaded_perl_provider = 0
+    vim.g.loaded_node_provider = 0
     ${init}
   '';
 in stdenvNoCC.mkDerivation ({

@@ -22,7 +22,7 @@ in {
       plugins = true;
       lsp = true;
       treesitter = true;
-      ai = true;
+      ai = false;
       langs = {
         c = false;
         data = true;
