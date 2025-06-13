@@ -5,7 +5,7 @@
 }: let
   updateScript = pkgs.writeShellScriptBin "update" ''
     set -e
-    darwin-rebuild --flake "$HOME/src/nix/cfg" switch
+    darwin-rebuild --flake "$HOME/src/nix/cfg#delta" switch
 
     # Update zsh completion cache on next start
     dumpfile="$HOME/.cache/zsh/zcompdump"
@@ -15,7 +15,7 @@
   '';
 in {
   # environment.systemPackages = [];
-  users.users.matthew-carta.packages =
+  users.users.mcarta.packages =
     (with pkgs; [
       # Terminal utilities
       fd
@@ -23,7 +23,6 @@ in {
       git
       ripgrep
       tree
-      vim
       jq
       yq-go
       visidata
@@ -33,6 +32,7 @@ in {
       wget
       curl
       nix-tree
+      coreutils
     ])
     ++ [
       updateScript
@@ -45,7 +45,7 @@ in {
   environment.darwinConfig = "$HOME/src/nix/cfg";
 
   # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
+  nix.enable = true;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';

@@ -75,10 +75,6 @@
       source "$(fzf-share)/key-bindings.zsh"
     fi
 
-    if [[ -x /opt/homebrew/bin/brew ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
-
     source ${./config/vim.zsh}
     source ${./config/prompt.zsh}
     source ${./config/history.zsh}

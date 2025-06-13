@@ -85,10 +85,12 @@
       vim.opt_local.keywordprg = ""
     '';
     markdown = ''
+      vim.g.markdown_recommended_style = 0
       ${two-space}
-      -- vim.opt_local.spell = true
-      -- vim.opt_local.colorcolumn = "89"
-      -- vim.opt_local.textwidth = 88
+      vim.opt_local.spell = true
+      vim.opt_local.colorcolumn = "89"
+      vim.opt_local.textwidth = 88
+      vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
     terraform = two-space;
@@ -217,6 +219,7 @@
     );
 in
   pkgs.callPackage ./wrapper.nix {
+    vimAlias = true;
     packages = packages;
     plugins = plugins;
     init = ''

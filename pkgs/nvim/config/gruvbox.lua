@@ -10,7 +10,7 @@ vim.opt.background = "dark"
 gruvbox.setup({
   undercurl = true,
   underline = true,
-  bold = false,
+  bold = true,
   italic = {
     strings = false,
     comments = false,
@@ -18,6 +18,9 @@ gruvbox.setup({
     folds = false,
   },
   overrides = {
+    -- Make function calls not bold
+    Function = { link = "GruvboxGreen" },
+    -- Make SignColumn transparent (TODO: think this is built in now)
     SignColumn = { fg = "none", bg = "none" },
     GruvboxRedSign = { bg = "none" },
     GruvboxGreenSign = { bg = "none" },
@@ -25,7 +28,7 @@ gruvbox.setup({
     GruvboxBlueSign = { bg = "none" },
     GruvboxPurpleSign = { bg = "none" },
     GruvboxAquaSign = { bg = "none" },
-    GruvboxOrangeSign = { bg = "none" }
+    GruvboxOrangeSign = { bg = "none" },
   },
 })
 

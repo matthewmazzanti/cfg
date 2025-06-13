@@ -31,7 +31,6 @@ local defaults = {
 -- Check that server binary exists
 local function find_ls(server_name)
   -- This is a hack for pulling internals...
-  local require_path = "lspconfig.configs." .. server_name
   local cfg = lspconfig[server_name].config_def
   return vim.fn.executable(cfg.default_config.cmd[1]) == 1
 end
@@ -62,7 +61,6 @@ end
 
 if find_ls("pyright") then
   local settings = {
-    root_dir = lspconfig.util.root_pattern("pyproject.toml"),
     on_new_config = function(config, root_dir)
       local python = find_python(root_dir)
       config.settings.python.pythonPath = python
