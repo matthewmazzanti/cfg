@@ -54,20 +54,9 @@ for _, server in ipairs(servers) do
   end
 end
 
-local function find_python(root_dir)
-  local venv_python = root_dir .. "/.venv/bin/python"
-  if vim.fn.filereadable(venv_python) == 1 then
-    return venv_python
-  end
-
-  return vim.fn.exepath("python")
-end
-
 if find_ls("pyright") then
   local settings = {
-    on_new_config = function(config, root_dir)
-      local python = find_python(root_dir)
-      config.settings.python.pythonPath = python
+    on_new_config = function(config, _)
       config.settings.python.analysis.autoImportCompletions = false
     end
   }
@@ -118,16 +107,23 @@ if find_ls("lua_ls") then
   lspconfig.lua_ls.setup(vim.tbl_extend("force", defaults, settings))
 end
 
+local symbol
+if vim.env.TERM == "linux" then
+  symbol = "*"
+else
+  symbol = "⏺"
+end
+
 vim.diagnostic.config({
   virtual_text = true,
   virtual_lines = false,
   severity_sort = true,
   signs = {
     text = {
-      [vim.diagnostic.severity.ERROR] = "e",
-      [vim.diagnostic.severity.WARN] = "w",
-      [vim.diagnostic.severity.HINT] = "h",
-      [vim.diagnostic.severity.INFO] = "i",
+      [vim.diagnostic.severity.ERROR] = symbol,
+      [vim.diagnostic.severity.WARN]  = symbol,
+      [vim.diagnostic.severity.HINT]  = symbol,
+      [vim.diagnostic.severity.INFO]  = symbol,
     }
   }
 })

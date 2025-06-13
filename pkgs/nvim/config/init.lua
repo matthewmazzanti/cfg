@@ -63,13 +63,23 @@ vim.opt.spellfile = vim.fn.expand("~/.local/share/nvim/spell/en.utf-8.add")
 
 -- Nice visualization of trailing space/tabs
 vim.opt.list = true
-vim.opt.listchars = {
-  tab = "» ",
-  extends = "›",
-  precedes = "‹",
-  nbsp = "␣",
-  trail = "•",
-}
+if vim.env.TERM == "linux" then
+  vim.opt.listchars = {
+    tab = ">>",
+    extends = ">",
+    precedes = "<",
+    nbsp = "_",
+    trail = "-",
+  }
+else
+  vim.opt.listchars = {
+    tab = "» ",
+    extends = "›",
+    precedes = "‹",
+    nbsp = "␣",
+    trail = "•",
+  }
+end
 
 -- Persistent undo
 vim.opt.undofile = true

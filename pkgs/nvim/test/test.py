@@ -1,8 +1,6 @@
 import json
 import hashlib
 
-import mock
-
 def qwer():
     return
 
@@ -14,7 +12,7 @@ def qwer():
 # still works
 def foobar(qwer, world):
     """
-    qwer
+    qwer              
     """
     print(qwer, world)
     print()
@@ -29,7 +27,7 @@ def partial_test():
     foobar(barbaz(), "world")
 
 def example():
-    m = hashlib.sha256()
+    hashlib.sha256()
 
 def hash_json(obj):
     """
