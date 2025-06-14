@@ -22,8 +22,12 @@
   };
 
   zshrc = ''
-    if [[ -f "$HOME/.zshrc" ]]; then
-      source "$HOME/.zshrc"
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+
+    if command -v direnv &> /dev/null; then
+      eval "$(direnv hook zsh)"
     fi
 
     function () {
@@ -67,10 +71,6 @@
     ZSH_AUTOSUGGEST_USE_ASYNC=true
     ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"
 
-    if command -v direnv &> /dev/null; then
-      eval "$(direnv hook zsh)";
-    fi
-
     source "${./config/vim.zsh}"
     source "${./config/prompt.zsh}"
     source "${./config/history.zsh}"
@@ -79,6 +79,10 @@
     source "${./config/fzf.zsh}"
 
     cfg="$HOME/src/nix/cfg"
+
+    if [[ -f "$HOME/.zshrc" ]]; then
+      source "$HOME/.zshrc"
+    fi
   '';
 in
   wrapZsh {

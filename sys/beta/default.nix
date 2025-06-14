@@ -3,15 +3,58 @@
   custom,
   ...
 }: let
-  updateScript = pkgs.writeShellScriptBin "update" ''
-    set -e
-    darwin-rebuild --flake "$HOME/src/nix/cfg" switch
+  hostName = "beta";
+
+  upgradeScript = pkgs.writeShellScriptBin "upgrade" ''
+    set -euo pipefail
+
+    can_upgrade() {
+      local dir="$1"
+
+      if ! git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "Not a Git repository: $dir"
+        return 1
+      fi
+
+      local branch="$(git -C "$dir" symbolic-ref --short HEAD 2>/dev/null || echo "detached")"
+      if [[ "$branch" != "dev" ]]; then
+        echo "Not on dev branch (currently on '$branch') in $dir"
+        return 1
+      fi
+
+      if [[ -n "$(git -C "$dir" status --porcelain)" ]]; then
+        echo "Repository at $dir is not clean"
+        return 1
+      fi
+
+      return 0
+    }
+
+    local cfg="''${1:-"$HOME/src/nix/cfg"}"
+    if ! can_upgrade "$cfg"; then
+      exit 1
+    fi
+
+    exec nix flake update --flake "$cfg''${hostname}"
+  '';
+
+  cleanCacheScript = pkgs.writeShellScriptBin "clean-caches" ''
+    set -euo pipefail
 
     # Update zsh completion cache on next start
-    dumpfile="$HOME/.cache/zsh/zcompdump"
-    if [ -e "$dumpfile" ]; then
-      rm "$dumpfile"
-    fi
+    cache="$HOME/.cache/zsh/zcompdump"
+    if [[ -e "$cache" ]]; then rm "$cache"; fi
+
+    # Clear neovim luac compilation cache
+    cache="$HOME/.cache/nvim/luac"
+    if [[ -d "$cache" ]]; then rm -r "$cache"; fi
+  '';
+
+  updateScript = pkgs.writeShellScriptBin "update" ''
+    set -eou pipefail
+    local cfg="''${1:-"$HOME/src/nix/cfg"}"
+    sudo darwin-rebuild --flake "$cfg#''${hostname}" switch
+    ${cleanCacheScript}/bin/clean-caches
   '';
 in {
   # environment.systemPackages = [];
@@ -19,55 +62,26 @@ in {
   users.users.mmazzanti.packages =
     (with pkgs; [
       # Terminal utilities
-      bat
-      fd
-      fzf
-      git
-      ripgrep
-      tree
-      jq
-      yq
-      visidata
-      htop
+      bat fd fzf git ripgrep tree jq yq visidata htop
       # Networking
-      nmap
-      httpie
-      wget
-      curl
+      nmap httpie wget curl
       # Languages
-      rustc
-      cargo
-      go
-      ruby
-      python3
-      poetry
+      rustc cargo go ruby python3 uv nodejs
 
       # Misc
-      pass
-      tio
-      wakeonlan
+      pass tio wakeonlan openssh pv m1ddc
       # MacOS replacement tools
-      coreutils
-      time
-      gnused
-      time
-      openssh
-      alacritty
-      helix
-      clang
+      coreutils time gnused time openssh helix clang
 
       # cloud
-      awscli2
-      gh
-      gh-copilot
-      nodejs
+      awscli2 gh gh-copilot nodejs
       # qemu
-      tmux
-      screen
+      tmux screen
       # nix
       nix-tree
     ])
     ++ [
+      upgradeScript
       updateScript
 
       # Customized tools
@@ -80,44 +94,73 @@ in {
 
   homebrew = {
     enable = true;
+    onActivation.cleanup = "uninstall";
     brews = [
       "ccache"
       "cmake"
       "dfu-util"
       "dtc" # Device tree compiler, zephyr
-      "ninja"
-      "qemu"
+      "esphome"
+      "esptool"
+      "geckodriver"
+      "irssi"
       "libvirt"
+      "minicom"
+      "ninja"
+      "ocrmypdf"
+      "openjdk"
+      "openvino"
+      "pkgconf"
+      "pass"
+      "platformio"
+      "qemu"
+      "speedtest-cli"
+      "weasyprint"
     ];
     casks = [
       "1password"
+      "1password-cli"
+      "android-platform-tools"
       "balenaetcher"
       "discord"
       "docker"
-      "element" # Matrix
+      "element"
       "firefox"
       "font-fira-code"
+      "font-fira-code-nerd-font"
+      "freecad"
+      "ftdi-vcp-driver"
       "fujitsu-scansnap-home"
-      "google-drive"
       "gcc-arm-embedded"
       "gimp"
       "google-chrome"
+      "google-drive"
+      "ghostty"
+      "inkscape"
       "iterm2"
+      "keycastr"
+      "logitune"
+      "macfuse"
+      "mixxx"
       "notion"
+      "obs"
+      "quicken"
+      "raspberry-pi-imager"
       "slack"
       "spotify"
+      "tailscale"
       "ticktick"
+      "todoist"
+      "ubiquiti-unifi-controller"
       "utm"
       "visual-studio-code"
       "zoom"
     ];
   };
 
-  nixpkgs.config.allowUnfree = true;
+  networking.hostName = hostName;
 
-  # Use a custom configuration.nix location.
-  # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin/configuration.nix
-  environment.darwinConfig = "$HOME/src/nix/cfg";
+  nixpkgs.config.allowUnfree = true;
 
   # Auto upgrade nix package and the daemon service.
   # optional, useful when the builder has a faster internet connection than yours

@@ -20,6 +20,7 @@ gruvbox.setup({
   overrides = {
     -- Make function calls not bold
     Function = { link = "GruvboxGreen" },
+    Title = { link = "GruvboxWhite" },
     -- Make SignColumn transparent (TODO: think this is built in now)
     SignColumn = { fg = "none", bg = "none" },
     GruvboxRedSign = { bg = "none" },
