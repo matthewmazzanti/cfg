@@ -51,7 +51,7 @@
     if [[ -d "$cache" ]]; then rm -r "$cache"; fi
   '';
 
-  upgradeScript = pkgs.writeShellScriptBin "update" ''
+  upgradeScript = pkgs.writeShellScriptBin "upgrade" ''
     set -eou pipefail
     local cfg="''${1:-"$HOME/src/nix/cfg"}"
     sudo darwin-rebuild --flake "$cfg#''${hostname}" switch
