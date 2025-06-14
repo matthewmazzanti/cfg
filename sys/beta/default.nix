@@ -30,7 +30,7 @@
       return 0
     }
 
-    local cfg="''${1:-"$HOME/src/nix/cfg"}"
+    cfg="''${1:-"$HOME/src/nix/cfg"}"
     if ! can_update "$cfg"; then
       exit 1
     fi
@@ -39,8 +39,11 @@
     nix flake update --flake "$cfg''${hostname}"
   '';
 
-  cleanCacheScript = pkgs.writeShellScriptBin "clean-caches" ''
+  cleanScript = pkgs.writeShellScriptBin "clean" ''
     set -euo pipefail
+
+    # Remove dead links from brew
+    brew cleanup --uninstall
 
     # Update zsh completion cache on next start
     cache="$HOME/.cache/zsh/zcompdump"
@@ -53,10 +56,9 @@
 
   upgradeScript = pkgs.writeShellScriptBin "upgrade" ''
     set -eou pipefail
-    local cfg="''${1:-"$HOME/src/nix/cfg"}"
+    cfg="''${1:-"$HOME/src/nix/cfg"}"
     sudo darwin-rebuild --flake "$cfg#''${hostname}" switch
     brew upgrade
-    ${cleanCacheScript}/bin/clean-caches
   '';
 in {
   # environment.systemPackages = [];
@@ -85,7 +87,7 @@ in {
     ++ [
       updateScript
       upgradeScript
-      cleanCacheScript
+      cleanScript
 
       # Customized tools
       custom."direnv/dev"
@@ -97,7 +99,7 @@ in {
 
   homebrew = {
     enable = true;
-    onActivation.cleanup = "uninstall";
+    global.autoUpdate = false;
     brews = [
       "ccache"
       "cmake"
@@ -130,7 +132,6 @@ in {
       "element"
       "firefox"
       "font-fira-code"
-      "font-fira-code-nerd-font"
       "freecad"
       "ftdi-vcp-driver"
       "fujitsu-scansnap-home"
