@@ -100,7 +100,7 @@ vim.g.mapleader = ";"
 
 -- Reset search highlighing
 vim.keymap.set("n", "<leader>n", function()
-  vim.cmd("nohlsearch")
+  vim.cmd.nohlsearch()
 end)
 
 -- Copy to system clipboard where available
@@ -121,7 +121,7 @@ vim.opt.jumpoptions = "stack"
 vim.api.nvim_create_autocmd({"VimEnter"}, {
   pattern = {"*"},
   callback = function ()
-    vim.cmd("clearjumps")
+    vim.cmd.clearjumps()
   end
 })
 

@@ -56,13 +56,13 @@
     source ${./config/copy.zsh}
 
     # Fast Syntax Highlighting
-    FAST_WORK_DIR="${fshTheme}"
-    source "${fshPlugin}"
+    FAST_WORK_DIR='${fshTheme}'
+    source '${fshPlugin}'
     # Man highlighting takes a huge amount of time, skip
     FAST_HIGHLIGHT[chroma-man]=
 
     # Zsh Autosuggestions
-    source "${zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    source '${zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh'
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
     ZSH_AUTOSUGGEST_USE_ASYNC=true
     ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"
@@ -71,15 +71,12 @@
       eval "$(direnv hook zsh)";
     fi
 
-    if command -v fzf-share &> /dev/null; then
-      source "$(fzf-share)/key-bindings.zsh"
-    fi
-
-    source ${./config/vim.zsh}
-    source ${./config/prompt.zsh}
-    source ${./config/history.zsh}
-    source ${./config/ls.zsh}
-    source ${./config/tar.zsh}
+    source "${./config/vim.zsh}"
+    source "${./config/prompt.zsh}"
+    source "${./config/history.zsh}"
+    source "${./config/ls.zsh}"
+    source "${./config/tar.zsh}"
+    source "${./config/fzf.zsh}"
 
     cfg="$HOME/src/nix/cfg"
   '';
