@@ -5,10 +5,10 @@
 }: let
   hostName = "beta";
 
-  upgradeScript = pkgs.writeShellScriptBin "upgrade" ''
+  updateScript = pkgs.writeShellScriptBin "update" ''
     set -euo pipefail
 
-    can_upgrade() {
+    can_update() {
       local dir="$1"
 
       if ! git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -31,11 +31,12 @@
     }
 
     local cfg="''${1:-"$HOME/src/nix/cfg"}"
-    if ! can_upgrade "$cfg"; then
+    if ! can_update "$cfg"; then
       exit 1
     fi
 
-    exec nix flake update --flake "$cfg''${hostname}"
+    brew update
+    nix flake update --flake "$cfg''${hostname}"
   '';
 
   cleanCacheScript = pkgs.writeShellScriptBin "clean-caches" ''
@@ -50,10 +51,11 @@
     if [[ -d "$cache" ]]; then rm -r "$cache"; fi
   '';
 
-  updateScript = pkgs.writeShellScriptBin "update" ''
+  upgradeScript = pkgs.writeShellScriptBin "update" ''
     set -eou pipefail
     local cfg="''${1:-"$HOME/src/nix/cfg"}"
     sudo darwin-rebuild --flake "$cfg#''${hostname}" switch
+    brew upgrade
     ${cleanCacheScript}/bin/clean-caches
   '';
 in {
@@ -81,8 +83,9 @@ in {
       nix-tree
     ])
     ++ [
-      upgradeScript
       updateScript
+      upgradeScript
+      cleanCacheScript
 
       # Customized tools
       custom."direnv/dev"
