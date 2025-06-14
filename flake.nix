@@ -69,6 +69,7 @@
         go
         uv
         alejandra
+        neovim-unwrapped.lua
       ];
     });
 
