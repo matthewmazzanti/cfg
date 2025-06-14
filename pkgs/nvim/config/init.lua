@@ -1,5 +1,8 @@
 -- GENERAL CONFIG --
 
+-- Enable faster lua loader - saves ~20ms!
+vim.loader.enable()
+
 -- Show numbers on each line next to text. Relative numbers for jumps
 -- relativenumber may be a bit heavy on low-power systems
 vim.opt.number = true
