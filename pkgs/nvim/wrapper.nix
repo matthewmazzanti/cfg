@@ -13,23 +13,9 @@
   plugins? [],
   init ? "",
   vimAlias ? false,
-  jit ? false,
 }: let
-  jitCompile = plugin:
-    plugin.overrideAttrs (final: prev: {
-      postInstall = ''
-        while IFS= read -r -d $'\0' f; do
-          ${neovim-unwrapped.lua}/bin/lua -bd "$f" "$f.tmp"
-          rm "$f"
-          mv "$f.tmp" "$f"
-        done < <(find "$out" -type f -name '*.lua' -print0)
-      '';
-    });
-
   # inherit interpreter from neovim
-  normalizedPlugins = neovimUtils.normalizePlugins (
-    if jit then (map jitCompile plugins) else plugins
-  );
+  normalizedPlugins = neovimUtils.normalizePlugins plugins;
 
   finalPackdir = neovimUtils.packDir {
     vimPackage = neovimUtils.normalizedPluginsToVimPackage normalizedPlugins;

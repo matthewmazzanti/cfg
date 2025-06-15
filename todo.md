@@ -11,10 +11,10 @@
 - Per-project editor config, lines, tabs etc - Already supported?
 - Pre-compile Lua code?
 - Re-add CCLS for C projects, if used
+- Markdown renderer, of some sort
 
 ## Zsh
 - Re-target zsh history file
-- Startup seems slow occasionally
 - <C-O>/<C-I> mappings to push/pop directories like my buffer stack
 
 ## iTerm2
@@ -24,3 +24,11 @@
 
 ## Direnv
 - Upstream wrapper changes
+
+__FOO__
+
+
+```python
+def foo():
+  bar, baz
+```

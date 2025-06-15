@@ -18,9 +18,9 @@ local function get_win_config(prompt, default)
     local width = vim.api.nvim_win_get_width(0)
     position = {
       relative = "win",
-      row = height / 3 - 1,
-      col = width / 4,
-      width = width / 2,
+      row = math.floor(height / 4) - 1,
+      col = math.floor(width / 8),
+      width = math.floor(width * 3/4),
       title_pos = "center",
     }
   end
@@ -31,7 +31,7 @@ local function get_win_config(prompt, default)
       focusable = true,
       style = "minimal",
       height = 1,
-      title = prompt,
+      title = " "..prompt,
       noautocmd = true,
     },
     position
@@ -76,7 +76,7 @@ local function input(opts, on_confirm)
         vim.api.nvim_set_current_win(parent_win)
         vim.api.nvim_win_set_cursor(parent_win, cursor_pos)
         if mode == "i" then
-          vim.cmd("startinsert")
+          vim.cmd.startinsert()
         end
       end
       on_confirm(value)

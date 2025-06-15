@@ -16,13 +16,13 @@ local defaults = {
       set("n", "gD", fzf.lsp_typedefs)
       set("n", "gi", fzf.lsp_implementations)
       set("n", "gr", fzf.lsp_references)
-      set("n", "ga", fzf.lsp_code_actions)
+      -- set("n", "ga", fzf.lsp_code_actions)
     else
       set("n", "gd", vim.lsp.buf.definition)
       set("n", "gD", vim.lsp.buf.type_definition)
       set("n", "gi", vim.lsp.buf.implementation)
       set("n", "gr", vim.lsp.buf.references)
-      set("n", "ga", vim.lsp.buf.code_action)
+      -- set("n", "ga", vim.lsp.buf.code_action)
     end
 
     -- TODO: For lua, would be nicer to have K open the help document

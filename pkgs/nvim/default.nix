@@ -126,7 +126,6 @@
     json
     json5
     lua
-    markdown
     nix
     python
     rst
@@ -189,16 +188,15 @@
       ++ optionals opts.lsp [
         # Language server configurations
         nvim-lspconfig
-
         # Completion
         blink-cmp
       ]
       ++ optionals opts.ai [
+        copilot-lua
         codecompanion-nvim
         mini-diff
       ]
       ++ optionals (opts.lsp && opts.ai) [
-        copilot-lua
         blink-copilot
       ]
     );
@@ -207,11 +205,11 @@
     [
       ./config/init.lua
       ./config/gruvbox.lua
-      ./config/input.lua
-      ./config/fidget.lua
     ]
     ++ optionals opts.plugins (
       [
+        ./config/input.lua
+        ./config/fidget.lua
         ./config/lualine.lua
         ./config/sandwich.lua
         ./config/fzf.lua
