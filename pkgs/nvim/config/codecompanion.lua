@@ -1,6 +1,29 @@
 local cc = require("codecompanion")
+local config = require("codecompanion.config")
 
+---@diagnostic disable-next-line: undefined-field
 cc.setup({
+  adapters = {
+    openai = function()
+      local path = vim.fs.abspath("~/.local/share/openai/key")
+      ---@diagnostic disable-next-line: undefined-field
+      if not vim.uv.fs_stat(path) then
+        error("Key file: "..path.." did not exist")
+      end
+
+      local api_key = nil
+      for line in io.lines(path) do
+        api_key = line
+        break
+      end
+
+      return require("codecompanion.adapters").extend("openai", {
+        env = {
+          api_key = api_key
+        },
+      })
+    end,
+  },
   display = {
     diff = {
       enabled = true,
@@ -10,16 +33,24 @@ cc.setup({
       window = {
         layout = "float",
         height = 0.85,
-        width = 0.80,
+        width = 0.85,
         row = math.floor(vim.o.lines * (1 - 0.85) * 0.35),
-        col = math.floor(vim.o.columns * (1 - 0.80)  * 0.5),
+        col = math.floor(vim.o.columns * (1 - 0.85)  * 0.5),
         border = "rounded",
+        opts = {
+          conceallevel = 2,
+          colorcolumn = "",
+          textwidth = nil,
+          number = false,
+          relativenumber = false,
+          signcolumn = "yes:1",
+        }
       },
     }
   },
   strategies = {
-    chat = { adapter = "copilot" },
-    inline = { adapter = "copilot" },
+    chat = { adapter = "openai" },
+    inline = { adapter = "openai" },
     -- cmd = { adapter = "copilot" },
   },
 })
@@ -28,11 +59,10 @@ vim.api.nvim_create_autocmd(
   "VimResized",
   {
     pattern = {"*"},
-    callback = function(ev)
-      vim.print(ev)
-      local window = require("codecompanion.config").config.display.chat.window;
+    callback = function()
+      local window = config.config.display.chat.window;
       window.row = math.floor(vim.o.lines * (1 - 0.85) * 0.35)
-      window.col = math.floor(vim.o.columns * (1 - 0.80)  * 0.5)
+      window.col = math.floor(vim.o.columns * (1 - 0.85)  * 0.5)
     end
   }
 )

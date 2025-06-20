@@ -162,7 +162,7 @@
         vim-wordmotion # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
         vim-sandwich # Surround
-        readline-vim # cli keybinds
+        # readline-vim # cli keybinds
         fidget-nvim
 
         (stdenvNoCC.mkDerivation (ftplugin // {
@@ -176,6 +176,15 @@
             done
           '';
         }))
+
+        # My own utils, factored as a plugin. `require("utils.whatever")`
+        (stdenvNoCC.mkDerivation {
+          name = "utils";
+          buildCommand = ''
+            mkdir -p "$out/lua"
+            cp -r ${./plugin} "$out/lua/utils"
+          '';
+        })
       ]
       ++ optionals opts.treesitter [
         # Treesitter
@@ -224,6 +233,9 @@
       ]
       ++ optionals opts.ai [
         ./config/codecompanion.lua
+      ]
+      ++ [
+        ./config/readline.lua
       ]
     );
 in

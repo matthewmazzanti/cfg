@@ -1,9 +1,12 @@
 {
   pkgs,
+  lib,
   custom,
   ...
 }: let
-  hostName = "beta";
+  inherit (lib) escapeShellArg;
+
+  hostname = "beta";
 
   updateScript = pkgs.writeShellScriptBin "update" ''
     set -euo pipefail
@@ -36,7 +39,7 @@
     fi
 
     brew update
-    nix flake update --flake "$cfg''${hostname}"
+    nix flake update --flake "$cfg#${escapeShellArg hostname}"
   '';
 
   cleanScript = pkgs.writeShellScriptBin "clean" ''
@@ -57,7 +60,7 @@
   upgradeScript = pkgs.writeShellScriptBin "upgrade" ''
     set -eou pipefail
     cfg="''${1:-"$HOME/src/nix/cfg"}"
-    sudo darwin-rebuild --flake "$cfg#''${hostname}" switch
+    sudo darwin-rebuild --flake "$cfg#${escapeShellArg hostname}" switch
     brew upgrade
   '';
 in {
@@ -70,7 +73,7 @@ in {
       # Networking
       nmap httpie wget curl
       # Languages
-      rustc cargo go ruby python3 uv nodejs
+      rustc cargo go ruby python313 uv nodejs
 
       # Misc
       pass tio wakeonlan openssh pv m1ddc
@@ -162,7 +165,7 @@ in {
     ];
   };
 
-  networking.hostName = hostName;
+  networking.hostName = hostname;
 
   nixpkgs.config.allowUnfree = true;
 
