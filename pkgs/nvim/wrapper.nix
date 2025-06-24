@@ -12,8 +12,11 @@
   packages? [],
   plugins? [],
   init ? "",
-  vimAlias ? false,
+  wrapperName ? "nvim",
+  aliases ? [],
 }: let
+  inherit (lib) optionalString escapeShellArg;
+
   # inherit interpreter from neovim
   normalizedPlugins = neovimUtils.normalizePlugins plugins;
 
@@ -38,7 +41,7 @@
 
 in stdenvNoCC.mkDerivation ({
   name = "neovim";
-  pname = "nvim";
+  pname = wrapperName;
   version = lib.getVersion neovim-unwrapped;
 
   nativeBuildInputs = [
@@ -60,20 +63,20 @@ in stdenvNoCC.mkDerivation ({
     mkdir -p "$out"
     lndir -silent "${neovim-unwrapped}" "$out"
     unlink "$out/bin/nvim"
-    makeWrapper ${neovim-unwrapped}/bin/nvim "$out/bin/nvim" \
+    makeWrapper ${neovim-unwrapped}/bin/nvim "$out/bin/"${escapeShellArg wrapperName} \
       --suffix PATH ':' "${lib.makeBinPath runtimeDeps}" \
       --prefix LUA_PATH ';' "$LUA_PATH" \
       --prefix LUA_CPATH ';' "$LUA_CPATH" \
       --add-flags '-u ${initLua}'
   ''
-  + lib.optionalString stdenvNoCC.hostPlatform.isLinux ''
+  + optionalString stdenvNoCC.hostPlatform.isLinux ''
     rm $out/share/applications/nvim.desktop
     substitute ${neovim-unwrapped}/share/applications/nvim.desktop "$out/share/applications/nvim.desktop" \
       --replace-warn 'Name=Neovim' 'Name=Neovim wrapper'
   ''
-  + lib.optionalString vimAlias ''
-    ln -s "nvim" "$out/bin/vim"
-  ''
+  + (lib.strings.concatMapStringsSep "\n" (alias: ''
+    ln -s ${escapeShellArg wrapperName} "$out/bin/"${escapeShellArg alias}
+  '') aliases)
   + ''
     runHook postBuild
   '';

@@ -53,6 +53,9 @@ cc.setup({
     inline = { adapter = "openai" },
     -- cmd = { adapter = "copilot" },
   },
+  opts = {
+    log_level = "DEBUG",
+  },
 })
 
 vim.api.nvim_create_autocmd(

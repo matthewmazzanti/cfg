@@ -46,7 +46,8 @@
     set -euo pipefail
 
     # Remove dead links from brew
-    brew cleanup --uninstall
+    brew autoremove
+    brew cleanup
 
     # Update zsh completion cache on next start
     cache="$HOME/.cache/zsh/zcompdump"
@@ -96,6 +97,7 @@ in {
       custom."direnv/dev"
       custom."less/dev"
       custom."nvim/dev"
+      custom."nvim/ai"
       custom."short-pwd/default"
       custom."zsh/dev"
     ];

@@ -240,7 +240,8 @@
     );
 in
   pkgs.callPackage ./wrapper.nix {
-    vimAlias = true;
+    wrapperName = if !opts.ai then "nvim" else "ai-nvim";
+    aliases = if !opts.ai then ["vim"] else ["ai-vim"];
     packages = packages;
     plugins = plugins;
     init = ''

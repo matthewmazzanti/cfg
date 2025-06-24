@@ -3,6 +3,8 @@
   system,
   inputs,
 }: let
+  inherit (pkgs.lib) recursiveUpdate;
+
   nvimOverlay = pkgs.extend (self: super: {
     vimPlugins =
       super.vimPlugins
@@ -15,49 +17,33 @@
         };
       };
   });
+
+  neovimOptions = {
+    plugins = true;
+    lsp = true;
+    treesitter = true;
+    ai = false;
+    langs = {
+      c = false;
+      data = true;
+      docs = true;
+      go = true;
+      haskell = false;
+      web = true;
+      lua = true;
+      nix = true;
+      python = true;
+      rust = false;
+      shell = true;
+    };
+  };
 in {
   "nvim/root" = nvimOverlay.callPackage ./nvim {};
   "nvim/dev" = nvimOverlay.callPackage ./nvim {
-    options = {
-      plugins = true;
-      lsp = true;
-      treesitter = true;
-      ai = false;
-      langs = {
-        c = false;
-        data = true;
-        docs = true;
-        go = true;
-        haskell = false;
-        web = true;
-        lua = true;
-        nix = true;
-        python = true;
-        rust = false;
-        shell = true;
-      };
-    };
+    options = neovimOptions;
   };
-  "nvim/test" = (nvimOverlay.callPackage ./nvim {
-    options = {
-      plugins = true;
-      lsp = true;
-      treesitter = true;
-      ai = true;
-      langs = {
-        c = false;
-        data = true;
-        docs = true;
-        go = true;
-        haskell = false;
-        web = true;
-        lua = true;
-        nix = true;
-        python = true;
-        rust = true;
-        shell = true;
-      };
-    };
+  "nvim/ai" = (nvimOverlay.callPackage ./nvim {
+    options = recursiveUpdate neovimOptions { ai = true; };
   });
   "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd/default" = pkgs.callPackage ./short-pwd {};
