@@ -24,8 +24,9 @@ nixos-install \
     --no-channel-copy \
     --no-root-password \
     --no-bootloader \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#framework"
 
+# Install sbctl keys, needed for bootloader install
 nixos-enter -- bash <<'EOF'
 sbctl create-keys
 ssh-keygen -A -f /persist
@@ -36,9 +37,13 @@ nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#framework"
 
-nixos-enter --command 'nix-collect-garbage --delete-old'
+# Cleanup /nix
+nixos-enter -- bash <<'EOF'
+nix-collect-garbage --delete-old
+nix-store --optimise
+EOF
 
 # Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl

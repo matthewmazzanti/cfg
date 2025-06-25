@@ -26,6 +26,7 @@ nixos-install \
     --no-bootloader \
     --flake "$SUDO_HOME/src/nix/cfg#hass"
 
+# Install sbctl keys, needed for bootloader install
 nixos-enter -- bash <<'EOF'
 sbctl create-keys
 ssh-keygen -A -f /persist
@@ -38,7 +39,11 @@ nixos-install \
     --no-root-password \
     --flake "$SUDO_HOME/src/nix/cfg#hass"
 
-nixos-enter --command 'nix-collect-garbage --delete-old'
+# Cleanup /nix
+nixos-enter -- bash <<'EOF'
+nix-collect-garbage --delete-old
+nix-store --optimise
+EOF
 
 # Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl
