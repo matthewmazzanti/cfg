@@ -30,13 +30,13 @@ get_passfile() {
 wipe_root_part() {
     local dev="$1"
 
-    # Wipe all filesystem/RAID signatures on the device
-    wipefs --all "$dev"
-
     # Wipe all signatures on current partitions
     for part in "$dev"?*; do
         wipefs --all "$part"
     done
+
+    # Wipe all filesystem/RAID signatures on the device
+    wipefs --all "$dev"
 
     # Clear the partition table
     sgdisk --zap-all "$dev"
