@@ -105,7 +105,7 @@ in {
     isNormalUser = true;
     initialHashedPassword = ""; # Allow mmazzanti without a password
     extraGroups = ["wheel" "networkmanager" "video"];
-    packages = [ flake.pacakges."nvim/nix" ];
+    packages = [ flake.packages."nvim/nix" ];
   };
 
   # Disable password for sudo
