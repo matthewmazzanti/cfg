@@ -24,7 +24,7 @@ nixos-install \
     --no-channel-copy \
     --no-root-password \
     --no-bootloader \
-    --flake "$HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#hass"
 
 nixos-enter -- bash <<'EOF'
 sbctl create-keys
@@ -36,7 +36,7 @@ nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
-    --flake "$HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#hass"
 
 
 # Unmount sbctl from chroot
