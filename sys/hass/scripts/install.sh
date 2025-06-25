@@ -3,10 +3,12 @@ set -xeuo pipefail
 
 make_password() {
     user="$1"
-    echo "Enter password for $1"
+    mkdir -p /mnt/persist/passwd
     touch "/mnt/persist/passwd/$user"
     chown root:shadow "/mnt/persist/passwd/$user"
     chmod 640 "/mnt/persist/passwd/$user"
+
+    echo "Enter password for $1"
     until openssl passwd -6 > "/mnt/persist/passwd/$user"; do
         echo "Try again"
     done
@@ -14,7 +16,7 @@ make_password() {
 
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
-sudo sbctl create-keys \
+USER=root sbctl create-keys \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
 # Mount into chroot
@@ -34,5 +36,4 @@ umount /mnt/var/lib/sbctl
 ssh-keygen -A -f /mnt/persist
 
 # Create passwords
-mkdir -p /mnt/persist/passwd
 make_password "mmazzanti"
