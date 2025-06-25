@@ -34,7 +34,10 @@ wipe_root_part() {
     wipefs --all "$dev"
 
     # Wipe all signatures on current partitions
-    for part in $(ls ${dev}?* 2>/dev/null); do
+    for part in "$dev"?*; do
+        if [ ! -e "$part" ]; then
+            continue
+        fi
         wipefs --all "$part"
     done
 
