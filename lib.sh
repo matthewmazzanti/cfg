@@ -49,4 +49,49 @@ wipe_root_part() {
 
     # Wait for old partitions to get removed
     udevadm settle --timeout=10
+
+    wait_none_exist "$dev"?*
+}
+
+MAX_TRIES=20
+DELAY=0.5
+
+wait_none_exist() {
+    local try
+    for try in $(seq 1 "$MAX_TRIES"); do
+        if none_exist "$@"; then
+            return 0
+        fi
+        sleep "$DELAY"
+    done
+    return 1
+}
+
+none_exist() {
+    for file in "$@"; do
+        if [[ -e "$file" ]]; then
+            return 1
+        fi
+    done
+    return 0
+}
+
+wait_all_exist() {
+    local try
+    for try in $(seq 1 "$MAX_TRIES"); do
+        if all_exist "$@"; then
+            return 0
+        fi
+        sleep "$DELAY"
+    done
+    return 1
+}
+
+all_exist() {
+    for file in "$@"; do
+        if [[ ! -e "$file" ]]; then
+            return 1
+        fi
+    done
+    return 0
 }
