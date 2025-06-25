@@ -35,9 +35,6 @@ wipe_root_part() {
 
     # Wipe all signatures on current partitions
     for part in "$dev"?*; do
-        if [ ! -e "$part" ]; then
-            continue
-        fi
         wipefs --all "$part"
     done
 
