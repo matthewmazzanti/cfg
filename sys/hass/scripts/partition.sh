@@ -9,7 +9,7 @@ trap 'rm -f "$passfile"' EXIT INT TERM
 KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
 KEY_FS="50c62c57-be39-4958-98fd-baab3d3b6d15"
 
-DEV="$by_id/nvme-Samsung_SSD_990_EVO_Plus_1TB_S7U5NJ0Y246737K"
+DEV="$by_id/nvme-Samsung_SSD_990_EVO_Plus_1TB_S7U5NJ0Y246737K_1"
 ESP_PART="9576e63c-16e9-476c-a83e-3f49b539898d"
 ESP_FS="CD23-F450"
 SWAP_PART="000b890e-d62c-4678-a4a6-ea8f43b727a9"
@@ -92,7 +92,7 @@ cryptsetup open \
     --perf-no_write_workqueue \
     --allow-discards \
     "$by_partuuid/$ROOT_PART" \
-    "$ROOT_PART"
+    "$ROOT_CRYPT"
 
 # Create esp partition
 mkfs.fat \
