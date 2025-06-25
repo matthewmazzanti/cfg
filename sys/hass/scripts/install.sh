@@ -38,6 +38,7 @@ nixos-install \
     --no-root-password \
     --flake "$SUDO_HOME/src/nix/cfg#hass"
 
+nixos-enter --command 'nix-collect-garbage --delete-old'
 
 # Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl

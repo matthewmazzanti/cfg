@@ -114,6 +114,9 @@ in {
   # Auto login as mmazzanti
   services.getty.autologinUser = "mmazzanti";
 
+  # Allow system to stay active with closed lid, if power if attached
+  services.logind.lidSwitchExternalPower = "ignore";
+
   # Enable zsh
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
