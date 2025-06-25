@@ -16,7 +16,8 @@ make_password() {
 
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
-USER=root sbctl create-keys \
+sbctl create-keys \
+    --disable-landlock \
     --database-path /mnt/persist/var/lib/sbctl \
     --export /mnt/persist/var/lib/sbctl/keys
 # Mount into chroot
