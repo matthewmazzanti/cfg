@@ -1,10 +1,5 @@
 # https://github.com/NixOS/nixpkgs/blob/8c00e8f75283bf91e5bfb2939ab9aa876e2cf461/nixos/modules/profiles/base.nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
+{ pkgs, flake, ... }: let
   keys = import ../../pkgs/keys;
 in {
   imports = [./hardware.nix];
@@ -99,6 +94,7 @@ in {
     # My installer stuff
     openssl
     sbctl
+    fio
   ];
 
   # User config
@@ -108,6 +104,9 @@ in {
     isNormalUser = true;
     initialHashedPassword = ""; # Allow mmazzanti without a password
     extraGroups = ["wheel" "networkmanager" "video"];
+    packages = [
+      flake.pacakges."nvim/nix"
+    ];
   };
 
   # Disable password for sudo

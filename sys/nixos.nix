@@ -2,9 +2,14 @@
   self,
   inputs,
 }: let
+  inherit (inputs.nixpkgs.lib) nixosSystem;
   system = "x86_64-linux";
+  flake = {
+    inherit inputs;
+    packages = self.pacakges.${system};
+  };
 in {
-  lambda = inputs.nixpkgs.lib.nixosSystem rec {
+  lambda = nixosSystem {
     inherit system;
     specialArgs.custom = self.packages.${system};
     modules = [
@@ -23,7 +28,7 @@ in {
     ];
   };
 
-  omega = inputs.nixpkgs-old.lib.nixosSystem rec {
+  omega = nixosSystem {
     inherit system;
     specialArgs.custom = self.packages.${system};
     modules = [
@@ -42,7 +47,7 @@ in {
     ];
   };
 
-  home-assistant = inputs.nixpkgs.lib.nixosSystem {
+  home-assistant = nixosSystem {
     inherit system;
     specialArgs.haDeps = {
       slider-entity-row = inputs.slider-entity-row;
@@ -51,22 +56,15 @@ in {
     modules = [./home-assistant];
   };
 
-  hass = inputs.nixpkgs.lib.nixosSystem {
+  hass = nixosSystem {
     inherit system;
-    specialArgs.flake = {
-      slider-entity-row = inputs.slider-entity-row;
-      pyscript = inputs.pyscript;
-    };
-    modules = [
-      inputs.impermanence.nixosModules.impermanence
-      inputs.lanzaboote.nixosModules.lanzaboote
-      ./hass
-    ];
+    specialArgs.flake = flake;
+    modules = [ ./hass ];
   };
 
-  live = inputs.nixpkgs.lib.nixosSystem {
+  live = nixosSystem {
     inherit system;
-    specialArgs.flake = {};
-    modules = [./live];
+    specialArgs.flake = flake;
+    modules = [ ./live ];
   };
 }

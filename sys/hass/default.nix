@@ -3,7 +3,6 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 {
   pkgs,
-  lib,
   flake,
   ...
 }: let
@@ -11,6 +10,8 @@
 in {
   imports = [
     # Include the results of the hardware scan.
+    flake.inputs.impermanence.nixosModules.impermanence
+    flake.inputs.lanzaboote.nixosModules.lanzaboote
     ./hardware.nix
     # ./home-automation.nix
   ];

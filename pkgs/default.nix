@@ -45,6 +45,17 @@ in {
   "nvim/ai" = (nvimOverlay.callPackage ./nvim {
     options = recursiveUpdate neovimOptions { ai = true; };
   });
+  "nvim/nix" = nvimOverlay.callPackage ./nvim {
+    options = {
+      plugins = true;
+      lsp = true;
+      treesitter = true;
+      langs = {
+        nix = true;
+        python = true;
+      };
+    };
+  };
   "zsh/dev" = pkgs.callPackage ./zsh {};
   "short-pwd/default" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv {
