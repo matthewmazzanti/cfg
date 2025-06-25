@@ -27,7 +27,7 @@ umount -R /mnt || true
 swapoff "$mapper/$ROOT_CRYPT" || true
 cryptsetup luksClose "$ROOT_CRYPT" || true
 zpool destroy root-pool || true
-cryptsetup luksClose root-crypt || true
+cryptsetup luksClose "$ROOT_CRYPT" || true
 wipe_root_part "$DEV"
 
 # Create partition for primary disk
