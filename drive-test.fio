@@ -11,19 +11,15 @@ group_reporting
 [seq_read]
 rw=read
 bs=4M
-name=Sequential Read
 
 [seq_write]
 rw=write
 bs=4M
-name=Sequential Write
 
 [rand_read]
 rw=randread
 bs=4k
-name=Random Read
 
 [rand_write]
 rw=randwrite
 bs=4k
-name=Random Write
