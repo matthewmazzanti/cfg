@@ -61,7 +61,7 @@ cryptsetup open \
 # Create Keyfile
 mkfs.ext4 -L key -U "$KEY_FS" "$KEY_DEV"
 mkdir /key-dev
-mount -t ext4 -o noatime,nodiratime "$by_uuid/$KEY_DEV" /key-dev
+mount -t ext4 -o noatime,nodiratime "$by_uuid/$KEY_FS" /key-dev
 echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
 touch /key-dev/key-file
