@@ -12,17 +12,6 @@ make_password() {
     done
 }
 
-if ! command -v git; then nix-env -iA nixpkgs.git; fi
-if ! command -v sbctl; then nix-env -iA nixos.sbctl; fi
-if ! command -v openssl; then nix-env -iA nixos.openssl; fi
-
-if ! [ -e "$HOME/src/nix" ]; then
-    mkdir -p "$HOME/src/nix"
-    git clone https://github.com/matthewmazzanti/cfg.git "$HOME/src/nix/cfg"
-else
-    git -C "$HOME/src/nix/cfg" pull
-fi
-
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 sbctl create-keys \
@@ -43,7 +32,6 @@ umount /mnt/var/lib/sbctl
 
 # Create ssh host keys in persist
 ssh-keygen -A -f /mnt/persist
-
 
 # Create passwords
 mkdir -p /mnt/persist/passwd
