@@ -46,7 +46,7 @@ install_user_password() {
     chmod 640 "/mnt/persist/passwd/$user"
 
     echo "Creating password for $1"
-    get_password | openssl passwd -6 > "/mnt/persist/passwd/$user"
+    get_password | openssl passwd -6 -stdin > "/mnt/persist/passwd/$user"
 }
 
 wipe_root_part() {
