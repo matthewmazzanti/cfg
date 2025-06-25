@@ -38,4 +38,4 @@ EOF
 umount /mnt/var/lib/sbctl
 
 # Create passwords
-make_password "mmazzanti"
+install_user_password "mmazzanti"
