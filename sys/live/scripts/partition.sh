@@ -21,6 +21,7 @@ wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
+    --set-alignment-value="$BLOCK_SIZE" \
     --new=1:0:+1G \
     --typecode=1:EF00 \
     --change-name=1:ESPLIVE \
@@ -56,6 +57,7 @@ cryptsetup open \
 mkfs.ext4 \
     -L root-live \
     -U "$ROOT_FS" \
+    -b "$BLOCK_SIZE" \
     "$mapper/$ROOT_CRYPT"
 
 mkfs.fat \
