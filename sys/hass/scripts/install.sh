@@ -16,10 +16,6 @@ make_password() {
 
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
-sbctl create-keys \
-    --database-path /mnt/persist/var/lib/sbctl \
-    --export /mnt/persist/var/lib/sbctl
-# Mount into chroot
 mount --bind /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 
 # Install nixos
@@ -27,13 +23,24 @@ nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
+    --no-bootloader \
     --flake "$HOME/src/nix/cfg#hass"
+
+nixos-enter -- bash <<'EOF'
+sbctl create-keys
+ssh-keygen -A -f /persist
+EOF
+
+# Install Bootloader
+nixos-install \
+    --root /mnt \
+    --no-channel-copy \
+    --no-root-password \
+    --flake "$HOME/src/nix/cfg#hass"
+
 
 # Unmount sbctl from chroot
 umount /mnt/var/lib/sbctl
-
-# Create ssh host keys in persist
-ssh-keygen -A -f /mnt/persist
 
 # Create passwords
 make_password "mmazzanti"
