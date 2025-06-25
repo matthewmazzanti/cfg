@@ -12,7 +12,6 @@ ESP_FS="F716-67B8"
 ROOT_PART="807c816a-cec5-4e2a-b7e1-e3034af7b6c7"
 ROOT_CRYPT="90581c5c-2e2b-4c0e-81fe-1310536bd256"
 ROOT_FS="f56ebe71-95cc-4e1c-b532-ffb24db99cb9"
-BLOCK_SIZE="4096"
 
 # Clean up $DEV
 umount -R /mnt || true
@@ -21,8 +20,6 @@ wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
-    --set-alignment="$BLOCK_SIZE" \
-    --align-end \
     --new=1:0:+1G \
     --typecode=1:EF00 \
     --change-name=1:ESPLIVE \
@@ -42,7 +39,6 @@ cryptsetup luksFormat \
     --type=luks2 \
     --cipher=aes-xts-plain64 --key-size=512 \
     --pbkdf=argon2id \
-    --sector-size="$BLOCK_SIZE" \
     --uuid="$ROOT_CRYPT" \
     --key-file "$passfile" \
     "$by_partuuid/$ROOT_PART"
@@ -59,7 +55,6 @@ cryptsetup open \
 mkfs.ext4 \
     -L root-live \
     -U "$ROOT_FS" \
-    -b "$BLOCK_SIZE" \
     "$mapper/$ROOT_CRYPT"
 
 mkfs.fat \
