@@ -118,6 +118,10 @@ in {
     packages = [ flake.packages."nvim/nix" ];
   };
 
+  # Auto login as mmazzanti
+  services.getty.autologinUser = "mmazzanti";
+  services.getty.autologinOnce = true;
+
   # Enable zsh
   users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
