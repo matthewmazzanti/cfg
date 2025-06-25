@@ -48,7 +48,7 @@ in {
 
   # Networking
   networking.hostName = "hass";
-  networking.hostId = "224d13b2";
+  networking.hostId = "6ed57933";
   networking.networkmanager.enable = true;
 
   # Console stuff

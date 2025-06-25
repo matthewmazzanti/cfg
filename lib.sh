@@ -9,12 +9,12 @@ get_password() {
 import sys
 import getpass
 
-password = getpass.getpass("Enter password: ")
-confirm = getpass.getpass("Confirm password: ")
-
-if password != confirm:
-    print("Passwords do not match.", file=sys.stderr)
-    sys.exit(1)
+while True:
+    password = getpass.getpass("Enter password: ")
+    confirm = getpass.getpass("Confirm password: ")
+    if password == confirm:
+        break
+    print("Passwords do not match, try again", file=sys.stderr)
 
 print(password, end="", flush=True)
 EOF
@@ -36,6 +36,17 @@ block_size = int(sys.argv[1])
 ashift = int(math.log2(block_size))
 print(ashift)
 EOF
+}
+
+install_user_password() {
+    user="$1"
+    mkdir -p /mnt/persist/passwd
+    touch "/mnt/persist/passwd/$user"
+    chown root:shadow "/mnt/persist/passwd/$user"
+    chmod 640 "/mnt/persist/passwd/$user"
+
+    echo "Creating password for $1"
+    get_password | openssl passwd -6 > "/mnt/persist/passwd/$user"
 }
 
 wipe_root_part() {
