@@ -95,6 +95,7 @@ in {
     openssl
     sbctl
     fio
+    python3
   ];
 
   # User config
@@ -104,9 +105,7 @@ in {
     isNormalUser = true;
     initialHashedPassword = ""; # Allow mmazzanti without a password
     extraGroups = ["wheel" "networkmanager" "video"];
-    packages = [
-      flake.pacakges."nvim/nix"
-    ];
+    packages = [ flake.pacakges."nvim/nix" ];
   };
 
   # Disable password for sudo

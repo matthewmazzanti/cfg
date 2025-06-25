@@ -82,34 +82,31 @@ in {
   ];
 
   # Packages
-  environment.systemPackages =
-    (with pkgs; [
-      neovim
-      # Http stuff
-      wget
-      curl
-      httpie
-      # Misc utils
-      ripgrep
-      fd
-      git
-      tree
-      jq
-      # Secure boot
-      sbctl
+  environment.systemPackages = with pkgs; [
+    flake.packages."nvim/root"
+    # Http stuff
+    wget
+    curl
+    httpie
+    # Misc utils
+    ripgrep
+    fd
+    git
+    tree
+    jq
+    # Secure boot
+    sbctl
 
-      # Installation/debug utils
-      e2fsprogs
-      gptfdisk
-      usbutils
+    # Installation/debug utils
+    e2fsprogs
+    gptfdisk
+    usbutils
 
-      # Compression
-      unzip
-      zip
-    ])
-    ++ [
-      flake.disko
-    ];
+    # Compression
+    unzip
+    zip
+    python3
+  ];
 
   # User config
   users.mutableUsers = false;
@@ -117,6 +114,7 @@ in {
     isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
     extraGroups = ["wheel" "networkmanager" "podman" "dialout"];
+    packages = [ flake.packages."nvim/nix" ];
   };
 
   # Enable zsh
