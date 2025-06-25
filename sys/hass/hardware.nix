@@ -26,6 +26,7 @@
     device = "/dev/disk/by-uuid/aa7f83ca-dfd0-47e1-981a-66740de64eb7";
     keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
     keyFileTimeout = 10;
+    bypassWorkqueues = true;
     allowDiscards = true;
   };
 
@@ -44,6 +45,7 @@
     {
       device = "/dev/disk/by-partuuid/000b890e-d62c-4678-a4a6-ea8f43b727a9";
       randomEncryption.enable = true;
+      randomEncryption.allowDiscards = true;
     }
   ];
 
