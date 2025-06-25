@@ -67,4 +67,10 @@ in {
     specialArgs.flake = flake;
     modules = [ ./live ];
   };
+
+  framework = nixosSystem {
+    inherit system;
+    specialArgs.flake = flake;
+    modules = [ ./framework ];
+  };
 }
