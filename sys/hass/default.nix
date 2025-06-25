@@ -105,7 +105,10 @@ in {
     # Compression
     unzip
     zip
+
     python3
+    # Install stuff, remove later
+    fio
   ];
 
   # User config
