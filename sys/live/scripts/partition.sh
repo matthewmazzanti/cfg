@@ -21,7 +21,7 @@ wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
-    --set-alignment-value="$BLOCK_SIZE" \
+    --set-alignment="$BLOCK_SIZE" \
     --new=1:0:+1G \
     --typecode=1:EF00 \
     --change-name=1:ESPLIVE \
