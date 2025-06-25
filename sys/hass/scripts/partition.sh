@@ -3,7 +3,8 @@ set -xeuo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
-get_password
+passfile="$(get_passfile)"
+trap 'rm -f "$passfile"' EXIT INT TERM
 
 KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
 KEY_FS="50c62c57-be39-4958-98fd-baab3d3b6d15"
@@ -27,22 +28,27 @@ swapoff "$mapper/$ROOT_CRYPT" || true
 cryptsetup luksClose "$ROOT_CRYPT" || true
 zpool destroy root-pool || true
 cryptsetup luksClose root-crypt || true
-wipefs --all "$DEV" || true
+wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
-    --clear \
-    --new=0:0:+10G --typecode=0:EF00 --change-name=0:ESP \
-    --partition-guid=0:"$ESP_PART" \
-    --new=0:0:+16G --typecode=0:8200 --change-name=0:swap \
-    --partition-guid=0:"$SWAP_PART" \
-    --new=0:0:0 --typecode=0:8300 --change-name=0:root \
-    --partition-guid=0:"$ROOT_PART" \
+    --new=1:0:+10G \
+    --typecode=1:EF00 \
+    --change-name=1:ESP \
+    --partition-guid=1:"$ESP_PART" \
+    --new=2:0:+16G \
+    --typecode=2:8200 \
+    --change-name=2:swap \
+    --partition-guid=2:"$SWAP_PART" \
+    --new=3:0:0 \
+    --typecode=3:8300 \
+    --change-name=3:root \
+    --partition-guid=3:"$ROOT_PART" \
     "$DEV"
 
-udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ESP_PART"
-udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$SWAP_PART"
-udevadm settle --timeout=10 --exit-if-exists="$by_partuuid/$ROOT_PART"
+blockdev --rereadpt "$DEV"
+udevadm settle --timeout=10
+wait_all_exist "$by_partuuid/$ESP_PART" "$by_partuuid/$ROOT_PART"
 
 # Open and mount
 cryptsetup open \
@@ -55,7 +61,7 @@ cryptsetup open \
 # Create Keyfile
 mkfs.ext4 -L key -U "$KEY_FS" "$KEY_DEV"
 mkdir /key-dev
-mount -t ext4 -o noatime "$by_uuid/$KEY_DEV" /key-dev
+mount -t ext4 -o noatime,nodiratime "$by_uuid/$KEY_DEV" /key-dev
 echo "hass" > /key-dev/system
 chmod 400 /key-dev/system
 touch /key-dev/key-file
@@ -65,15 +71,18 @@ head -c256 < /dev/urandom | base64 > /key-dev/key-file
 # Create luks filesystem on root partition
 cryptsetup luksFormat \
     --type=luks2 \
+    --cipher=aes-xts-plain64 \
+    --key-size=512 \
+    --pbkdf=argon2id \
+    --sector-size=4096 \
     --uuid="$ROOT_CRYPT" \
-    --sector-size="4096" \
     --key-file=/key-dev/key-file \
     "$by_partuuid/$ROOT_PART"
 
 cryptsetup luksAddKey \
     --key-file=/key-dev/key-file \
     --new-key-slot=31 \
-    --new-keyfile=<(tr -d '\n' <<<"$PASSWORD") \
+    --new-keyfile="$passfile" \
     "$by_partuuid/$ROOT_PART"
 
 cryptsetup open \
@@ -81,6 +90,7 @@ cryptsetup open \
     --persistent \
     --perf-no_read_workqueue \
     --perf-no_write_workqueue \
+    --allow-discards \
     "$by_partuuid/$ROOT_PART" \
     "$ROOT_PART"
 
@@ -115,9 +125,9 @@ zfs snapshot root-pool/local/root@blank
 # Mount all filesystems
 swapon "$mapper/$SWAP_CRYPT"
 mkdir -p /mnt
-mount -t zfs -o noatime root-pool/local/root /mnt
+mount -t zfs -o noatime,nodiratime root-pool/local/root /mnt
 mkdir -p /mnt/boot /mnt/nix /mnt/persist /mnt/home
-mount -t vfat -o noatime "$by_uuid/$ESP_FS" /mnt/boot
-mount -t zfs -o noatime root-pool/local/nix /mnt/nix
-mount -t zfs -o noatime root-pool/state/persist /mnt/persist
-mount -t zfs -o noatime root-pool/state/home /mnt/home
+mount -t vfat -o noatime,nodiratime "$by_uuid/$ESP_FS" /mnt/boot
+mount -t zfs -o noatime,nodiratime root-pool/local/nix /mnt/nix
+mount -t zfs -o noatime,nodiratime root-pool/state/persist /mnt/persist
+mount -t zfs -o noatime,nodiratime root-pool/state/home /mnt/home

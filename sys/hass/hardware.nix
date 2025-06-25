@@ -22,9 +22,9 @@
 
   boot.initrd.systemd.enable = true;
 
-  boot.initrd.luks.devices."root-crypt" = {
-    device = "/dev/disk/by-uuid/547d874f-c18a-4519-b52b-0969dc999cc3";
-    keyFile = "/key-file:UUID=e96b6967-aacd-4f25-8256-664ae143646f";
+  boot.initrd.luks.devices."aa7f83ca-dfd0-47e1-981a-66740de64eb7" = {
+    device = "/dev/disk/by-uuid/aa7f83ca-dfd0-47e1-981a-66740de64eb7";
+    keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
     keyFileTimeout = 10;
     allowDiscards = true;
   };
@@ -42,7 +42,7 @@
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/8d065161-122d-4919-af6b-95a15b2954a4";
+      device = "/dev/disk/by-partuuid/000b890e-d62c-4678-a4a6-ea8f43b727a9";
       randomEncryption.enable = true;
     }
   ];
@@ -51,34 +51,34 @@
     "/" = {
       device = "root-pool/local/root";
       fsType = "zfs";
-      options = ["noatime"];
+      options = ["noatime" "nodiratime" ];
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/E745-7031";
+      device = "/dev/disk/by-uuid/CD23-F450";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
-      options = ["noatime" "fmask=0077" "dmask=0077"];
+      options = ["noatime" "nodiratime" "fmask=0077" "dmask=0077"];
     };
 
     "/nix" = {
       device = "root-pool/local/nix";
       fsType = "zfs";
-      options = ["noatime"];
+      options = ["noatime" "nodiratime" ];
     };
 
     "/persist" = {
       device = "root-pool/state/persist";
       fsType = "zfs";
-      options = ["noatime"];
+      options = ["noatime" "nodiratime" ];
       neededForBoot = true;
     };
 
     "/home" = {
       device = "root-pool/state/home";
       fsType = "zfs";
-      options = ["noatime"];
+      options = ["noatime" "nodiratime" ];
     };
   };
 

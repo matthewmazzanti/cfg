@@ -37,7 +37,8 @@ wait_all_exist "$by_partuuid/$ESP_PART" "$by_partuuid/$ROOT_PART"
 # Encrypt root filesystem
 cryptsetup luksFormat \
     --type=luks2 \
-    --cipher=aes-xts-plain64 --key-size=512 \
+    --cipher=aes-xts-plain64 \
+    --key-size=512 \
     --pbkdf=argon2id \
     --uuid="$ROOT_CRYPT" \
     --key-file "$passfile" \
