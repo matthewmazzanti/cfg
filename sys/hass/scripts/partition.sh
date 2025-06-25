@@ -17,6 +17,7 @@ SWAP_CRYPT="d7472648-6e61-409c-b7c9-903155901615"
 ROOT_PART="dd27ca90-fa6b-4aa1-9e98-f1401e0e3dea"
 ROOT_CRYPT="aa7f83ca-dfd0-47e1-981a-66740de64eb7"
 ROOT_FS="3365f70d-8620-4d65-8612-11f34048ad37"
+BLOCK_SIZE="4096"
 
 # Clean up $KEY_DEV
 umount /key-dev || true
@@ -24,7 +25,7 @@ wipefs --all "$KEY_DEV" || true
 
 # Clean up $DEV
 umount -R /mnt || true
-swapoff "$mapper/$ROOT_CRYPT" || true
+swapoff "$mapper/$SWAP_CRYPT" || true
 cryptsetup luksClose "$SWAP_CRYPT" || true
 zpool destroy root-pool || true
 cryptsetup luksClose "$ROOT_CRYPT" || true
@@ -32,7 +33,7 @@ wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
-    --set-alignment=4096 \
+    --set-alignment="$BLOCK_SIZE" \
     --align-end \
     --new=1:0:+10G \
     --typecode=1:EF00 \
@@ -77,7 +78,7 @@ cryptsetup luksFormat \
     --cipher=aes-xts-plain64 \
     --key-size=512 \
     --pbkdf=argon2id \
-    --sector-size=4096 \
+    --sector-size="$BLOCK_SIZE" \
     --uuid="$ROOT_CRYPT" \
     --key-file=/key-dev/key-file \
     "$by_partuuid/$ROOT_PART"
@@ -109,7 +110,7 @@ mkswap --label=swap "$mapper/$SWAP_CRYPT"
 
 # Create zfs/impermanence filesystems
 zpool create -f \
-    -o ashift=12 \
+    -o ashift="$(to_ashift "$BLOCK_SIZE")" \
     -O compression=lz4 \
     -O atime=off \
     -O xattr=sa \

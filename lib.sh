@@ -27,6 +27,17 @@ get_passfile() {
     echo "$passfile"
 }
 
+to_ashift() {
+    local block_size="$1"
+    python3 - "$block_size" <<'EOF'
+import math
+import sys
+block_size = int(sys.argv[1])
+ashift = int(math.log2(block_size))
+print(ashift)
+EOF
+}
+
 wipe_root_part() {
     local dev="$1"
 
