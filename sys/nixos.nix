@@ -6,7 +6,7 @@
   system = "x86_64-linux";
   flake = {
     inherit inputs;
-    packages = self.pacakges.${system};
+    packages = self.packages.${system};
   };
 in {
   lambda = nixosSystem {
