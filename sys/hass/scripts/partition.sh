@@ -25,13 +25,15 @@ wipefs --all "$KEY_DEV" || true
 # Clean up $DEV
 umount -R /mnt || true
 swapoff "$mapper/$ROOT_CRYPT" || true
-cryptsetup luksClose "$ROOT_CRYPT" || true
+cryptsetup luksClose "$SWAP_CRYPT" || true
 zpool destroy root-pool || true
 cryptsetup luksClose "$ROOT_CRYPT" || true
 wipe_root_part "$DEV"
 
 # Create partition for primary disk
 sgdisk \
+    --set-alignment=4096 \
+    --align-end \
     --new=1:0:+10G \
     --typecode=1:EF00 \
     --change-name=1:ESP \
