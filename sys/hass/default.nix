@@ -13,7 +13,7 @@ in {
     flake.inputs.impermanence.nixosModules.impermanence
     flake.inputs.lanzaboote.nixosModules.lanzaboote
     ./hardware.nix
-    # ./home-automation.nix
+    ./home-automation.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
