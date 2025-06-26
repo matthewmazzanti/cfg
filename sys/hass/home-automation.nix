@@ -37,7 +37,7 @@ in {
     ];
     extraOptions = ["--network=host"];
   };
-  services.nginx.virtualHosts."hass.iot" = {
+  services.nginx.virtualHosts."hass.lan" = {
     forceSSL = true;
     sslCertificate = "${hassData}/tls/hass.iot.crt";
     sslCertificateKey = "${hassData}/tls/hass.iot.key";
@@ -67,7 +67,7 @@ in {
     volumes = ["${zwaveData}/store:/usr/src/app/store"];
     extraOptions = ["--device=/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"];
   };
-  services.nginx.virtualHosts."zwave.iot" = {
+  services.nginx.virtualHosts."zwave.lan" = {
     forceSSL = true;
     sslCertificate = "${zwaveData}/tls/zwave.iot.crt";
     sslCertificateKey = "${zwaveData}/tls/zwave.iot.key";
