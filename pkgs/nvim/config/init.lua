@@ -126,4 +126,8 @@ vim.api.nvim_create_autocmd({"VimEnter"}, {
 })
 
 -- Use rounded borders around windows
-vim.opt.winborder = "rounded"
+if vim.env.TERM == "linux" then
+  vim.opt.winborder = "single"
+else
+  vim.opt.winborder = "rounded"
+end
