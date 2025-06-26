@@ -47,7 +47,7 @@ in {
   };
 
   # Networking
-  networking.hostName = "hass";
+  networking.hostName = "framework";
   networking.hostId = "6ed57933";
   networking.networkmanager.enable = true;
 
