@@ -65,11 +65,12 @@ vim.opt.spellfile = vim.fn.expand("~/.local/share/nvim/spell/en.utf-8.add")
 vim.opt.list = true
 if vim.env.TERM == "linux" then
   vim.opt.listchars = {
-    tab = ">>",
+    -- Apparently some of these work?
+    tab = "» ",
     extends = ">",
     precedes = "<",
     nbsp = "_",
-    trail = "-",
+    trail = "•",
   }
 else
   vim.opt.listchars = {
