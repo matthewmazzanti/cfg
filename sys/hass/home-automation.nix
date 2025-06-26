@@ -1,6 +1,6 @@
 {
   config,
-  haDeps,
+  flake,
   ...
 }:
 # TODOS:
@@ -32,8 +32,8 @@ in {
     volumes = [
       "${hassData}/config:/config"
       "${./hass-config/configuration.yaml}:/config/configuration.yaml:ro"
-      "${haDeps.slider-entity-row}:/config/www/slider-entity-row:ro"
-      "${haDeps.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
+      "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
+      "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
     extraOptions = ["--network=host"];
   };
