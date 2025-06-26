@@ -79,6 +79,7 @@ in {
   users.users.mmazzanti.openssh.authorizedKeys.keys = with keys.ssh; [
     lambda
     beta
+    framework
   ];
 
   # Packages
