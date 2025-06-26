@@ -7,9 +7,8 @@
 # - Run containers as non-root
 # - More complex configuration/ui-lovelace configuration reloads
 let
-  images = builtins.fromJSON (builtins.readFile ./images.lock);
-  hassData = "/var/lib/hass";
-  zwaveData = "/var/lib/zwave";
+  hassData = "/persist/containers/hass";
+  zwaveData = "/persist/containers/zwave";
 in {
   # Allow Home Assistant to discover local devices
   # TODO: Fix home assistant/apple tv stuff, configure ports correctly.
@@ -25,7 +24,8 @@ in {
 
   # === Home Assistant ===
   virtualisation.oci-containers.containers.hass = {
-    image = images.hass.lock;
+    # Tag: ghcr.io/home-assistant/home-assistant:stable
+    image = "ghcr.io/home-assistant/home-assistant@sha256:e207929bdf5dc95db43c618b877364e99f7ad506ec5440aeef80d5c9c1cae668";
     serviceName = "hass";
     autoStart = true;
     environment.TZ = config.time.timeZone;
@@ -39,7 +39,6 @@ in {
   };
   services.nginx.virtualHosts."hass.iot" = {
     forceSSL = true;
-    # TODO: These are manually provisioned, find way to automate
     sslCertificate = "${hassData}/tls/hass.iot.crt";
     sslCertificateKey = "${hassData}/tls/hass.iot.key";
     locations."/" = {
@@ -58,7 +57,8 @@ in {
 
   # === Zwave JS ===
   virtualisation.oci-containers.containers.zwave = {
-    image = images.zwave.lock;
+    # Tag: zwavejs/zwave-js-ui:latest
+    image = "zwavejs/zwave-js-ui@sha256:52b6ee2c37fa1a3c13a8d8f59b45145b546ec31b5c85d5053e1279fc558c5a1e";
     serviceName = "zwave";
     autoStart = true;
     environment.TZ = config.time.timeZone;
@@ -69,7 +69,6 @@ in {
   };
   services.nginx.virtualHosts."zwave.iot" = {
     forceSSL = true;
-    # TODO: These are manually provisioned, find way to automate
     sslCertificate = "${zwaveData}/tls/zwave.iot.crt";
     sslCertificateKey = "${zwaveData}/tls/zwave.iot.key";
     locations."/" = {
