@@ -121,7 +121,7 @@
   users.defaultUserShell = pkgs.zsh;
 
   # Trust my CA
-  security.pki.certificates = [keys.ca.crt];
+  security.pki.certificates = [flake.lib.keys.ca.crt];
 
   # Nix configuration
   nix.extraOptions = "experimental-features = nix-command flakes";
