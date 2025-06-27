@@ -22,13 +22,18 @@
     # Http stuff
     wget curl
     # Misc utils
-    ripgrep fd git tree jq tmux openssl
+    ripgrep fd tree jq tmux git openssl
 
     # Compression
     unzip zip
 
     # Scripting languages
     python3
+
+    # Installation/debug utils
+    e2fsprogs # ext filesystem management, chattr
+    gptfdisk # sgdisk
+    usbutils # lsusb
   ];
 
   # Users may only be specified via nix

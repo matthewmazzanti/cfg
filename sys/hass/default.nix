@@ -1,4 +1,4 @@
-{ pkgs, flake, ... }: {
+{ flake, ... }: {
   imports = [
     flake.modules.base
     flake.modules.impermanence
@@ -21,12 +21,7 @@
   services.zfs.trim.enable = true;
 
   # Packages
-  environment.systemPackages = with pkgs; [
-    # Installation/debug utils
-    e2fsprogs
-    gptfdisk
-    usbutils
-  ];
+  # environment.systemPackages = with pkgs; [];
 
   # User config
   users.users.mmazzanti = {
