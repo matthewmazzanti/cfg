@@ -12,9 +12,9 @@ fzf.setup({
       vertical = "up:45%",
       horizontal = "right:50%",
       delay = 50,
+      border = border,
       winopts = {
         number = false,
-        border = border,
       },
     }
   },
