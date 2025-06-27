@@ -4,6 +4,7 @@ local actions = fzf.actions
 fzf.setup({
   winopts = {
     backdrop = 100,
+    border = vim.opts.winborder,
     preview = {
       vertical = "up:45%",
       horizontal = "right:50%",
