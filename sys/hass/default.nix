@@ -10,6 +10,7 @@
     # Include the results of the hardware scan.
     flake.modules.impermanence
     flake.modules.lanzaboote
+    flake.modules.base
     ./hardware.nix
     ./home-automation.nix
   ];
@@ -51,13 +52,6 @@
   networking.hostId = "224d13b2"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
 
-  # Console stuff
-  i18n.defaultLocale = "en_US.UTF-8";
-  console.keyMap = "us";
-
-  # Time zone.
-  time.timeZone = "America/New_York";
-
   # Auto cleanup
   nix.gc.automatic = true;
   nix.gc.options = "--delete-older-than 180d";
@@ -65,34 +59,9 @@
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
 
-  # SSH
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-    };
-  };
-  users.users.mmazzanti.openssh.authorizedKeys.keys = with flake.lib.keys.ssh; [
-    lambda
-    beta
-    framework
-  ];
-
   # Packages
   environment.systemPackages = with pkgs; [
     flake.packages."nvim/root"
-    # Http stuff
-    wget
-    curl
-    httpie
-    # Misc utils
-    ripgrep
-    fd
-    git
-    tree
-    jq
     # Secure boot
     sbctl
 
@@ -101,33 +70,17 @@
     gptfdisk
     usbutils
 
-    # Compression
-    unzip
-    zip
-
     python3
     # Install stuff, remove later
     fio
   ];
 
   # User config
-  users.mutableUsers = false;
   users.users.mmazzanti = {
-    isNormalUser = true;
     hashedPasswordFile = "/persist/passwd/mmazzanti";
-    extraGroups = ["wheel" "networkmanager" "podman" "dialout"];
+    extraGroups = ["networkmanager" "podman" "dialout"];
     packages = [ flake.packages."nvim/nix" ];
   };
-
-  # Enable zsh
-  users.defaultUserShell = pkgs.zsh;
-  programs.zsh.enable = true;
-
-  # Trust my CA
-  security.pki.certificates = [flake.lib.keys.ca.crt];
-
-  # Nix configuration
-  nix.extraOptions = "experimental-features = nix-command flakes";
 
   system.stateVersion = "24.11";
 }

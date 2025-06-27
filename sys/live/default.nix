@@ -1,6 +1,9 @@
 # https://github.com/NixOS/nixpkgs/blob/8c00e8f75283bf91e5bfb2939ab9aa876e2cf461/nixos/modules/profiles/base.nix
 { pkgs, flake, ... }: {
-  imports = [./hardware.nix];
+  imports = [
+    flake.modules.base
+    ./hardware.nix
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.initrd.systemd.enable = true;
@@ -19,32 +22,10 @@
     "zfs"
   ];
 
-  # Console stuff
-  i18n.defaultLocale = "en_US.UTF-8";
-  console.keyMap = "us";
-
-  # Time zone.
-  time.timeZone = "America/New_York";
-
   # Networking
   networking.hostName = "live";
   networking.hostId = "13e69ac8"; # Really for zfs
   networking.networkmanager.enable = true;
-
-  # SSH
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-    };
-  };
-  users.users.mmazzanti.openssh.authorizedKeys.keys = with flake.lib.keys.ssh; [
-    lambda
-    beta
-    framework
-  ];
 
   # Include some utilities that are useful for installing or repairing
   # the system.
@@ -58,52 +39,20 @@
     ccrypt
     cryptsetup # needed for dm-crypt volumes
 
-    # Some text editors.
-    neovim
-
     # Some networking tools.
-    fuse
-    fuse3
-    sshfs-fuse
-    socat
-    screen
-    tcpdump
+    fuse fuse3 sshfs-fuse socat screen tcpdump
 
     # Hardware-related tools.
-    sdparm
-    hdparm
-    smartmontools
-    pciutils
-    usbutils
-    nvme-cli
+    sdparm hdparm smartmontools pciutils usbutils nvme-cli
 
-    # Some compression/archiver tools.
-    unzip
-    zip
-
-    # Http stuff
-    wget
-    curl
-    # Misc utils
-    ripgrep
-    fd
-    git
-    tree
-    jq
     # My installer stuff
-    openssl
-    sbctl
-    fio
-    python3
+    sbctl fio
   ];
 
   # User config
-  users.mutableUsers = false;
-  users.users.root.initialHashedPassword = ""; # Allow root without password
   users.users.mmazzanti = {
-    isNormalUser = true;
     initialHashedPassword = ""; # Allow mmazzanti without a password
-    extraGroups = ["wheel" "networkmanager" "video"];
+    extraGroups = ["networkmanager" "video"];
     packages = [ flake.packages."nvim/nix" ];
   };
 
@@ -115,16 +64,6 @@
 
   # Allow system to stay active with closed lid, if power if attached
   services.logind.lidSwitchExternalPower = "ignore";
-
-  # Enable zsh
-  programs.zsh.enable = true;
-  users.defaultUserShell = pkgs.zsh;
-
-  # Trust my CA
-  security.pki.certificates = [flake.lib.keys.ca.crt];
-
-  # Nix configuration
-  nix.extraOptions = "experimental-features = nix-command flakes";
 
   system.stateVersion = "25.05";
 }
