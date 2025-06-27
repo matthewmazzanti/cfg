@@ -1,15 +1,21 @@
 local fzf = require("fzf-lua")
 local actions = fzf.actions
 
+---@diagnostic disable-next-line: undefined-field
+local border = vim.opt.winborder:get()
+
 fzf.setup({
   winopts = {
     backdrop = 100,
-    border = vim.opt.winborder,
+    border = border,
     preview = {
       vertical = "up:45%",
       horizontal = "right:50%",
       delay = 50,
-      winopts = { number = false },
+      winopts = {
+        number = false,
+        border = border,
+      },
     }
   },
   keymap = {
