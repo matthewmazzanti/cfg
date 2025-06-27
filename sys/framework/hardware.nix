@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -20,23 +19,10 @@
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
 
-  boot.initrd.systemd.enable = true;
-
   boot.initrd.luks.devices."0050d616-0fd0-40da-8760-e14cc7f108f6" = {
     device = "/dev/disk/by-uuid/0050d616-0fd0-40da-8760-e14cc7f108f6";
     bypassWorkqueues = true;
     allowDiscards = true;
-  };
-
-  boot.initrd.systemd.services.rollback-root = {
-    description = "Rollback root filesystem to blank state on boot";
-    wantedBy = ["initrd.target"];
-    before = ["sysroot.mount"];
-    after = ["zfs-import-root-pool.service"];
-    path = with pkgs; [zfs];
-    unitConfig.DefaultDependencies = "no";
-    serviceConfig.Type = "oneshot";
-    script = "zfs rollback -r root-pool/local/root@blank";
   };
 
   swapDevices = [
@@ -82,7 +68,6 @@
     };
   };
 
-  networking.useDHCP = lib.mkDefault true;
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
