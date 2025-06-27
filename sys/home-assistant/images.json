@@ -1,4 +1,0 @@
-{
-  "home-assistant": "ghcr.io/home-assistant/home-assistant:stable",
-  "zwave-js": "zwavejs/zwave-js-ui:latest"
-}

@@ -47,15 +47,6 @@ in {
     ];
   };
 
-  home-assistant = nixosSystem {
-    inherit system;
-    specialArgs.haDeps = {
-      slider-entity-row = inputs.slider-entity-row;
-      pyscript = inputs.pyscript;
-    };
-    modules = [./home-assistant];
-  };
-
   hass = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
