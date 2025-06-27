@@ -5,9 +5,7 @@
   pkgs,
   flake,
   ...
-}: let
-  keys = import ../../pkgs/keys;
-in {
+}: {
   imports = [
     # Include the results of the hardware scan.
     flake.inputs.impermanence.nixosModules.impermanence
@@ -76,7 +74,7 @@ in {
       KbdInteractiveAuthentication = false;
     };
   };
-  users.users.mmazzanti.openssh.authorizedKeys.keys = with keys.ssh; [
+  users.users.mmazzanti.openssh.authorizedKeys.keys = with flake.lib.keys.ssh; [
     lambda
     beta
     framework

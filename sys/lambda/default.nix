@@ -5,7 +5,7 @@
   custom,
   ...
 }: let
-  keys = import ../../pkgs/keys;
+  keys = import ../../lib/keys;
 in {
   imports = [./hardware.nix];
 
