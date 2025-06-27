@@ -8,14 +8,16 @@
 
   # Networking
   networking.hostName = "hass";
-  networking.hostId = "d015a266"; # TODO: Move with zfs settings
+
+  # NetworkManager
   networking.networkmanager.enable = true;
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
     "/var/lib/NetworkManager"
   ];
 
-  # ZFS auto-cleanup
+  # ZFS
+  networking.hostId = "d015a266";
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
 

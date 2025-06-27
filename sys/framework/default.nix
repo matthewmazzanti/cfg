@@ -12,7 +12,6 @@
 
   # Networking
   networking.hostName = "framework";
-  networking.hostId = "6ed57933";
   networking.networkmanager.enable = true;
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
@@ -20,6 +19,7 @@
   ];
 
   # Auto cleanup
+  networking.hostId = "6ed57933";
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
 
