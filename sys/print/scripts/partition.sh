@@ -6,10 +6,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 passfile="$(get_passfile)"
 trap 'rm -f "$passfile"' EXIT INT TERM
 
-KEY_DEV="$by_id/TODO"
+KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_04019fcd9c4e79ca44691256512632c8626a90f14e01b7093716c05a775fdfdf29450000000000000000000015af046c00821b1883558107a8ac7d66-0:0"
 KEY_FS="800e8fd9-22c6-4879-bbaf-99f506722cf9"
 
-DEV="$by_id/TODO"
+DEV="$by_id/nvme-Samsung_SSD_990_EVO_1TB_S7M3NL0X933009L_1"
 ESP_PART="32527feb-6556-4559-9d7b-99f0a85bad8a"
 ESP_FS="2413-6615"
 SWAP_PART="58570ec6-bec4-4b1c-8dd6-4d037dddd15e"

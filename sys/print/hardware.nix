@@ -70,7 +70,7 @@
     ''DRIVERS=="usb"''
     ''ATTRS{idProduct}=="5583"''
     ''ATTRS{idVendor}=="0781"''
-    ''ATTRS{serial}=="TODO"''
+    ''ATTRS{serial}=="04019fcd9c4e79ca44691256512632c8626a90f14e01b7093716c05a775fdfdf29450000000000000000000015af046c00821b1883558107a8ac7d66"''
     ''RUN+="${pkgs.systemd}/bin/poweroff"''
   ];
 
