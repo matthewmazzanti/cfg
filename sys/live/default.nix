@@ -6,7 +6,6 @@
   ];
 
   boot.loader.systemd-boot.enable = true;
-  boot.initrd.systemd.enable = true;
 
   # Include support for various filesystems and tools to create / manipulate
   # them.
@@ -64,6 +63,4 @@
 
   # Allow system to stay active with closed lid, if power if attached
   services.logind.lidSwitchExternalPower = "ignore";
-
-  system.stateVersion = "25.05";
 }
