@@ -12,9 +12,9 @@
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
 
-  boot.initrd.luks.devices."aa7f83ca-dfd0-47e1-981a-66740de64eb7" = {
-    device = "/dev/disk/by-uuid/aa7f83ca-dfd0-47e1-981a-66740de64eb7";
-    keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
+  boot.initrd.luks.devices."c74b3bec-0c38-4e8f-a2b0-bf89fa234b1a" = {
+    device = "/dev/disk/by-uuid/c74b3bec-0c38-4e8f-a2b0-bf89fa234b1a";
+    keyFile = "/key-file:UUID=800e8fd9-22c6-4879-bbaf-99f506722cf9";
     keyFileTimeout = 10;
     bypassWorkqueues = true;
     allowDiscards = true;
@@ -22,7 +22,7 @@
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/000b890e-d62c-4678-a4a6-ea8f43b727a9";
+      device = "/dev/disk/by-partuuid/58570ec6-bec4-4b1c-8dd6-4d037dddd15e";
       randomEncryption.enable = true;
       randomEncryption.allowDiscards = true;
     }
@@ -36,7 +36,7 @@
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/CD23-F450";
+      device = "/dev/disk/by-uuid/2413-6615";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
@@ -70,7 +70,7 @@
     ''DRIVERS=="usb"''
     ''ATTRS{idProduct}=="5583"''
     ''ATTRS{idVendor}=="0781"''
-    ''ATTRS{serial}=="010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e"''
+    ''ATTRS{serial}=="TODO"''
     ''RUN+="${pkgs.systemd}/bin/poweroff"''
   ];
 

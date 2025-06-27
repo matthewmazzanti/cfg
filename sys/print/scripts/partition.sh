@@ -6,17 +6,17 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 passfile="$(get_passfile)"
 trap 'rm -f "$passfile"' EXIT INT TERM
 
-KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e-0:0"
-KEY_FS="50c62c57-be39-4958-98fd-baab3d3b6d15"
+KEY_DEV="$by_id/TODO"
+KEY_FS="800e8fd9-22c6-4879-bbaf-99f506722cf9"
 
-DEV="$by_id/nvme-Samsung_SSD_990_EVO_Plus_1TB_S7U5NJ0Y246737K_1"
-ESP_PART="9576e63c-16e9-476c-a83e-3f49b539898d"
-ESP_FS="CD23-F450"
-SWAP_PART="000b890e-d62c-4678-a4a6-ea8f43b727a9"
-SWAP_CRYPT="d7472648-6e61-409c-b7c9-903155901615"
-ROOT_PART="dd27ca90-fa6b-4aa1-9e98-f1401e0e3dea"
-ROOT_CRYPT="aa7f83ca-dfd0-47e1-981a-66740de64eb7"
-ROOT_FS="3365f70d-8620-4d65-8612-11f34048ad37"
+DEV="$by_id/TODO"
+ESP_PART="32527feb-6556-4559-9d7b-99f0a85bad8a"
+ESP_FS="2413-6615"
+SWAP_PART="58570ec6-bec4-4b1c-8dd6-4d037dddd15e"
+SWAP_CRYPT="c5bbc38f-975a-46b0-af01-62b0c8b4b085"
+ROOT_PART="c8662350-29ee-4ff2-b492-53be5b5e54c9"
+ROOT_CRYPT="c74b3bec-0c38-4e8f-a2b0-bf89fa234b1a"
+ROOT_FS="4b81dd49-4c1e-40ae-ba1f-0d2f5e5fd169"
 BLOCK_SIZE="4096"
 
 # Clean up $KEY_DEV
@@ -39,7 +39,7 @@ sgdisk \
     --typecode=1:EF00 \
     --change-name=1:ESP \
     --partition-guid=1:"$ESP_PART" \
-    --new=2:0:+16G \
+    --new=2:0:+8G \
     --typecode=2:8200 \
     --change-name=2:swap \
     --partition-guid=2:"$SWAP_PART" \

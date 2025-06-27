@@ -9,7 +9,7 @@
 
   # Networking
   networking.hostName = "hass";
-  networking.hostId = "224d13b2"; # TODO: Move with zfs settings
+  networking.hostId = "d015a266"; # TODO: Move with zfs settings
   networking.networkmanager.enable = true;
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
