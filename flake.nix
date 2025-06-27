@@ -82,6 +82,12 @@
       packages = self.packages.aarch64-darwin;
     };
 
+    nixosModules = {
+      impermanence = inputs.impermanence.nixosModules.impermanence;
+      lanzaboote = inputs.lanzaboote.nixosModules.lanzaboote;
+      base = import ./modules/nixos.nix;
+    };
+
     nixosConfigurations = import ./sys/nixos.nix {
       inherit self inputs;
     };

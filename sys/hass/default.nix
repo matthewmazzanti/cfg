@@ -8,8 +8,8 @@
 }: {
   imports = [
     # Include the results of the hardware scan.
-    flake.inputs.impermanence.nixosModules.impermanence
-    flake.inputs.lanzaboote.nixosModules.lanzaboote
+    flake.modules.impermanence
+    flake.modules.lanzaboote
     ./hardware.nix
     ./home-automation.nix
   ];

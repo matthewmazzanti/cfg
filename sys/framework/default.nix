@@ -7,8 +7,8 @@
   ...
 }: {
   imports = [
-    flake.inputs.impermanence.nixosModules.impermanence
-    flake.inputs.lanzaboote.nixosModules.lanzaboote
+    flake.modules.impermanence
+    flake.modules.anzaboote
     ./hardware.nix
   ];
 

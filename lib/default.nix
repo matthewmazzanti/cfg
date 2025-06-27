@@ -28,4 +28,6 @@ in rec {
       } @ systemInputs:
         (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
     );
+
+  keys = import ./keys;
 }

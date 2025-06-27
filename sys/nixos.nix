@@ -7,6 +7,8 @@
   flake = {
     inherit inputs;
     packages = self.packages.${system};
+    lib = self.lib;
+    modules = self.nixosModules;
   };
 in {
   lambda = nixosSystem {
