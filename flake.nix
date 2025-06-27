@@ -83,9 +83,9 @@
     };
 
     nixosModules = {
-      impermanence = inputs.impermanence.nixosModules.impermanence;
-      lanzaboote = inputs.lanzaboote.nixosModules.lanzaboote;
-      base = import ./modules/nixos.nix;
+      impermanence = import ./modules/nixos/impermanence.nix;
+      lanzaboote = import ./modules/nixos/lanzaboote.nix;
+      base = import ./modules/nixos/base.nix;
     };
 
     nixosConfigurations = import ./sys/nixos.nix {

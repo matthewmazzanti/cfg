@@ -66,4 +66,10 @@ in {
     specialArgs.flake = flake;
     modules = [ ./framework ];
   };
+
+  print = nixosSystem {
+    inherit system;
+    specialArgs.flake = flake;
+    modules = [ ./print ];
+  };
 }

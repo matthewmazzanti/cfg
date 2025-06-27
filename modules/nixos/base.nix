@@ -1,4 +1,13 @@
-{ pkgs, flake, ... }: {
+{ pkgs, lib, modulesPath, flake, ... }: {
+  # Not entirely sure what this does, but it definitely does something
+  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
+
+  # Use systemd in initrd
+  boot.initrd.systemd.enable = true;
+
+  # Use dhcp - from hardware scan
+  networking.useDHCP = lib.mkDefault true;
+
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "us";
@@ -11,7 +20,7 @@
     # Minimally configured neovim
     flake.packages."nvim/root"
     # Http stuff
-    wget curl httpie
+    wget curl
     # Misc utils
     ripgrep fd git tree jq tmux openssl
 
@@ -54,8 +63,16 @@
   ];
 
   # Trust my CA
-  security.pki.certificates = [flake.lib.keys.ca.crt];
+  security.pki.certificates = [ flake.lib.keys.ca.crt ];
+
+  # Auto cleanup
+  nix.gc.automatic = true;
+  nix.gc.options = "--delete-older-than 180d";
+  nix.optimise.automatic = true;
 
   # Allow flakes and `nix` command
   nix.extraOptions = "experimental-features = nix-command flakes";
+
+  # State version for all systems
+  system.stateVersion = "25.05";
 }
