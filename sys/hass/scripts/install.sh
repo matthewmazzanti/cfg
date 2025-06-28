@@ -1,18 +1,7 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-make_password() {
-    user="$1"
-    mkdir -p /mnt/persist/passwd
-    touch "/mnt/persist/passwd/$user"
-    chown root:shadow "/mnt/persist/passwd/$user"
-    chmod 640 "/mnt/persist/passwd/$user"
-
-    echo "Enter password for $1"
-    until openssl passwd -6 > "/mnt/persist/passwd/$user"; do
-        echo "Try again"
-    done
-}
+source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
@@ -49,4 +38,4 @@ EOF
 umount /mnt/var/lib/sbctl
 
 # Create passwords
-make_password "mmazzanti"
+install_user_password "mmazzanti"
