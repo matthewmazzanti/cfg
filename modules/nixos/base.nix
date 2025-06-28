@@ -10,7 +10,10 @@
 
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
-  console.keyMap = "us";
+  console.keyMap = pkgs.writeText "keymap" ''
+    include "${pkgs.kbd}/share/keymaps/i386/querty/us.map.gz"
+    keycode 58 = Escape
+  '';
 
   # Time zone.
   time.timeZone = "America/New_York";
@@ -22,7 +25,7 @@
     # Http stuff
     wget curl
     # Misc utils
-    ripgrep fd tree jq tmux git openssl htop
+    ripgrep fd tree jq tmux git openssl htop dig
 
     # Compression
     unzip zip
