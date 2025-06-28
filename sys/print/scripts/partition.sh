@@ -3,9 +3,6 @@ set -xeuo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
-passfile="$(get_passfile)"
-trap 'rm -f "$passfile"' EXIT INT TERM
-
 KEY_DEV="$by_id/usb-USB_SanDisk_3.2Gen1_04019fcd9c4e79ca44691256512632c8626a90f14e01b7093716c05a775fdfdf29450000000000000000000015af046c00821b1883558107a8ac7d66-0:0"
 KEY_FS="800e8fd9-22c6-4879-bbaf-99f506722cf9"
 
@@ -18,6 +15,11 @@ ROOT_PART="c8662350-29ee-4ff2-b492-53be5b5e54c9"
 ROOT_CRYPT="c74b3bec-0c38-4e8f-a2b0-bf89fa234b1a"
 ROOT_FS="4b81dd49-4c1e-40ae-ba1f-0d2f5e5fd169"
 BLOCK_SIZE="4096"
+
+confirm_reformat "$DEV" "$KEY_DEV"
+
+passfile="$(get_passfile)"
+trap 'rm -f "$passfile"' EXIT INT TERM
 
 # Clean up $KEY_DEV
 umount /key-dev || true
@@ -78,6 +80,7 @@ cryptsetup luksFormat \
     --cipher=aes-xts-plain64 \
     --key-size=512 \
     --pbkdf=argon2id \
+    --batch-mode \
     --sector-size="$BLOCK_SIZE" \
     --uuid="$ROOT_CRYPT" \
     --key-file=/key-dev/key-file \

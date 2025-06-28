@@ -3,9 +3,6 @@ set -xeuo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
-passfile="$(get_passfile)"
-trap 'rm -f "$passfile"' EXIT INT TERM
-
 DEV="$by_id/nvme-WD_BLACK_SN850X_1000GB_23234X800785_1"
 ESP_PART="86955eb0-c4a9-4b8f-82fd-9e6880ab0abc"
 ESP_FS="542F-DBEC"
@@ -15,6 +12,11 @@ ROOT_PART="2f8b15e5-866c-41be-85bd-7f1478ea1f75"
 ROOT_CRYPT="0050d616-0fd0-40da-8760-e14cc7f108f6"
 ROOT_FS="1e7cc615-eaa3-4636-be79-c67bb165cfd0"
 BLOCK_SIZE="4096"
+
+confirm_reformat "$DEV" "$KEY_DEV"
+
+passfile="$(get_passfile)"
+trap 'rm -f "$passfile"' EXIT INT TERM
 
 # Clean up $DEV
 umount -R /mnt || true
@@ -60,6 +62,7 @@ cryptsetup luksFormat \
     --cipher=aes-xts-plain64 \
     --key-size=512 \
     --pbkdf=argon2id \
+    --batch-mode \
     --sector-size="$BLOCK_SIZE" \
     --uuid="$ROOT_CRYPT" \
     --key-file "$passfile" \

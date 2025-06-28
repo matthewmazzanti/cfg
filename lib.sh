@@ -4,6 +4,16 @@ by_partuuid="/dev/disk/by-partuuid"
 by_path="/dev/disk/by-path"
 mapper="/dev/mapper"
 
+confirm_reformat() {
+    echo "WARNING: This will reformat the following disks: $@"
+    echo "ALL DATA WILL BE LOST"
+    read -p "Type 'YES' to continue: " confirm
+    if [[ "$confirm" != "YES" ]]; then
+        echo "Aborted"
+        exit 1
+    fi
+}
+
 get_password() {
     python3 - <<'EOF'
 import sys
