@@ -28,7 +28,7 @@
     unzip zip
 
     # Scripting languages
-    python3
+    python3 uv
 
     # Installation/debug utils
     e2fsprogs # ext filesystem management, chattr
