@@ -4,3 +4,4 @@ result
 a.out
 startup
 scripts/fio/results/
+.DS_Store
