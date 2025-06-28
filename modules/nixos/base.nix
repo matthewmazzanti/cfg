@@ -25,7 +25,8 @@
     # Http stuff
     wget curl
     # Misc utils
-    ripgrep fd tree jq tmux git openssl htop dig
+    ripgrep fd tree jq tmux git openssl htop lsof
+    dig netcat nmap
 
     # Compression
     unzip zip
