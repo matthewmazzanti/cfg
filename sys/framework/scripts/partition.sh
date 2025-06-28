@@ -101,7 +101,7 @@ zpool create -f \
 zfs create -o mountpoint=none root-pool/local
 zfs create -o mountpoint=none root-pool/state
 zfs create -o mountpoint=legacy root-pool/local/root
-zfs create -o mountpoint=legacy -o recordsize=128K root-pool/local/nix
+zfs create -o mountpoint=legacy -o recordsize=16k root-pool/local/nix
 zfs create -o mountpoint=legacy root-pool/state/persist
 zfs create -o mountpoint=legacy root-pool/state/home
 zfs snapshot root-pool/local/root@blank
