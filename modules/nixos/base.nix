@@ -11,7 +11,7 @@
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = pkgs.writeText "keymap" ''
-    include "${pkgs.kbd}/share/keymaps/i386/querty/us.map.gz"
+    include "${pkgs.kbd}/share/keymaps/i386/qwerty/us.map.gz"
     keycode 58 = Escape
   '';
 
