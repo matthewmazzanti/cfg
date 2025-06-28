@@ -3,3 +3,4 @@ result
 .ccls-cache/
 a.out
 startup
+scripts/fio/results/
