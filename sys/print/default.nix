@@ -7,7 +7,7 @@
   ];
 
   # Networking
-  networking.hostName = "hass";
+  networking.hostName = "print";
 
   # NetworkManager
   networking.networkmanager.enable = true;
