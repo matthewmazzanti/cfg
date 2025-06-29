@@ -49,7 +49,8 @@ wipe_root_part "$DEV"
 
 # Clean up $DATA_DEVS
 for i in "${!DATA_DEVS[@]}"; do
-  wipefs --all "${DATA_DEVS[i]}" || true
+    cryptsetup luksClose "${DATA_CRYPTS[i]}" || true
+    wipefs --all "${DATA_DEVS[i]}" || true
 done
 
 # Create partition for primary disk
