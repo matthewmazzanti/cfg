@@ -32,3 +32,7 @@ __FOO__
 def foo():
   bar, baz
 ```
+
+# Gitea
+- Run on second interface to allow native port 22. Requires setting up static addressing
+  and multiple addresses for the server
