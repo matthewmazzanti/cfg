@@ -49,27 +49,33 @@ in {
     ];
   };
 
-  hass = nixosSystem {
-    inherit system;
-    specialArgs.flake = flake;
-    modules = [ ./hass ];
-  };
-
-  live = nixosSystem {
-    inherit system;
-    specialArgs.flake = flake;
-    modules = [ ./live ];
-  };
-
   framework = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
     modules = [ ./framework ];
   };
 
+  server = nixosSystem {
+    inherit system;
+    specialArgs.flake = flake;
+    modules = [ ./server ];
+  };
+
+  hass = nixosSystem {
+    inherit system;
+    specialArgs.flake = flake;
+    modules = [ ./hass ];
+  };
+
   print = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
     modules = [ ./print ];
+  };
+
+  live = nixosSystem {
+    inherit system;
+    specialArgs.flake = flake;
+    modules = [ ./live ];
   };
 }
