@@ -12,12 +12,38 @@
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
 
-  boot.initrd.luks.devices."5934f569-b4a3-492e-9c5c-6429939a4082" = {
-    device = "/dev/disk/by-uuid/5934f569-b4a3-492e-9c5c-6429939a4082";
-    keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
-    keyFileTimeout = 10;
-    bypassWorkqueues = true;
-    allowDiscards = true;
+  boot.initrd.luks.devices = {
+    "5934f569-b4a3-492e-9c5c-6429939a4082" = {
+      device = "/dev/disk/by-uuid/5934f569-b4a3-492e-9c5c-6429939a4082";
+      keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+      allowDiscards = true;
+    };
+    "e0c6ed81-51f8-423c-ba9f-2873837a91e7" = {
+      device = "/dev/disk/by-uuid/e0c6ed81-51f8-423c-ba9f-2873837a91e7";
+      keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+    };
+    "b2bcfa53-8f2e-47b2-b7d7-3a68f2a13660" = {
+      device = "/dev/disk/by-uuid/b2bcfa53-8f2e-47b2-b7d7-3a68f2a13660";
+      keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+    };
+    "26713afa-4b9b-41b3-be58-8ae760a31ca9" = {
+      device = "/dev/disk/by-uuid/26713afa-4b9b-41b3-be58-8ae760a31ca9";
+      keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+    };
+    "61a8a2ef-77e7-41bd-9448-8e4404a040e6" = {
+      device = "/dev/disk/by-uuid/61a8a2ef-77e7-41bd-9448-8e4404a040e6";
+      keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+    };
   };
 
   swapDevices = [
