@@ -4,11 +4,10 @@
     flake.modules.impermanence
     flake.modules.lanzaboote
     ./hardware.nix
-    ./home-automation.nix
   ];
 
   # Networking
-  networking.hostName = "hass";
+  networking.hostName = "server";
   networking.networkmanager.enable = true;
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
@@ -16,7 +15,7 @@
   ];
 
   # ZFS auto-cleanup
-  networking.hostId = "224d13b2";
+  networking.hostId = "a87230c5";
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
 

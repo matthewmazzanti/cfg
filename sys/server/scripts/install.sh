@@ -3,6 +3,8 @@ set -xeuo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../../../lib.sh"
 
+HOST="server"
+
 # Create sbctl keys
 mkdir -p /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
 mount --bind /mnt/persist/var/lib/sbctl /mnt/var/lib/sbctl
@@ -13,7 +15,7 @@ nixos-install \
     --no-channel-copy \
     --no-root-password \
     --no-bootloader \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#$HOST"
 
 # Install sbctl keys, needed for bootloader install
 nixos-enter -- bash <<'EOF'
@@ -26,7 +28,7 @@ nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#$HOST"
 
 # Cleanup /nix
 nixos-enter -- bash <<'EOF'
