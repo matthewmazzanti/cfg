@@ -16,6 +16,7 @@ ROOT_CRYPT="c74b3bec-0c38-4e8f-a2b0-bf89fa234b1a"
 ROOT_FS="4b81dd49-4c1e-40ae-ba1f-0d2f5e5fd169"
 BLOCK_SIZE="4096"
 
+confirm_rootfs SOURCE root-pool/local/root
 confirm_reformat "$DEV" "$KEY_DEV"
 
 passfile="$(get_passfile)"

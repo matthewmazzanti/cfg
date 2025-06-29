@@ -10,6 +10,7 @@ ROOT_PART="807c816a-cec5-4e2a-b7e1-e3034af7b6c7"
 ROOT_CRYPT="90581c5c-2e2b-4c0e-81fe-1310536bd256"
 ROOT_FS="f56ebe71-95cc-4e1c-b532-ffb24db99cb9"
 
+confirm_rootfs UUID "$ROOT_FS"
 confirm_reformat "$DEV"
 
 passfile="$(get_passfile)"
