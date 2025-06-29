@@ -12,9 +12,9 @@
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
 
-  boot.initrd.luks.devices."aa7f83ca-dfd0-47e1-981a-66740de64eb7" = {
-    device = "/dev/disk/by-uuid/aa7f83ca-dfd0-47e1-981a-66740de64eb7";
-    keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
+  boot.initrd.luks.devices."5934f569-b4a3-492e-9c5c-6429939a4082" = {
+    device = "/dev/disk/by-uuid/5934f569-b4a3-492e-9c5c-6429939a4082";
+    keyFile = "/key-file:UUID=f893b93f-b2a7-4de9-9650-71e6d850102d";
     keyFileTimeout = 10;
     bypassWorkqueues = true;
     allowDiscards = true;
@@ -22,7 +22,7 @@
 
   swapDevices = [
     {
-      device = "/dev/disk/by-partuuid/000b890e-d62c-4678-a4a6-ea8f43b727a9";
+      device = "/dev/disk/by-partuuid/bd9314f2-1074-428d-a1ed-7ab0d5fd36fe";
       randomEncryption.enable = true;
       randomEncryption.allowDiscards = true;
     }
@@ -36,7 +36,7 @@
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/CD23-F450";
+      device = "/dev/disk/by-uuid/D01B-0C25";
       fsType = "vfat";
       # Systemd "Security hole" warnings:
       # https://github.com/NixOS/nixpkgs/issues/279362
@@ -61,6 +61,18 @@
       fsType = "zfs";
       options = ["noatime" "nodiratime" ];
     };
+
+    "/srv/share/media" = {
+      device = "data-pool/share/media";
+      fsType = "zfs";
+      options = ["noatime" "nodiratime" ];
+    };
+
+    "/srv/share/documents" = {
+      device = "data-pool/share/documents";
+      fsType = "zfs";
+      options = ["noatime" "nodiratime" ];
+    };
   };
 
   services.udev.path = [pkgs.systemd];
@@ -70,7 +82,7 @@
     ''DRIVERS=="usb"''
     ''ATTRS{idProduct}=="5583"''
     ''ATTRS{idVendor}=="0781"''
-    ''ATTRS{serial}=="010120f1fc6b4bb4ab4d7391d2fdf545bb3e6e6143450208f305b9fd806943b3e4e900000000000000000000f833a26f001c4900835581072a33742e"''
+    ''ATTRS{serial}=="01017529487ef0c9a1ba96ca2d7456553b31c2036f1da2f1b6eb04fe662b0413d8e40000000000000000000084629741001e5a00835581072a336cdf"''
     ''RUN+="${pkgs.systemd}/bin/poweroff"''
   ];
 
