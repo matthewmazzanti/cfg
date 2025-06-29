@@ -207,6 +207,6 @@ mount -t zfs  -o noatime,nodiratime root-pool/local/nix      /mnt/nix
 mount -t zfs  -o noatime,nodiratime root-pool/state/persist  /mnt/persist
 mount -t zfs  -o noatime,nodiratime root-pool/state/home     /mnt/home
 
-mkdir -p /mnt/srv/gitea /mnt/srv/share/media /mnt/srv/share/documents /mnt/srv/backups/mbp
+mkdir -p /mnt/srv/share/media /mnt/srv/share/documents
 mount -t zfs -o noatime,nodiratime data-pool/share/media      /mnt/srv/share/media
 mount -t zfs -o noatime,nodiratime data-pool/share/documents  /mnt/srv/share/documents
