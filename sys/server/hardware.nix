@@ -93,7 +93,6 @@
       options = ["noatime" "nodiratime" ];
     };
 
-    /*
     "/srv/share/media" = {
       device = "data-pool/share/media";
       fsType = "zfs";
@@ -105,7 +104,6 @@
       fsType = "zfs";
       options = ["noatime" "nodiratime" ];
     };
-    */
   };
 
   services.udev.path = [pkgs.systemd];
