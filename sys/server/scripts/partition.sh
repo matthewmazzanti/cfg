@@ -48,6 +48,7 @@ cryptsetup luksClose "$ROOT_CRYPT" || true
 wipe_root_part "$DEV"
 
 # Clean up $DATA_DEVS
+zpool destroy data-pool || true
 for i in "${!DATA_DEVS[@]}"; do
     cryptsetup luksClose "${DATA_CRYPTS[i]}" || true
     wipefs --all "${DATA_DEVS[i]}" || true
