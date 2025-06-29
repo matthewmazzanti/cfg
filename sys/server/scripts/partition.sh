@@ -74,7 +74,7 @@ sgdisk \
 
 blockdev --rereadpt "$DEV"
 udevadm settle --timeout=10
-wait_all_exist "$by_partuuid/$ESP_PART" "$by_partuuid/$ROOT_PART"
+wait_all_exist "$by_partuuid/$ESP_PART" "$by_partuuid/$SWAP_PART" "$by_partuuid/$ROOT_PART"
 
 # Open and mount
 cryptsetup open \

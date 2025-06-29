@@ -54,6 +54,11 @@
     }
   ];
 
+  boot.zfs.pools = {
+    "root-pool".devNodes = "/dev/mapper";
+    "data-pool".devNodes = "/dev/mapper";
+  };
+
   fileSystems = {
     "/" = {
       device = "root-pool/local/root";
