@@ -4,6 +4,15 @@ by_partuuid="/dev/disk/by-partuuid"
 by_path="/dev/disk/by-path"
 mapper="/dev/mapper"
 
+confirm_rootfs() {
+    local column="$1"
+    local root="$2"
+    if [[ "$(findmnt -n -o "$column")" == "$root" ]]; then
+        echo "System currently mounted at root! Refusing to continue"
+        exit 1
+    fi
+}
+
 confirm_reformat() {
     echo "WARNING: This will reformat the following disks: $@"
     echo "ALL DATA WILL BE LOST"
