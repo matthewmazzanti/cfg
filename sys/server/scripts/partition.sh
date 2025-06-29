@@ -177,12 +177,12 @@ zpool create -f \
     -O mountpoint=none \
     data-pool raidz1 "${DATA_CRYPTS[@]/#/$mapper/}"
 
-zfs snapshot root-pool/local/root@blank
 
 # -- Impermanence --
 zfs create -o mountpoint=none root-pool/local
 zfs create -o mountpoint=legacy root-pool/local/root
 zfs create -o mountpoint=legacy root-pool/local/nix
+zfs snapshot root-pool/local/root@blank
 
 # -- Persistence --
 zfs create -o mountpoint=none root-pool/state
