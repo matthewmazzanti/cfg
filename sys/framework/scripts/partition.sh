@@ -91,7 +91,6 @@ mkswap --label=swap "$mapper/$SWAP_CRYPT"
 zpool create -f \
     -o ashift="$(to_ashift "$BLOCK_SIZE")" \
     -O compression=lz4 \
-    -O recordsize=128K \
     -O atime=off \
     -O xattr=sa \
     -O acltype=posixacl \
@@ -101,7 +100,7 @@ zpool create -f \
 zfs create -o mountpoint=none root-pool/local
 zfs create -o mountpoint=none root-pool/state
 zfs create -o mountpoint=legacy root-pool/local/root
-zfs create -o mountpoint=legacy -o recordsize=128k root-pool/local/nix
+zfs create -o mountpoint=legacy root-pool/local/nix
 zfs create -o mountpoint=legacy root-pool/state/persist
 zfs create -o mountpoint=legacy root-pool/state/home
 zfs snapshot root-pool/local/root@blank
