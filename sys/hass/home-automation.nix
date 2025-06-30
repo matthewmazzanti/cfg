@@ -48,7 +48,7 @@ in {
     ];
     extraOptions = [
       "--cap-add=CAP_NET_RAW,CAP_NET_BIND_SERVICE"
-      # "--network=host"
+      "--network=host"
     ];
     podman.user = "hass";
   };
