@@ -27,6 +27,7 @@ in {
     isSystemUser = true;
     group = "hass";
     home = "/var/lib/hass";
+    linger = true;
     createHome = true;
     autoSubUidGidRange = true;
   };
@@ -71,6 +72,7 @@ in {
     isSystemUser = true;
     group = "zwave";
     home = "/var/lib/zwave";
+    linger = true;
     createHome = true;
     autoSubUidGidRange = true;
   };
