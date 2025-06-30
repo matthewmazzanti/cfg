@@ -23,16 +23,14 @@ in {
   };
 
   # === Home Assistant ===
-  users.groups.hass = {};
   users.users.hass = {
     isSystemUser = true;
     group = "hass";
     home = "/var/lib/hass";
     createHome = true;
     autoSubUidGidRange = true;
-    # subUidRanges = [ { count = 65536; } ];
-    # subGidRanges = [ { count = 65536; } ];
   };
+  users.groups.hass = {};
 
   virtualisation.oci-containers.containers.hass = {
     # Tag: ghcr.io/home-assistant/home-assistant:stable
@@ -47,8 +45,9 @@ in {
       "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
     extraOptions = [ "--network=host" ];
-    # podman.user = "hass";
+    podman.user = "hass";
   };
+
   services.nginx.virtualHosts."hass.iot" = {
     forceSSL = true;
     sslCertificate = "${hassData}/tls/hass.iot.crt";
@@ -68,6 +67,15 @@ in {
   };
 
   # === Zwave JS ===
+  users.users.zwave = {
+    isSystemUser = true;
+    group = "zwave";
+    home = "/var/lib/zwave";
+    createHome = true;
+    autoSubUidGidRange = true;
+  };
+  users.groups.zwave = {};
+
   virtualisation.oci-containers.containers.zwave = {
     # Tag: zwavejs/zwave-js-ui:latest
     image = "zwavejs/zwave-js-ui@sha256:52b6ee2c37fa1a3c13a8d8f59b45145b546ec31b5c85d5053e1279fc558c5a1e";
@@ -78,7 +86,9 @@ in {
     ports = ["127.0.0.1:8091:8091" "127.0.0.1:3000:3000"];
     volumes = ["${zwaveData}/store:/usr/src/app/store"];
     extraOptions = ["--device=/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"];
+    podman.user = "zwave";
   };
+
   services.nginx.virtualHosts."zwave.iot" = {
     forceSSL = true;
     sslCertificate = "${zwaveData}/tls/zwave.iot.crt";
