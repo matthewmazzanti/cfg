@@ -46,7 +46,10 @@ in {
       "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
       "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
-    extraOptions = ["--network=host"];
+    extraOptions = [
+      "--cap-add=CAP_NET_RAW,CAP_NET_BIND_SERVICE"
+      # "--network=host"
+    ];
     podman.user = "hass";
   };
   services.nginx.virtualHosts."hass.iot" = {
