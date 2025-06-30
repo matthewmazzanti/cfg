@@ -23,6 +23,16 @@ in {
   };
 
   # === Home Assistant ===
+  users.groups.hass = {};
+  users.users.hass = {
+    isSystemUser = true;
+    group = "hass";
+    home = "/var/lib/hass";
+    createHome = true;
+    subUidRanges = [ { count = 65536; } ];
+    subGidRanges = [ { count = 65536; } ];
+  };
+
   virtualisation.oci-containers.containers.hass = {
     # Tag: ghcr.io/home-assistant/home-assistant:stable
     image = "ghcr.io/home-assistant/home-assistant@sha256:e207929bdf5dc95db43c618b877364e99f7ad506ec5440aeef80d5c9c1cae668";
@@ -36,6 +46,7 @@ in {
       "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
     extraOptions = ["--network=host"];
+    podman.user = "hass";
   };
   services.nginx.virtualHosts."hass.iot" = {
     forceSSL = true;
