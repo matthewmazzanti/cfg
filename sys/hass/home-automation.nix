@@ -29,8 +29,9 @@ in {
     group = "hass";
     home = "/var/lib/hass";
     createHome = true;
-    subUidRanges = [ { count = 65536; } ];
-    subGidRanges = [ { count = 65536; } ];
+    autoSubUidGidRange = true;
+    # subUidRanges = [ { count = 65536; } ];
+    # subGidRanges = [ { count = 65536; } ];
   };
 
   virtualisation.oci-containers.containers.hass = {
