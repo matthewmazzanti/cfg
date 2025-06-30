@@ -46,7 +46,7 @@ in {
       "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
     ];
     extraOptions = [ "--network=host" ];
-    podman.user = "hass";
+    # podman.user = "hass";
   };
 
   services.nginx.virtualHosts."hass.iot" = {
@@ -88,7 +88,7 @@ in {
     ports = ["127.0.0.1:8091:8091" "127.0.0.1:3000:3000"];
     volumes = ["${zwaveData}/store:/usr/src/app/store"];
     extraOptions = ["--device=/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"];
-    podman.user = "zwave";
+    # podman.user = "zwave";
   };
 
   services.nginx.virtualHosts."zwave.iot" = {
