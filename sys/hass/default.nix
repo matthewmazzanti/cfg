@@ -37,7 +37,6 @@
         Address = "172.16.2.10/20";
         Gateway = "172.16.0.1";
         DNS = [ "172.16.0.1" ];
-
         VLAN = [ "enp1s0.18" ];
       };
     };
@@ -60,6 +59,18 @@
         IPv6AcceptRA = false;
         LinkLocalAddressing = "no";
       };
+    };
+
+    netdevs."10-br-int" = {
+      netdevConfig = {
+        Name = "br-int";
+        Kind = "bridge";
+      };
+    };
+
+    networks."10-br-int" = {
+      matchConfig.Name = "br-int";
+      networkConfig.Address = "172.20.0.1/24";
     };
   };
 }
