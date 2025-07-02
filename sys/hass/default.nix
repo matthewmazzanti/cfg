@@ -37,6 +37,8 @@
         Address = "172.16.2.10/20";
         Gateway = "172.16.0.1";
         DNS = [ "172.16.0.1" ];
+
+        VLAN = [ "enp1s0.18" ];
       };
     };
 
@@ -47,17 +49,6 @@
       };
       vlanConfig = {
         Id = 2;
-        Link = "eth0";
-      };
-    };
-
-    networks."05-enp1s0.18" = {
-      matchConfig.Name = "enp1s0.18";
-      networkConfig = {
-        # Disable networking through this interface for the host
-        DHCP = "no";
-        IPv6AcceptRA = false;
-        LinkLocalAddressing = "no";
       };
     };
   };
