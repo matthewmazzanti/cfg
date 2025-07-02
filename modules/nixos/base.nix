@@ -1,12 +1,9 @@
-{ pkgs, lib, modulesPath, flake, ... }: {
+{ pkgs, modulesPath, flake, ... }: {
   # Not entirely sure what this does, but it definitely does something
   imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
   # Use systemd in initrd
   boot.initrd.systemd.enable = true;
-
-  # Use dhcp - from hardware scan
-  networking.useDHCP = lib.mkDefault true;
 
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";

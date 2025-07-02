@@ -9,11 +9,11 @@
 
   # Networking
   networking.hostName = "hass";
-  networking.networkmanager.enable = true;
-  environment.persistence."/persist".directories = [
-    "/etc/NetworkManager/system-connections"
-    "/var/lib/NetworkManager"
-  ];
+  # networking.networkmanager.enable = true;
+  # environment.persistence."/persist".directories = [
+  #   "/etc/NetworkManager/system-connections"
+  #   "/var/lib/NetworkManager"
+  # ];
 
   # ZFS auto-cleanup
   networking.hostId = "224d13b2";
@@ -27,5 +27,38 @@
   users.users.mmazzanti = {
     extraGroups = ["networkmanager" "podman" "dialout"];
     packages = [ flake.packages."nvim/nix" ];
+  };
+
+  networking.useNetworkd = true;
+  systemd.network = {
+    networks."00-enp1s0" = {
+      matchConfig.Name = "enp1s0";
+      networkConfig = {
+        Address = "172.16.0.236/20";
+        Gateway = "172.16.0.1";
+        DNS = [ "172.16.0.1" ];
+      };
+    };
+
+    netdevs."05-enp1s0.18" = {
+      netdevConfig = {
+        Name = "enp1s0.18";
+        Kind = "vlan";
+      };
+      vlanConfig = {
+        Id = 2;
+        Link = "eth0";
+      };
+    };
+
+    networks."05-enp1s0.18" = {
+      matchConfig.Name = "enp1s0.18";
+      networkConfig = {
+        # Disable networking through this interface for the host
+        DHCP = "no";
+        IPv6AcceptRA = false;
+        LinkLocalAddressing = "no";
+      };
+    };
   };
 }
