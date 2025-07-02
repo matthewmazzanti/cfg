@@ -34,7 +34,7 @@
     networks."00-enp1s0" = {
       matchConfig.Name = "enp1s0";
       networkConfig = {
-        Address = "172.16.0.236/20";
+        Address = "172.16.2.10/20";
         Gateway = "172.16.0.1";
         DNS = [ "172.16.0.1" ];
       };
