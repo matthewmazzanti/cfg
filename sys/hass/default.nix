@@ -78,7 +78,7 @@
         Name = "veth-ha";
         Kind = "veth";
       };
-      vethPeerConfig.Name = "veth-ha-c";
+      peerConfig.Name = "veth-ha-c";
     };
 
     networks."20-veth-ha" = {
@@ -91,7 +91,7 @@
         Name = "veth-zwave";
         Kind = "veth";
       };
-      vethPeerConfig.Name = "veth-zwave-c";
+      peerConfig.Name = "veth-zwave-c";
     };
 
     networks."20-veth-zwave" = {
