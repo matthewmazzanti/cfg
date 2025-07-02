@@ -37,7 +37,7 @@ in {
     # Tag: ghcr.io/home-assistant/home-assistant:stable
     image = "ghcr.io/home-assistant/home-assistant@sha256:e207929bdf5dc95db43c618b877364e99f7ad506ec5440aeef80d5c9c1cae668";
     serviceName = "hass";
-    autoStart = true;
+    autoStart = false;
     environment.TZ = config.time.timeZone;
     volumes = [
       "${hassData}/config:/config"
@@ -82,7 +82,7 @@ in {
     # Tag: zwavejs/zwave-js-ui:latest
     image = "zwavejs/zwave-js-ui@sha256:52b6ee2c37fa1a3c13a8d8f59b45145b546ec31b5c85d5053e1279fc558c5a1e";
     serviceName = "zwave";
-    autoStart = true;
+    autoStart = false;
     environment.TZ = config.time.timeZone;
     environmentFiles = ["${zwaveData}/env.secret"];
     ports = ["127.0.0.1:8091:8091" "127.0.0.1:3000:3000"];
