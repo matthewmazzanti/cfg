@@ -70,7 +70,7 @@
 
     networks."10-br-int" = {
       matchConfig.Name = "br-int";
-      networkConfig.Address = "172.20.0.1/24";
+      networkConfig.Address = "192.168.0.1/24";
     };
   };
 }
