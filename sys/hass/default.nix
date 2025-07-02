@@ -47,7 +47,7 @@
         Kind = "vlan";
       };
       vlanConfig = {
-        Id = 2;
+        Id = 18;
       };
     };
 
