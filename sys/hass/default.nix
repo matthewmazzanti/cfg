@@ -72,5 +72,46 @@
       matchConfig.Name = "br-int";
       networkConfig.Address = "192.168.0.1/24";
     };
+
+    netdevs."20-veth-ha" = {
+      netdevConfig = {
+        Name = "veth-ha";
+        Kind = "veth";
+      };
+      vethPeerConfig.Name = "veth-ha-c";
+    };
+
+    networks."20-veth-ha" = {
+      matchConfig.Name = "veth-ha";
+      networkConfig.Bridge = "br-int";
+    };
+
+    netdevs."20-veth-zwave" = {
+      netdevConfig = {
+        Name = "veth-zwave";
+        Kind = "veth";
+      };
+      vethPeerConfig.Name = "veth-zwave-c";
+    };
+
+    networks."20-veth-zwave" = {
+      matchConfig.Name = "veth-zwave";
+      networkConfig.Bridge = "br-int";
+    };
+
+    netdevs."30-macvlan-ha" = {
+      netdevConfig = {
+        Name = "macvlan-ha";
+        Kind = "macvlan";
+      };
+      macvlanConfig = {
+        Mode = "bridge";
+      };
+    };
+
+    networks."30-macvlan-ha" = {
+      matchConfig.Name = "macvlan-ha";
+      networkConfig.ConfigureWithoutCarrier = true;
+    };
   };
 }
