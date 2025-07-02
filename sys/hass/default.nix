@@ -112,6 +112,7 @@
     networks."30-macvlan-ha" = {
       matchConfig.Name = "macvlan-ha";
       networkConfig = {
+        MACVLAN = "macvlan-ha";
         Address = "172.18.2.10/20";
         Gateway = "172.18.0.1";
         DNS = [ "172.18.0.1" ];
