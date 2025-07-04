@@ -81,14 +81,14 @@
     containers = {
       nginx = {
         unitConfig = {
-          after = [ "var-lib-nginx.mount" ];
-          requires = [ "var-lib-nginx.mount" ];
+          After = [ "var-lib-nginx.mount" ];
+          Requires = [ "var-lib-nginx.mount" ];
         };
         containerConfig = {
           name = "nginx";
-          # image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
-          image = "docker.io/nicolaka/netshoot:latest";
-          entrypoint = builtins.toJSON ["sleep" "infinity"];
+          image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
+          # image = "docker.io/nicolaka/netshoot:latest";
+          # entrypoint = builtins.toJSON ["sleep" "infinity"];
           uidMaps = ["0:200000:65536"];
           gidMaps = ["0:200000:65536"];
           dropCapabilities = ["ALL"];
@@ -106,8 +106,8 @@
 
       hass = {
         unitConfig = {
-          after = [ "var-lib-hass.mount" ];
-          requires = [ "var-lib-hass.mount" ];
+          After = [ "var-lib-hass.mount" ];
+          Requires = [ "var-lib-hass.mount" ];
         };
         containerConfig = {
           name = "hass";
@@ -136,8 +136,8 @@
 
       zwave = {
         unitConfig = {
-          after = [ "var-lib-zwave.mount" ];
-          requires = [ "var-lib-zwave.mount" ];
+          After = [ "var-lib-zwave.mount" ];
+          Requires = [ "var-lib-zwave.mount" ];
         };
         containerConfig = {
           name = "zwave";
