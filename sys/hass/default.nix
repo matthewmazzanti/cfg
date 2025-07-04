@@ -61,7 +61,7 @@
         driver = "bridge";
         internal = true;
         disableDns = true;
-        subnets = [ "192.168.100.0/24" ];
+        subnets = [ "192.168.0.0/24" ];
       };
 
       ha-macvlan.networkConfig = {
@@ -73,13 +73,26 @@
     };
 
     containers = {
+      nginx.containerConfig = {
+        name = "hass";
+        networks = [
+          "ha-internal:ip=192.168.0.2"
+        ];
+        dns = [ "172.18.0.1" ];
+        # TODO: Remove/update following
+        addCapabilities = [ "NET_RAW" ];
+        image = "docker.io/nicolaka/netshoot:latest";
+        entrypoint = builtins.toJSON ["sleep" "infinity"];
+      };
+
       hass.containerConfig = {
         name = "hass";
         networks = [
           "ha-macvlan:ip=172.18.2.10,mac=02:11:22:33:44:55"
-          "ha-internal:alias=hass"
+          "ha-internal:ip=192.168.0.3"
         ];
         dns = [ "172.18.0.1" ];
+        # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
         entrypoint = builtins.toJSON ["sleep" "infinity"];
@@ -87,10 +100,8 @@
 
       zwave.containerConfig = {
         name = "zwave";
-        networks = [
-          "ha-internal:alias=zwave"
-        ];
-        dns = [ "172.18.0.1" ];
+        networks = [ "ha-internal:ip=192.168.0.4" ];
+        # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
         entrypoint = builtins.toJSON ["sleep" "infinity"];
