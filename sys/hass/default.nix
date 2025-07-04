@@ -116,10 +116,10 @@
           image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
           uidMaps = ["0:300000:65536"];
           gidMaps = ["0:300000:65536"];
-          dropCapabilities = ["ALL"];
-          addCapabilities = ["FOWNER" "NET_RAW"];
-          readOnly = true;
-          tmpfses = [ "/var/run" "/tmp" ];
+          # dropCapabilities = ["ALL"];
+          # addCapabilities = ["FOWNER" "NET_RAW"];
+          # readOnly = true;
+          # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/hass:/config:rw"
