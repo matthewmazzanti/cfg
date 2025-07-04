@@ -60,7 +60,6 @@
       ha-internal.networkConfig = {
         driver = "bridge";
         internal = true;
-        disableDns = true;
         subnets = [ "192.168.100.0/24" ];
       };
 
@@ -78,8 +77,8 @@
       hass.containerConfig = {
         name = "hass";
         networks = [
-          "ha-internal:alias=hass"
           "ha-macvlan:mac=02:11:22:33:44:55"
+          "ha-internal:alias=hass"
         ];
         addCapabilities = [
           "NET_RAW"
