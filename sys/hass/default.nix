@@ -79,6 +79,7 @@
           "ha-internal:ip=192.168.100.2"
         ];
         dns = [ "172.18.0.1" ];
+        environments.TZ = config.time.timeZone;
         # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
@@ -87,11 +88,21 @@
 
       hass.containerConfig = {
         name = "hass";
+        volumes = [
+          "/etc/localtime:/etc/localtime:ro"
+          "/persist/containers/hass/config:/config:rw"
+          "${./hass-config/configuration.yaml}:/config/configuration.yaml:ro"
+          "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
+          "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
+        ];
         networks = [
           "ha-macvlan:ip=172.18.2.10,mac=02:11:22:33:44:55"
           "ha-internal:ip=192.168.100.3"
         ];
         dns = [ "172.18.0.1" ];
+        uidMaps = ["0:200000:65536"];
+        gidMaps = ["0:200000:65536"];
+        environments.TZ = config.time.timeZone;
         # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
@@ -101,6 +112,12 @@
       zwave.containerConfig = {
         name = "zwave";
         networks = [ "ha-internal:ip=192.168.100.4" ];
+        uidMaps = ["0:200000:65536"];
+        gidMaps = ["0:200000:65536"];
+        devices = [
+          "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"
+        ];
+        environments.TZ = config.time.timeZone;
         # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
