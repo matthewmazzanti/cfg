@@ -3,6 +3,7 @@
     flake.modules.base
     flake.modules.impermanence
     flake.modules.lanzaboote
+    flake.modules.quadlet
     ./hardware.nix
     # ./home-automation.nix
   ];

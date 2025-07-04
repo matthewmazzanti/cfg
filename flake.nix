@@ -21,6 +21,8 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -83,6 +85,7 @@
     };
 
     nixosModules = {
+      quadlet = inputs.quadlet-nix.nixosModules.quadlet;
       impermanence = import ./modules/nixos/impermanence.nix;
       lanzaboote = import ./modules/nixos/lanzaboote.nix;
       base = import ./modules/nixos/base.nix;
