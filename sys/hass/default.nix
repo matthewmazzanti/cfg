@@ -75,9 +75,9 @@
     containers = {
       nginx.containerConfig = {
         name = "nginx";
-        networks = [
-          "ha-internal:ip=192.168.100.2"
-        ];
+        uidMaps = ["0:200000:65536"];
+        gidMaps = ["0:200000:65536"];
+        networks = [ "ha-internal:ip=192.168.100.2" ];
         dns = [ "172.18.0.1" ];
         environments.TZ = config.time.timeZone;
         # TODO: Remove/update following
@@ -88,6 +88,8 @@
 
       hass.containerConfig = {
         name = "hass";
+        uidMaps = ["0:300000:65536"];
+        gidMaps = ["0:300000:65536"];
         volumes = [
           "/etc/localtime:/etc/localtime:ro"
           "/persist/containers/hass/config:/config:rw"
@@ -100,8 +102,6 @@
           "ha-internal:ip=192.168.100.3"
         ];
         dns = [ "172.18.0.1" ];
-        uidMaps = ["0:200000:65536"];
-        gidMaps = ["0:200000:65536"];
         environments.TZ = config.time.timeZone;
         # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
@@ -111,13 +111,11 @@
 
       zwave.containerConfig = {
         name = "zwave";
-        networks = [ "ha-internal:ip=192.168.100.4" ];
-        uidMaps = ["0:200000:65536"];
-        gidMaps = ["0:200000:65536"];
-        devices = [
-          "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave"
-        ];
+        uidMaps = ["0:400000:65536"];
+        gidMaps = ["0:400000:65536"];
+        devices = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave" ];
         environments.TZ = config.time.timeZone;
+        networks = [ "ha-internal:ip=192.168.100.4" ];
         # TODO: Remove/update following
         addCapabilities = [ "NET_RAW" ];
         image = "docker.io/nicolaka/netshoot:latest";
