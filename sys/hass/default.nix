@@ -91,9 +91,9 @@
           # entrypoint = builtins.toJSON ["sleep" "infinity"];
           uidMaps = ["0:200000:65536"];
           gidMaps = ["0:200000:65536"];
-          dropCapabilities = ["ALL"];
-          readOnly = true;
-          tmpfses = [ "/var/run" "/tmp" ];
+          # dropCapabilities = ["ALL"];
+          # readOnly = true;
+          # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
