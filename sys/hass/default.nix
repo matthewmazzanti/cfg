@@ -25,6 +25,7 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
+  networking.useDHCP = false;
   systemd.network = {
     enable = true;
     networks."00-enp1s0" = {
@@ -64,7 +65,7 @@
 
       ha-macvlan.networkConfig = {
         driver = "macvlan";
-        options = "parent=enp1s0";
+        options = "parent=enp1s0.18";
         subnets = [ "172.18.0.0/20" ];
         ipRanges = [ "172.18.2.10/32" ];
       };
