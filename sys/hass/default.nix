@@ -60,7 +60,7 @@
       ha-internal.networkConfig = {
         driver = "bridge";
         internal = true;
-        dns = false;
+        disableDns = true;
         subnets = [ "192.168.100.0/24" ];
       };
 
