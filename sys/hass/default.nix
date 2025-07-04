@@ -84,6 +84,7 @@
           "NET_RAW"
         ];
         image = "docker.io/nicolaka/netshoot:latest";
+        dns = [ "172.18.0.1" ];
         entrypoint = builtins.toJSON ["sleep" "infinity"];
       };
     };
