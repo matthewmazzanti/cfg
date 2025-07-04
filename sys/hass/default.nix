@@ -91,7 +91,7 @@
         uidMaps = ["0:300000:65536"];
         gidMaps = ["0:300000:65536"];
         dropCapabilities = ["ALL"];
-        addCapabilities = ["CHOWN" "FOWNER"];
+        addCapabilities = ["CHOWN" "FOWNER" "NET_RAW"];
         volumes = [
           "/etc/localtime:/etc/localtime:ro"
           "/persist/containers/hass/config:/config:rw"
