@@ -82,7 +82,7 @@
           "NET_RAW"
         ];
         image = "docker.io/nicolaka/netshoot:latest";
-        entrypoint = ["sleep" "infinity"];
+        entrypoint = builtins.toJSON ["sleep" "infinity"];
       };
     };
   };
