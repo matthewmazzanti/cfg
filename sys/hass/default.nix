@@ -74,7 +74,7 @@
 
     containers = {
       nginx.containerConfig = {
-        name = "hass";
+        name = "nginx";
         networks = [
           "ha-internal:ip=192.168.0.2"
         ];
