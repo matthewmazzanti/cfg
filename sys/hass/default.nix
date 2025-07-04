@@ -25,6 +25,7 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   networking.useDHCP = false;
   systemd.network = {
     enable = true;
@@ -78,7 +79,6 @@
       };
     };
 
-    networking.firewall.allowedTCPPorts = [ 80 443 ];
 
     containers = {
       nginx = {
