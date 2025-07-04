@@ -4,16 +4,11 @@
     flake.modules.impermanence
     flake.modules.lanzaboote
     ./hardware.nix
-    ./home-automation.nix
+    # ./home-automation.nix
   ];
 
   # Networking
   networking.hostName = "hass";
-  # networking.networkmanager.enable = true;
-  # environment.persistence."/persist".directories = [
-  #   "/etc/NetworkManager/system-connections"
-  #   "/var/lib/NetworkManager"
-  # ];
 
   # ZFS auto-cleanup
   networking.hostId = "224d13b2";
@@ -29,8 +24,8 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
-  networking.useNetworkd = true;
   systemd.network = {
+    enable = true;
     networks."00-enp1s0" = {
       matchConfig.Name = "enp1s0";
       networkConfig = {
@@ -41,24 +36,24 @@
       };
     };
 
-    # netdevs."05-enp1s0.18" = {
-    #   netdevConfig = {
-    #     Name = "enp1s0.18";
-    #     Kind = "vlan";
-    #   };
-    #   vlanConfig = {
-    #     Id = 18;
-    #   };
-    # };
-    #
-    # networks."05-enp1s0.18" = {
-    #   matchConfig.Name = "enp1s0.18";
-    #   networkConfig = {
-    #     # Disable networking through this interface for the host
-    #     DHCP = "no";
-    #     IPv6AcceptRA = false;
-    #     LinkLocalAddressing = "no";
-    #   };
-    # };
+    netdevs."05-enp1s0.18" = {
+      netdevConfig = {
+        Name = "enp1s0.18";
+        Kind = "vlan";
+      };
+      vlanConfig = {
+        Id = 18;
+      };
+    };
+
+    networks."05-enp1s0.18" = {
+      matchConfig.Name = "enp1s0.18";
+      networkConfig = {
+        # Disable networking through this interface for the host
+        DHCP = "no";
+        IPv6AcceptRA = false;
+        LinkLocalAddressing = "no";
+      };
+    };
   };
 }
