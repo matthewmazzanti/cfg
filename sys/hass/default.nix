@@ -25,7 +25,7 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.enable = false;
   networking.useDHCP = false;
   systemd.network = {
     enable = true;
