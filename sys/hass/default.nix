@@ -52,21 +52,21 @@
       # Don't bring the link up
       linkConfig.Unmanaged = true;
     };
+  };
 
-    virtualisation.quadlet = {
-      networks = {
-        ha-internal.networkConfig = {
-          driver = "bridge";
-          internal = true;
-          subnets = [ "192.168.100.0/24" ];
-        };
+  virtualisation.quadlet = {
+    networks = {
+      ha-internal.networkConfig = {
+        driver = "bridge";
+        internal = true;
+        subnets = [ "192.168.100.0/24" ];
+      };
 
-        ha-macvlan.networkConfig = {
-          driver = "macvlan";
-          options = "parent=enp1s0 vlan=18";
-          subnet = [ "172.18.0.0/20" ];
-          ipRanges = [ "172.18.2.10/32" ];
-        };
+      ha-macvlan.networkConfig = {
+        driver = "macvlan";
+        options = "parent=enp1s0 vlan=18";
+        subnet = [ "172.18.0.0/20" ];
+        ipRanges = [ "172.18.2.10/32" ];
       };
     };
   };
