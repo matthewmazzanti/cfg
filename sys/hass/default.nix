@@ -64,61 +64,91 @@
         subnets = [ "192.168.100.0/24" ];
       };
 
-      ha-macvlan.networkConfig = {
-        driver = "macvlan";
-        options = "parent=enp1s0.18";
-        subnets = [ "172.18.0.0/20" ];
-        gateways = [ "172.18.0.1" ];
+      ha-macvlan = {
+        unitConfig = {
+          after = [ "sys-devices-virtual-net-enp1s0.18.device" ];
+          requires = [ "sys-devices-virtual-net-enp1s0.18.device" ];
+        };
+        networkConfig = {
+          driver = "macvlan";
+          options = "parent=enp1s0.18";
+          subnets = [ "172.18.0.0/20" ];
+          gateways = [ "172.18.0.1" ];
+        };
       };
     };
 
     containers = {
-      nginx.containerConfig = {
-        name = "nginx";
-        uidMaps = ["0:200000:65536"];
-        gidMaps = ["0:200000:65536"];
-        networks = [ "ha-internal:ip=192.168.100.2" ];
-        dns = [ "172.18.0.1" ];
-        environments.TZ = config.time.timeZone;
-        # TODO: Remove/update following
-        addCapabilities = [ "NET_RAW" ];
-        image = "docker.io/nicolaka/netshoot:latest";
-        entrypoint = builtins.toJSON ["sleep" "infinity"];
+      nginx = {
+        unitConfig = {
+          after = [ "var-lib-nginx.mount" ];
+          requires = [ "var-lib-nginx.mount" ];
+        };
+        containerConfig = {
+          name = "nginx";
+          image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
+          uidMaps = ["0:200000:65536"];
+          gidMaps = ["0:200000:65536"];
+          dropCapabilities = ["ALL"];
+          readOnly = true;
+          tmpfses = [ "/var/run" "/tmp" ];
+          volumes = [
+            "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
+            "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
+          ];
+          networks = [ "ha-internal:ip=192.168.100.2" ];
+          publishPorts = ["172.16.2.10:80:8080" "172.16.2.10:443:8443"];
+          environments.TZ = config.time.timeZone;
+        };
       };
 
-      hass.containerConfig = {
-        name = "hass";
-        uidMaps = ["0:300000:65536"];
-        gidMaps = ["0:300000:65536"];
-        dropCapabilities = ["ALL"];
-        addCapabilities = ["CHOWN" "FOWNER" "NET_RAW"];
-        volumes = [
-          "/etc/localtime:/etc/localtime:ro"
-          "/persist/containers/hass/config:/config:rw"
-          "${./hass-config/configuration.yaml}:/config/configuration.yaml:ro"
-          "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
-          "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
-        ];
-        networks = [
-          "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
-          "ha-internal:ip=192.168.100.3"
-        ];
-        dns = [ "172.18.0.1" ];
-        environments.TZ = config.time.timeZone;
-        image = "ghcr.io/home-assistant/home-assistant@sha256:e207929bdf5dc95db43c618b877364e99f7ad506ec5440aeef80d5c9c1cae668";
+      hass = {
+        unitConfig = {
+          after = [ "var-lib-hass.mount" ];
+          requires = [ "var-lib-hass.mount" ];
+        };
+        containerConfig = {
+          name = "hass";
+          image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
+          uidMaps = ["0:300000:65536"];
+          gidMaps = ["0:300000:65536"];
+          dropCapabilities = ["ALL"];
+          addCapabilities = ["FOWNER" "NET_RAW"];
+          readOnly = true;
+          tmpfses = [ "/var/run" "/tmp" ];
+          volumes = [
+            "/etc/localtime:/etc/localtime:ro"
+            "/var/lib/hass:/config:rw"
+            "${./configuration.yaml}:/config/configuration.yaml:ro"
+            "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
+            "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
+          ];
+          networks = [
+            "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
+            "ha-internal:ip=192.168.100.3"
+          ];
+          dns = [ "172.18.0.1" ];
+          environments.TZ = config.time.timeZone;
+        };
       };
 
-      zwave.containerConfig = {
-        name = "zwave";
-        uidMaps = ["0:400000:65536"];
-        gidMaps = ["0:400000:65536"];
-        devices = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave" ];
-        environments.TZ = config.time.timeZone;
-        networks = [ "ha-internal:ip=192.168.100.4" ];
-        # TODO: Remove/update following
-        addCapabilities = [ "NET_RAW" ];
-        image = "docker.io/nicolaka/netshoot:latest";
-        entrypoint = builtins.toJSON ["sleep" "infinity"];
+      zwave = {
+        unitConfig = {
+          after = [ "var-lib-zwave.mount" ];
+          requires = [ "var-lib-zwave.mount" ];
+        };
+        containerConfig = {
+          name = "zwave";
+          uidMaps = ["0:400000:65536"];
+          gidMaps = ["0:400000:65536"];
+          devices = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave" ];
+          environments.TZ = config.time.timeZone;
+          networks = [ "ha-internal:ip=192.168.100.4" ];
+          # TODO: Remove/update following
+          addCapabilities = [ "NET_RAW" ];
+          image = "docker.io/nicolaka/netshoot:latest";
+          entrypoint = builtins.toJSON ["sleep" "infinity"];
+        };
       };
     };
   };
