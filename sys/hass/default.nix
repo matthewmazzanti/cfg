@@ -86,7 +86,9 @@
         };
         containerConfig = {
           name = "nginx";
-          image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
+          # image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
+          image = "docker.io/nicolaka/netshoot:latest";
+          entrypoint = builtins.toJSON ["sleep" "infinity"];
           uidMaps = ["0:200000:65536"];
           gidMaps = ["0:200000:65536"];
           dropCapabilities = ["ALL"];
