@@ -100,7 +100,7 @@
           "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
         ];
         networks = [
-          "ha-macvlan:ip=172.18.2.10,mac=02:11:22:33:44:55"
+          "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
           "ha-internal:ip=192.168.100.3"
         ];
         dns = [ "172.18.0.1" ];
