@@ -101,7 +101,12 @@
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
           ];
           networks = [ "ha-internal:ip=192.168.100.2" ];
-          publishPorts = ["172.16.2.10:80:8080" "172.16.2.10:443:8443"];
+          publishPorts = [
+            "172.16.2.10:80:8080"
+            "172.16.2.10:443:8443"
+            "127.0.0.1:80:8080"
+            "127.0.0.1:443:8443"
+          ];
           environments.TZ = config.time.timeZone;
         };
       };
