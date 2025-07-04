@@ -90,6 +90,8 @@
         name = "hass";
         uidMaps = ["0:300000:65536"];
         gidMaps = ["0:300000:65536"];
+        dropCapabilities = ["ALL"];
+        addCapabilities = ["CHOWN" "FOWNER"];
         volumes = [
           "/etc/localtime:/etc/localtime:ro"
           "/persist/containers/hass/config:/config:rw"
