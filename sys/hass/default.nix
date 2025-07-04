@@ -67,6 +67,7 @@
         driver = "macvlan";
         options = "parent=enp1s0.18";
         subnets = [ "172.18.0.0/20" ];
+        gateway = "172.18.0.1";
         ipRanges = [ "172.18.2.10/32" ];
       };
     };
