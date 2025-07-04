@@ -70,5 +70,19 @@
         ipRanges = [ "172.18.2.10/32" ];
       };
     };
+
+    containers = {
+      hass = {
+        name = "hass";
+        networks = [
+          "ha-internal:alias=hass"
+          "ha-internal:mac=02:11:22:33:44:55"
+        ];
+        addCapabilities = [
+          "NET_RAW"
+        ];
+        image = "docker.io/nicolaka/netshoot:latest";
+      };
+    };
   };
 }
