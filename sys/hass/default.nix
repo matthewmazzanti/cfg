@@ -78,6 +78,8 @@
       };
     };
 
+    networking.firewall.allowedTCPPorts = [ 80 443 ];
+
     containers = {
       nginx = {
         unitConfig = {
@@ -86,7 +88,7 @@
         };
         containerConfig = {
           name = "nginx";
-          image = "docker.io/library/nginx:alpine-slim@sha256:e80262314d449f100c1c010f76b50bcac17dc48be6cb177382ae63208c7c1461";
+          image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
           # image = "docker.io/nicolaka/netshoot:latest";
           # entrypoint = builtins.toJSON ["sleep" "infinity"];
           uidMaps = ["0:200000:65536"];
