@@ -37,21 +37,21 @@
       };
     };
 
-    # netdevs."05-enp1s0.18" = {
-    #   netdevConfig = {
-    #     Name = "enp1s0.18";
-    #     Kind = "vlan";
-    #   };
-    #   vlanConfig = {
-    #     Id = 18;
-    #   };
-    # };
-    #
-    # networks."05-enp1s0.18" = {
-    #   matchConfig.Name = "enp1s0.18";
-    #   # Don't bring the link up
-    #   linkConfig.Unmanaged = true;
-    # };
+    netdevs."05-enp1s0.18" = {
+      netdevConfig = {
+        Name = "enp1s0.18";
+        Kind = "vlan";
+      };
+      vlanConfig = {
+        Id = 18;
+      };
+    };
+
+    networks."05-enp1s0.18" = {
+      matchConfig.Name = "enp1s0.18";
+      # Don't bring the link up
+      linkConfig.Unmanaged = true;
+    };
   };
 
   virtualisation.quadlet = {
@@ -64,7 +64,7 @@
 
       ha-macvlan.networkConfig = {
         driver = "macvlan";
-        options = "parent=enp1s0 vlan=18";
+        options = "parent=enp1s0";
         subnets = [ "172.18.0.0/20" ];
         ipRanges = [ "172.18.2.10/32" ];
       };
