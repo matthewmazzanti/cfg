@@ -77,14 +77,14 @@
       hass.containerConfig = {
         name = "hass";
         networks = [
-          "ha-macvlan:mac=02:11:22:33:44:55"
+          # "ha-macvlan:mac=02:11:22:33:44:55"
           # "ha-internal:alias=hass"
         ];
         addCapabilities = [
           "NET_RAW"
         ];
         image = "docker.io/nicolaka/netshoot:latest";
-        # dns = [ "172.18.0.1" ];
+        dns = [ "172.18.0.1" ];
         entrypoint = builtins.toJSON ["sleep" "infinity"];
       };
     };
