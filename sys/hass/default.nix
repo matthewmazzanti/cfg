@@ -105,10 +105,7 @@
         ];
         dns = [ "172.18.0.1" ];
         environments.TZ = config.time.timeZone;
-        # TODO: Remove/update following
-        # addCapabilities = [ "NET_RAW" ];
         image = "ghcr.io/home-assistant/home-assistant@sha256:e207929bdf5dc95db43c618b877364e99f7ad506ec5440aeef80d5c9c1cae668";
-        # entrypoint = builtins.toJSON ["sleep" "infinity"];
       };
 
       zwave.containerConfig = {

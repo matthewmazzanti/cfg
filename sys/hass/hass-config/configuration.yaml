@@ -359,9 +359,9 @@ automation:
     alias: Set Transition Temp
     trigger:
       - platform: time
-        at: "07:00"
-      - platform: time
-        at: "22:00"
+        at:
+          - "07:00"
+          - "22:00"
     action:
       - action: climate.set_temperature
         target:
@@ -387,9 +387,13 @@ automation:
     alias: Turn off Apple TVs
     trigger:
       - platform: time
-        at: "01:00:00"
-      - platform: time
-        at: "02:00:00"
+        at:
+          - "00:00"
+          - "01:00"
+          - "02:00"
+          - "03:00"
+          - "04:00"
+          - "05:00"
     action:
       - action: media_player.turn_off
         target:
@@ -400,9 +404,13 @@ automation:
     alias: Turn off Apple TVs
     trigger:
       - platform: time
-        at: "01:00:00"
-      - platform: time
-        at: "02:00:00"
+        at:
+          - "00:00"
+          - "01:00"
+          - "02:00"
+          - "03:00"
+          - "04:00"
+          - "05:00"
     action:
       - action: media_player.turn_off
         target:
@@ -413,7 +421,7 @@ automation:
     alias: Turn on Espresso Machine
     trigger:
       - platform: time
-        at: "07:30:00"
+        at: "06:00"
     action:
       - action: switch.turn_on
         target:
@@ -423,7 +431,9 @@ automation:
     alias: Turn off Espresso Machine
     trigger:
       - platform: time
-        at: "19:00:00"
+        at:
+          - "19:00"
+          - "00:00"
     action:
       - action: switch.turn_off
         target:
