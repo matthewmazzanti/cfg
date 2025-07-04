@@ -68,8 +68,6 @@
         options = "parent=enp1s0.18";
         subnets = [ "172.18.0.0/20" ];
         gateways = [ "172.18.0.1" ];
-        dns = [ "172.18.0.1" ];
-        ipRanges = [ "172.18.2.10/32" ];
       };
     };
 
@@ -78,7 +76,7 @@
         name = "hass";
         networks = [
           # "ha-macvlan:mac=02:11:22:33:44:55"
-          # "ha-internal:alias=hass"
+          "ha-internal:alias=hass,ip=172.18.2.10"
         ];
         addCapabilities = [
           "NET_RAW"
