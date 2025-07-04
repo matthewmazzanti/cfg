@@ -72,7 +72,7 @@
     };
 
     containers = {
-      hass = {
+      hass.containerConfig = {
         name = "hass";
         networks = [
           "ha-internal:alias=hass"
