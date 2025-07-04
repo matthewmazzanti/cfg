@@ -65,7 +65,7 @@
       ha-macvlan.networkConfig = {
         driver = "macvlan";
         options = "parent=enp1s0 vlan=18";
-        subnet = [ "172.18.0.0/20" ];
+        subnets = [ "172.18.0.0/20" ];
         ipRanges = [ "172.18.2.10/32" ];
       };
     };
