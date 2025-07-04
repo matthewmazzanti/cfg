@@ -100,7 +100,7 @@
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
           ];
-          # networks = [ "ha-internal:ip=192.168.100.2" ];
+          networks = [ "ha-internal:ip=192.168.100.2" "podman" ];
           publishPorts = [
             "172.16.2.10:80:8080"
             "172.16.2.10:443:8443"
