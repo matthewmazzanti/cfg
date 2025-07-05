@@ -59,9 +59,11 @@
   virtualisation.quadlet = {
     networks = {
       ha-bridge = {
-        driver = "bridge";
-        subnets = [ "192.168.1.0/24" ];
-        gateways = [ "192.168.1.1" ];
+        networkConfig = {
+          driver = "bridge";
+          subnets = [ "192.168.1.0/24" ];
+          gateways = [ "192.168.1.1" ];
+        };
       };
       ha-macvlan = {
         unitConfig = {
