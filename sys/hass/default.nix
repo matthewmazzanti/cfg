@@ -1,4 +1,4 @@
-{ config, pkgs, flake, ... }: {
+{ config, pkgs, lib, flake, ... }: {
   imports = [
     flake.modules.base
     flake.modules.impermanence
@@ -58,6 +58,18 @@
 
     networks."05-enp1s0.18" = {
       matchConfig.Name = "enp1s0.18";
+    };
+  };
+
+  systemd.services.ha-netns = {
+    description = "Create mynetns with ha-macvlan and ha-veth";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStartPre = ./netns/delete.sh;
+      ExecStart = ./netns/create.sh;
+      ExecStop = ./netns/delete.sh;
     };
   };
 

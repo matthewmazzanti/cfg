@@ -20,14 +20,6 @@ VETH_HOST_IP="192.168.1.1"
 VETH_NS_IP="192.168.1.2"
 VETH_MASK="32"
 
-# === TEARDOWN (idempotent) ===
-
-# Remove route if it exists
-ip route del "$VETH_NS_IP" dev "$VETH_HOST" 2>/dev/null || true
-ip netns del "$NS_NAME" 2>/dev/null || true
-ip link del "$VETH_HOST" 2>/dev/null || true
-ip link del "$IPVLAN_IF" 2>/dev/null || true
-
 # Create netns
 ip netns add "$NS_NAME"
 
