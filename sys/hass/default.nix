@@ -33,6 +33,7 @@
   };
 
   networking.firewall.enable = false;
+
   networking.useDHCP = false;
   systemd.network = {
     enable = true;
@@ -72,6 +73,56 @@
       ExecStart = ./netns/create.sh;
       ExecStop = ./netns/delete.sh;
       RemainAfterExit = true;
+    };
+  };
+
+  boot.kernel.sysctl."net.ipv4.ip_forward" = true;
+  networking.nftables.enable = true;
+  networking.nftables.tables = {
+    nat = {
+      family = "ip";
+      chains = {
+        prerouting = {
+          type = "nat";
+          hook = "prerouting";
+          priority = -100;
+          policy = "accept";
+          rules = [
+            # HTTP forwards
+            { expr = "iif lo tcp dport 80 dnat to 192.168.1.2:8080"; }
+            { expr = "ip daddr 172.16.2.10 tcp dport 80 dnat to 192.168.1.2:8080"; }
+
+            # HTTPS forwards
+            {
+              expr = "iif lo tcp dport 443 dnat to 192.168.1.2:8443";
+            }
+            {
+              expr = "ip daddr 172.16.2.10 tcp dport 443 dnat to 192.168.1.2:8443";
+            }
+          ];
+        };
+      };
+    };
+
+    filter = {
+      family = "ip";
+      chains = {
+        forward = {
+          type = "filter";
+          hook = "forward";
+          priority = 0;
+          policy = "accept";
+          rules = [
+            # Allow HTTP and HTTPS forwarding to netns service
+            {
+              expr = "ip daddr 192.168.1.2 tcp dport 8080 accept";
+            }
+            {
+              expr = "ip daddr 192.168.1.2 tcp dport 8443 accept";
+            }
+          ];
+        };
+      };
     };
   };
 
