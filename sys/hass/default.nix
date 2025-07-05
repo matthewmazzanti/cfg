@@ -63,7 +63,7 @@
           driver = "bridge";
           subnets = [ "192.168.1.0/24" ];
           internal = true;
-          options = "isolate no_default_route=1";
+          options = "isolate=true no_default_route=true";
         };
       };
       ha-macvlan = {
