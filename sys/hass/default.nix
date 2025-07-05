@@ -68,8 +68,8 @@
         networkConfig = {
           driver = "bridge";
           subnets = [ "192.168.1.0/24" ];
-          internal = true;
-          # options = ["isolate=true" "no_default_route=1"];
+          # internal = true;
+          options = ["isolate=true" "no_default_route=1"];
         };
       };
       ha-macvlan = {
