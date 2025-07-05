@@ -79,7 +79,7 @@
       };
     };
 
-    cmatthewmazzantis = {
+    containers = {
       nginx = {
         unitConfig = {
           After = [ "var-lib-nginx.mount" ];
