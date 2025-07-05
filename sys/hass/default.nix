@@ -65,6 +65,7 @@
     description = "Create mynetns with ha-macvlan and ha-veth";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
+    path = with pkgs; [ bash iproute2 ];
     serviceConfig = {
       Type = "oneshot";
       ExecStartPre = ./netns/delete.sh;
