@@ -67,7 +67,6 @@
         options = "parent=enp1s0.18";
         subnets = [ "172.18.0.0/20" ];
         gateways = [ "172.18.0.1" ];
-        dns = [ "172.18.0.1" ];
       };
     };
 
@@ -76,6 +75,7 @@
       networks = [ "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9" ];
       uidMaps = ["0:200000:65536"];
       gidMaps = ["0:200000:65536"];
+      dns = [ "172.18.0.1" ];
       publishPorts = [
         "172.16.2.10:80:8080"
         "172.16.2.10:443:8443"
@@ -93,9 +93,9 @@
         containerConfig = {
           name = "nginx";
           pod = "ha.pod";
-          # image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
-          image = "docker.io/nicolaka/netshoot:latest";
-          entrypoint = builtins.toJSON ["sleep" "infinity"];
+          image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
+          # image = "docker.io/nicolaka/netshoot:latest";
+          # entrypoint = builtins.toJSON ["sleep" "infinity"];
           # dropCapabilities = ["ALL"];
           # noNewPrivileges = true;
           # readOnly = true;
@@ -116,9 +116,9 @@
         containerConfig = {
           name = "hass";
           pod = "ha.pod";
-          # image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
-          image = "docker.io/nicolaka/netshoot:latest";
-          entrypoint = builtins.toJSON ["sleep" "infinity"];
+          image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
+          # image = "docker.io/nicolaka/netshoot:latest";
+          # entrypoint = builtins.toJSON ["sleep" "infinity"];
           # dropCapabilities = ["ALL"];
           # addCapabilities = ["FOWNER" "NET_RAW"];
           # noNewPrivileges = true;
@@ -143,9 +143,9 @@
         containerConfig = {
           name = "zwave";
           pod = "ha.pod";
-          # addCapabilities = [ "NET_RAW" ];
-          image = "docker.io/nicolaka/netshoot:latest";
-          entrypoint = builtins.toJSON ["sleep" "infinity"];
+          addCapabilities = [ "NET_RAW" ];
+          # image = "docker.io/nicolaka/netshoot:latest";
+          # entrypoint = builtins.toJSON ["sleep" "infinity"];
           # dropCapabilities = ["ALL"];
           # addCapabilities = ["FOWNER" "NET_RAW"];
           # noNewPrivileges = true;
