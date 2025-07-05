@@ -71,6 +71,7 @@
       ExecStartPre = ''-${./netns/delete.sh}'';
       ExecStart = ./netns/create.sh;
       ExecStop = ./netns/delete.sh;
+      RemainAfterExit = true;
     };
   };
 
