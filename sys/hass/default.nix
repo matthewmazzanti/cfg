@@ -73,7 +73,7 @@
     pods.ha.podConfig = {
       name = "ha";
       networks = [
-        # "podman"
+        "podman"
         "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
       ];
       uidMaps = ["0:200000:65536"];
