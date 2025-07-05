@@ -1,4 +1,4 @@
-{ config, flake, ... }: {
+{ config, pkgs, flake, ... }: {
   imports = [
     flake.modules.base
     flake.modules.impermanence
@@ -17,7 +17,10 @@
   services.zfs.trim.enable = true;
 
   # Packages
-  # environment.systemPackages = with pkgs; [];
+  environment.systemPackages = with pkgs; [
+    iptables
+    nftables
+  ];
 
   environment.persistence."/persist".directories = [
     "/var/lib/containers"
