@@ -26,7 +26,7 @@ VETH_MASK="32"
 ip route del "$VETH_NS_IP" dev "$VETH_HOST" 2>/dev/null || true
 ip netns del "$NS_NAME" 2>/dev/null || true
 ip link del "$VETH_HOST" 2>/dev/null || true
-ip link del "$MACVLAN_IF" 2>/dev/null || true
+ip link del "$IPVLAN_IF" 2>/dev/null || true
 
 # Create netns
 ip netns add "$NS_NAME"
@@ -54,8 +54,8 @@ ip addr add '$VETH_NS_IP/$VETH_MASK' dev '$VETH_NS'
 ip link set '$VETH_NS' up
 ip route add '$VETH_HOST_IP' dev '$VETH_NS'
 
-# Configure ha-macvlan
-ip addr add '$IOT_IP/$IOT_MASK' dev '$MACVLAN_IF'
-ip link set '$MACVLAN_IF' up
-ip route add default via '$IOT_GW' dev '$MACVLAN_IF'
+# Configure ha-ipvlan
+ip addr add '$IOT_IP/$IOT_MASK' dev '$IPVLAN_IF'
+ip link set '$IPVLAN_IF' up
+ip route add default via '$IOT_GW' dev '$IPVLAN_IF'
 EOF
