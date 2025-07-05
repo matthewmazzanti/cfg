@@ -57,23 +57,30 @@
   };
 
   virtualisation.quadlet = {
-    networks.ha-macvlan = {
-      unitConfig = {
-        after = [ "sys-devices-virtual-net-enp1s0.18.device" ];
-        requires = [ "sys-devices-virtual-net-enp1s0.18.device" ];
+    networks = {
+      ha-bridge = {
+        driver = "bridge";
+        subnets = [ "192.168.1.0/24" ];
+        gateways = [ "192.168.1.1" ];
       };
-      networkConfig = {
-        driver = "macvlan";
-        options = "parent=enp1s0.18";
-        subnets = [ "172.18.0.0/20" ];
-        gateways = [ "172.18.0.1" ];
+      ha-macvlan = {
+        unitConfig = {
+          after = [ "sys-devices-virtual-net-enp1s0.18.device" ];
+          requires = [ "sys-devices-virtual-net-enp1s0.18.device" ];
+        };
+        networkConfig = {
+          driver = "macvlan";
+          options = "parent=enp1s0.18";
+          subnets = [ "172.18.0.0/20" ];
+          gateways = [ "172.18.0.1" ];
+        };
       };
     };
 
     pods.ha.podConfig = {
       name = "ha";
       networks = [
-        "podman"
+        "ha-bridge:ip=192.168.1.2"
         "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
       ];
       uidMaps = ["0:200000:65536"];
