@@ -57,6 +57,7 @@
   };
 
   virtualisation.quadlet = {
+    autoEscape = true;
     networks = {
       ha-bridge = {
         networkConfig = {
