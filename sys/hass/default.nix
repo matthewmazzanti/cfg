@@ -68,7 +68,7 @@
         networkConfig = {
           driver = "bridge";
           subnets = [ "192.168.1.0/24" ];
-          # internal = true;
+          internal = true;
           # options = ["isolate=true" "no_default_route=1"];
         };
       };
