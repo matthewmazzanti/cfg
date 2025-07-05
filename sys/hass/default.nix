@@ -91,7 +91,7 @@
           uidMaps = ["0:200000:65536"];
           gidMaps = ["0:200000:65536"];
           # dropCapabilities = ["ALL"];
-          # noNewPrivileges = true;
+          noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           networks = [ "ha-bridge:ip=192.168.1.2" ];
@@ -121,7 +121,7 @@
           gidMaps = ["0:200000:65536"];
           # dropCapabilities = ["ALL"];
           addCapabilities = ["FOWNER" "NET_RAW"];
-          # noNewPrivileges = true;
+          noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           networks = [
@@ -152,7 +152,7 @@
           gidMaps = ["0:200000:65536"];
           # dropCapabilities = ["ALL"];
           # addCapabilities = ["FOWNER" "NET_RAW"];
-          # noNewPrivileges = true;
+          noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           networks = [ "ha-bridge:ip=192.168.1.4" ];
