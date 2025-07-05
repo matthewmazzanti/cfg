@@ -19,6 +19,10 @@
   # Packages
   # environment.systemPackages = with pkgs; [];
 
+  environment.persistence."/persist".directories = [
+    "/var/lib/containers"
+  ];
+
   # User config
   users.users.mmazzanti = {
     extraGroups = ["networkmanager" "podman" "dialout"];
