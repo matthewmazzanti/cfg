@@ -63,27 +63,7 @@
 
   virtualisation.quadlet = {
     autoEscape = true;
-    networks = {
-      ha-bridge = {
-        networkConfig = {
-          driver = "bridge";
-          subnets = [ "192.168.1.0/24" ];
-        };
-      };
-      ha-macvlan = {
-        unitConfig = {
-          after = [ "sys-devices-virtual-net-enp1s0.18.device" ];
-          requires = [ "sys-devices-virtual-net-enp1s0.18.device" ];
-        };
-        networkConfig = {
-          driver = "macvlan";
-          subnets = [ "172.18.0.0/20" ];
-          gateways = [ "172.18.0.1" ];
-          options = [ "parent=enp1s0.18" ];
-        };
-      };
-    };
-
+    /*
     containers = {
       nginx = {
         unitConfig = {
@@ -166,5 +146,6 @@
         };
       };
     };
+    */
   };
 }
