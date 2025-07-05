@@ -62,7 +62,7 @@
           driver = "bridge";
           subnets = [ "192.168.1.0/24" ];
           internal = true;
-          options = "isolate=true,no_default_route=true";
+          options = ["isolate" "no_default_route=1"];
         };
       };
       ha-macvlan = {
@@ -72,14 +72,14 @@
         };
         networkConfig = {
           driver = "macvlan";
-          options = "parent=enp1s0.18";
           subnets = [ "172.18.0.0/20" ];
           gateways = [ "172.18.0.1" ];
+          options = [ "parent=enp1s0.18" ];
         };
       };
     };
 
-    containers = {
+    cmatthewmazzantis = {
       nginx = {
         unitConfig = {
           After = [ "var-lib-nginx.mount" ];
