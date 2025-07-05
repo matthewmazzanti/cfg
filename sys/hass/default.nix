@@ -68,7 +68,7 @@
     path = with pkgs; [ bash iproute2 ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStartPre = ./netns/delete.sh;
+      ExecStartPre = ''-${./netns/delete.sh}'';
       ExecStart = ./netns/create.sh;
       ExecStop = ./netns/delete.sh;
     };
