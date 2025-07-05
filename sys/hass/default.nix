@@ -97,7 +97,7 @@
           name = "nginx";
           pod = "ha.pod";
           image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
-          dropCapabilities = ["ALL"];
+          # dropCapabilities = ["ALL"];
           # noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
@@ -118,7 +118,7 @@
           name = "hass";
           pod = "ha.pod";
           image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
-          dropCapabilities = ["ALL"];
+          # dropCapabilities = ["ALL"];
           addCapabilities = ["FOWNER" "NET_RAW"];
           # noNewPrivileges = true;
           # readOnly = true;
@@ -142,9 +142,7 @@
         containerConfig = {
           name = "zwave";
           pod = "ha.pod";
-          addCapabilities = [ "NET_RAW" ];
-          # image = "docker.io/nicolaka/netshoot:latest";
-          # entrypoint = builtins.toJSON ["sleep" "infinity"];
+          image = "zwavejs/zwave-js-ui@sha256:52b6ee2c37fa1a3c13a8d8f59b45145b546ec31b5c85d5053e1279fc558c5a1e";
           # dropCapabilities = ["ALL"];
           # addCapabilities = ["FOWNER" "NET_RAW"];
           # noNewPrivileges = true;
