@@ -51,8 +51,6 @@
 
     networks."05-enp1s0.18" = {
       matchConfig.Name = "enp1s0.18";
-      # Don't bring the link up
-      linkConfig.Unmanaged = true;
     };
   };
 
