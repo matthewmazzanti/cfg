@@ -32,10 +32,7 @@
 
   virtualisation.quadlet = {
     networks.ha.networkConfig = {
-      driver = "ipvlan";
-      subnets = [ "172.18.2.10/20" ];
-      gateways = [ "172.18.0.1" ];
-      dns = [ "172.18.0.1" ];
+      driver = "macvlan";
     };
 
     pods.ha.podConfig = {
