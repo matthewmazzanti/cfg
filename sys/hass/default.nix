@@ -68,9 +68,7 @@
           environments.TZ = config.time.timeZone;
         };
       };
-    };
 
-    /*
       hass = {
         unitConfig = {
           After = [ "var-lib-hass.mount" ];
@@ -82,7 +80,7 @@
           image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
           # dropCapabilities = ["ALL"];
           addCapabilities = ["FOWNER" "NET_RAW"];
-          # noNewPrivileges = true;
+          noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
@@ -95,7 +93,9 @@
           environments.TZ = config.time.timeZone;
         };
       };
+    };
 
+    /*
       zwave = {
         unitConfig = {
           After = [ "var-lib-zwave.mount" ];
