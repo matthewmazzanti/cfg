@@ -61,24 +61,6 @@
       fsType = "zfs";
       options = ["noatime" "nodiratime" ];
     };
-
-    "/var/lib/nginx" = {
-      device = "root-pool/state/services/nginx";
-      fsType = "zfs";
-      options = ["noatime" "nodiratime" ];
-    };
-
-    "/var/lib/hass" = {
-      device = "root-pool/state/services/hass";
-      fsType = "zfs";
-      options = ["noatime" "nodiratime" ];
-    };
-
-    "/var/lib/zwave" = {
-      device = "root-pool/state/services/zwave";
-      fsType = "zfs";
-      options = ["noatime" "nodiratime" ];
-    };
   };
 
   services.udev.path = [pkgs.systemd];

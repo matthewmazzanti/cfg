@@ -61,10 +61,10 @@ in {
     modules = [ ./server ];
   };
 
-  hass = nixosSystem {
+  ha = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
-    modules = [ ./hass ];
+    modules = [ ./ha ];
   };
 
   print = nixosSystem {

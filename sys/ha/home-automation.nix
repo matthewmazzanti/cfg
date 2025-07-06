@@ -1,5 +1,27 @@
 { config, flake, ... }: {
+  # Storage for containers
   environment.persistence."/persist".directories = [ "/var/lib/containers" ];
+
+  # Create filesystems for different containers in zfs
+  fileSystems = {
+    "/var/lib/nginx" = {
+      device = "root-pool/state/services/nginx";
+      fsType = "zfs";
+      options = [ "noatime" "nodiratime" ];
+    };
+
+    "/var/lib/hass" = {
+      device = "root-pool/state/services/hass";
+      fsType = "zfs";
+      options = [ "noatime" "nodiratime" ];
+    };
+
+    "/var/lib/zwave" = {
+      device = "root-pool/state/services/zwave";
+      fsType = "zfs";
+      options = [ "noatime" "nodiratime" ];
+    };
+  };
 
   virtualisation.quadlet = {
     networks.ha.networkConfig = {
@@ -50,7 +72,7 @@
           pod = "ha.pod";
           image = "ghcr.io/home-assistant/home-assistant:stable@sha256:e876528e4159974e844bbf3555e67ff48d73a78bf432b717dd9d178328230b40";
           # dropCapabilities = ["ALL"];
-          addCapabilities = ["FOWNER" "NET_RAW"];
+          addCapabilities = [ "FOWNER" "NET_RAW" ];
           noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];

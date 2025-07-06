@@ -9,7 +9,7 @@
   ];
 
   # Networking
-  networking.hostName = "hass";
+  networking.hostName = "ha";
 
   # ZFS auto-cleanup
   networking.hostId = "224d13b2";
@@ -24,5 +24,4 @@
     extraGroups = ["networkmanager" "podman" "dialout"];
     packages = [ flake.packages."nvim/nix" ];
   };
-
 }
