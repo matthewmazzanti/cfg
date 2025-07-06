@@ -33,7 +33,7 @@
   virtualisation.quadlet = {
     networks.ha.networkConfig = {
       driver = "macvlan";
-      subnets = [ "172.18.0.0/20" ];
+      subnets = [ "172.18.0.0/16" ];
       gateways = [ "172.18.0.1" ];
     };
 
@@ -43,7 +43,6 @@
       dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
-      publishPorts = [ "80:8080" "443:8443" ];
     };
 
     /*
