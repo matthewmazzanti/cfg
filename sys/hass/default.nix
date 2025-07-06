@@ -39,7 +39,8 @@
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [ "ha:ip=172.18.2.11,mac=02:fd:38:25:58:f9" ];
+      networks = [ "ha:mac=02:fd:38:25:58:f9" ];
+      ip = "172.18.2.11";
       dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
