@@ -110,7 +110,10 @@
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [ "/var/lib/zwave/store:/usr/src/app/store" ];
           devices = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave" ];
-          environments.TZ = config.time.timeZone;
+          environments = {
+            TZ = config.time.timeZone;
+            TRUST_PROXY = "127.0.0.1";
+          };
           environmentFiles = [ "/var/lib/zwave/env.secret" ];
         };
       };
