@@ -77,7 +77,7 @@
         containerConfig = {
           name = "hass";
           pod = "ha.pod";
-          image = "ghcr.io/home-assistant/home-assistant:stable@sha256:d80b831e5a7ec80949231d45c4bea9102c60d5e2f02c961d3120e5d48226cbc9";
+          image = "ghcr.io/home-assistant/home-assistant:stable@sha256:e876528e4159974e844bbf3555e67ff48d73a78bf432b717dd9d178328230b40";
           # dropCapabilities = ["ALL"];
           addCapabilities = ["FOWNER" "NET_RAW"];
           noNewPrivileges = true;
