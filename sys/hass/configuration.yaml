@@ -6,12 +6,6 @@ http:
 
 logger:
   default: info
-  logs:
-    homeassistant.components.websocket_api: debug
-    homeassistant.components.http: debug
-    homeassistant.components.api: debug
-    aiohttp.access: debug
-    aiohttp.server: debug
 
 sun:
 # Enable Apple TV

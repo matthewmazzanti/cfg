@@ -35,6 +35,7 @@
     e2fsprogs # ext filesystem management, chattr
     gptfdisk # sgdisk
     usbutils # lsusb
+    nftables # firewall control
   ];
 
   # Users may only be specified via nix
