@@ -44,8 +44,8 @@
       ipRanges = [ "172.16.1.12/32" ];
     };
 
-    pods.jellyfin.podConfig = {
-      name = "jellyfin";
+    pods.jellyfin-pod.podConfig = {
+      name = "jellyfin-pod";
       networks = [ "jellyfin:mac=a2:d9:5d:37:ef:10" ];
       ip = "172.16.1.12";
       dns = [ "172.16.0.1" ];
@@ -85,7 +85,7 @@
         };
         containerConfig = {
           name = "jellyfin";
-          pod = "jellyfin.pod";
+          pod = "jellyfin-pod.pod";
           image = "docker.io/jellyfin/jellyfin:unstable@sha256:8581a885d7d554bc36f81bd90c411394bdd685267b1af76c73ed4aedb5edb65e";
           # dropCapabilities = ["ALL"];
           # addCapabilities = [ "FOWNER" "NET_RAW" ];
