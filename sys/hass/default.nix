@@ -46,7 +46,6 @@
       gidMaps = [ "0:100000:65536" ];
     };
 
-    /*
     containers = {
       nginx = {
         unitConfig = {
@@ -58,7 +57,8 @@
           pod = "ha.pod";
           image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
           # dropCapabilities = ["ALL"];
-          # noNewPrivileges = true;
+          addCapabilities = [ "NET_BIND_SERVICE" ];
+          noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
@@ -68,7 +68,9 @@
           environments.TZ = config.time.timeZone;
         };
       };
+    };
 
+    /*
       hass = {
         unitConfig = {
           After = [ "var-lib-hass.mount" ];
