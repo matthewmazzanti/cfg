@@ -30,13 +30,17 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
-
   virtualisation.quadlet = {
-    networks.ha.networkConfig.driver = "ipvlan";
+    networks.ha.networkConfig = {
+      driver = "ipvlan";
+      subnets = [ "172.18.2.10/20" ];
+      gateways = [ "172.18.0.1" ];
+      dns = [ "172.18.0.1" ];
+    };
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [ "ha:mac=02:fd:38:25:58:f9" ];
+      networks = [ "ha:ip=172.18.2.10,mac=02:fd:38:25:58:f9" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
       publishPorts = [ "80:8080" "443:8443" ];
