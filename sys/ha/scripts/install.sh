@@ -13,7 +13,7 @@ nixos-install \
     --no-channel-copy \
     --no-root-password \
     --no-bootloader \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#ha"
 
 # Install sbctl keys, needed for bootloader install
 nixos-enter -- bash <<'EOF'
@@ -26,7 +26,7 @@ nixos-install \
     --root /mnt \
     --no-channel-copy \
     --no-root-password \
-    --flake "$SUDO_HOME/src/nix/cfg#hass"
+    --flake "$SUDO_HOME/src/nix/cfg#ha"
 
 # Cleanup /nix
 nixos-enter -- bash <<'EOF'

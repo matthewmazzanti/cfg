@@ -1,6 +1,0 @@
-- Persistence scripts
-    - File copy script
-    - Diff script
-- Auto cleanup timers
-- Vim alias
-- Keyfile auto-shutoff udev
