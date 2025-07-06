@@ -33,6 +33,9 @@
   virtualisation.quadlet = {
     networks.ha.networkConfig = {
       driver = "macvlan";
+      subnets = [ "172.18.2.10/20" ];
+      gateways = [ "172.18.0.1" ];
+      dns = [ "172.18.0.1" ];
     };
 
     pods.ha.podConfig = {
