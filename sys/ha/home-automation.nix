@@ -28,11 +28,12 @@
       driver = "macvlan";
       subnets = [ "172.18.0.0/16" ];
       gateways = [ "172.18.0.1" ];
+      ipRanges  = [ "172.18.2.11/32" ];
     };
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [ "ha:mac=02:fd:38:25:58:f9" ];
+      networks = [ "ha:mac=a2:d9:5d:37:ef:10" ];
       ip = "172.18.2.11";
       dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];

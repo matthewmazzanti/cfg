@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+import random
+
+# Step 1: Generate 6 random bytes
+mac = list(random.getrandbits(8) for _ in range(6))
+
+# Step 2: Set the "locally administered" bit (bit 1) and clear the "multicast" bit (bit 0) in the first byte
+mac[0] = (mac[0] | 0b00000010) & 0b11111110
+
+# Step 3: Format as a MAC address string
+mac_str = ':'.join(f'{byte:02x}' for byte in mac)
+
+print(mac_str, end="")
