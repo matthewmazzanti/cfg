@@ -35,12 +35,12 @@
       driver = "macvlan";
       subnets = [ "172.18.0.0/20" ];
       gateways = [ "172.18.0.1" ];
-      dns = [ "172.18.0.1" ];
     };
 
     pods.ha.podConfig = {
       name = "ha";
       networks = [ "ha:ip=172.18.2.11,mac=02:fd:38:25:58:f9" ];
+      dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
       publishPorts = [ "80:8080" "443:8443" ];
