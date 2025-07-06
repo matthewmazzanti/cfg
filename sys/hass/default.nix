@@ -30,74 +30,19 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
-  networking.firewall.enable = false;
-  networking.useDHCP = false;
-  systemd.network = {
-    enable = true;
-    networks."00-enp1s0" = {
-      matchConfig.Name = "enp1s0";
-      networkConfig = {
-        Address = "172.16.2.10/20";
-        Gateway = "172.16.0.1";
-        DNS = [ "172.16.0.1" ];
-        VLAN = [ "enp1s0.18" ];
-      };
-    };
-
-    netdevs."05-enp1s0.18" = {
-      netdevConfig = {
-        Name = "enp1s0.18";
-        Kind = "vlan";
-      };
-      vlanConfig = {
-        Id = 18;
-      };
-    };
-
-    networks."05-enp1s0.18" = {
-      matchConfig.Name = "enp1s0.18";
-      # Don't bring the link up
-      linkConfig.Unmanaged = true;
-    };
-  };
 
   virtualisation.quadlet = {
-    networks = {
-      ha-bridge = {
-        driver = "bridge";
-        subnets = [ "192.168.1.0/24" ];
-      };
-      ha-macvlan = {
-        unitConfig = {
-          after = [ "sys-devices-virtual-net-enp1s0.18.device" ];
-          requires = [ "sys-devices-virtual-net-enp1s0.18.device" ];
-        };
-        networkConfig = {
-          driver = "macvlan";
-          options = "parent=enp1s0.18";
-          subnets = [ "172.18.0.0/20" ];
-          gateways = [ "172.18.0.1" ];
-        };
-      };
-    };
+    networks.ha.networkConfig.driver = "ipvlan";
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [
-        "ha-bridge"
-        "ha-macvlan:ip=172.18.2.10,mac=02:fd:38:25:58:f9"
-      ];
-      uidMaps = ["0:200000:65536"];
-      gidMaps = ["0:200000:65536"];
-      dns = [ "172.18.0.1" ];
-      publishPorts = [
-        "172.16.2.10:80:8080"
-        "172.16.2.10:443:8443"
-        "127.0.0.1:80:8080"
-        "127.0.0.1:443:8443"
-      ];
+      networks = [ "ha:mac=02:fd:38:25:58:f9" ];
+      uidMaps = [ "0:100000:65536" ];
+      gidMaps = [ "0:100000:65536" ];
+      publishPorts = [ "80:8080" "443:8443" ];
     };
 
+    /*
     containers = {
       nginx = {
         unitConfig = {
@@ -164,5 +109,6 @@
         };
       };
     };
+    */
   };
 }
