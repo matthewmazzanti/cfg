@@ -26,12 +26,12 @@
         containerConfig = {
           name = "nginx";
           pod = "ha.pod";
-          image = "docker.io/nginxinc/nginx-unprivileged:alpine-slim@sha256:ca2305d71219043ad4cdf91d588b5a4f94d6bc3cd44bfd8667cee0b6c121b712";
+          image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
           dropCapabilities = ["ALL"];
           addCapabilities = [ "NET_BIND_SERVICE" ];
           noNewPrivileges = true;
           readOnly = true;
-          tmpfses = [ "/tmp:rw,uid=101,gid=101" ];
+          tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
