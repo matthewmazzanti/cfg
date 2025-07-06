@@ -31,7 +31,7 @@
           addCapabilities = [ "NET_BIND_SERVICE" ];
           noNewPrivileges = true;
           readOnly = true;
-          tmpfses = [ "/tmp:rw" ];
+          tmpfses = [ "/tmp:rw,uid=101,gid=101" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
