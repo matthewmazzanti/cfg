@@ -30,8 +30,8 @@
           dropCapabilities = ["ALL"];
           addCapabilities = [ "NET_BIND_SERVICE" ];
           noNewPrivileges = true;
-          readOnly = true;
-          tmpfses = [ "/var/run" "/tmp" ];
+          # readOnly = true;
+          # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
