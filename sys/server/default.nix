@@ -49,7 +49,6 @@
 
     networks."05-enp7s0.18" = {
       matchConfig.Name = "enp7s0.18";
-      linkConfig.Unmanaged = true;
     };
   };
 }
