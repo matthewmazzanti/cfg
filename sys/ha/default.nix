@@ -24,6 +24,4 @@
     extraGroups = ["networkmanager" "podman" "dialout"];
     packages = [ flake.packages."nvim/nix" ];
   };
-
-  networking.firewall.allowedTCPPorts = ["8000"];
 }
