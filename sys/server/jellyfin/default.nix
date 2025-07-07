@@ -33,7 +33,7 @@
         };
         containerConfig = {
           name = "jellyfin-nginx";
-          pod = "jellyfin.pod";
+          pod = "jellyfin-pod.pod";
           image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
           dropCapabilities = ["ALL"];
           addCapabilities = [ "SETUID" "SETGID" "CHOWN" "NET_BIND_SERVICE" ];
