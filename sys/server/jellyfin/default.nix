@@ -14,7 +14,7 @@
       subnets = [ "172.18.0.0/16" ];
       gateways = [ "172.18.0.1" ];
       ipRanges = [ "172.18.1.10/32" ];
-      options = [ "parent=enp1s0.18" ];
+      options = [ "parent=enp7s0.18" ];
     };
 
     pods.jellyfin-pod.podConfig = {
