@@ -80,8 +80,7 @@
     });
 
     darwinConfigurations = import ./sys/darwin.nix {
-      inherit darwin;
-      packages = self.packages.aarch64-darwin;
+      inherit self inputs;
     };
 
     nixosModules = {

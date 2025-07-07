@@ -2,6 +2,7 @@
   pkgs,
   lib,
   custom,
+  flake,
   ...
 }: let
   inherit (lib) escapeShellArg;
@@ -185,6 +186,8 @@ in {
     enableCompletion = false;
     enableBashCompletion = false;
   };
+
+  security.pki.certificates = [ flake.lib.keys.ca.crt ];
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
