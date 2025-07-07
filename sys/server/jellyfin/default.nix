@@ -64,6 +64,7 @@
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "/var/lib/jellyfin/config:/config:rw"
+            "${./network.xml}:/config/config/network.xml:ro"
             "/var/lib/jellyfin/cache:/cache:rw"
             "/srv/share/media:/media:ro"
           ];
