@@ -28,8 +28,8 @@
     containers = {
       jellyfin-nginx = {
         unitConfig = {
-          After = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
-          Requires = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
+          After = [ "var-lib-jellyfin.mount" ];
+          Requires = [ "var-lib-jellyfin.mount" ];
         };
         containerConfig = {
           name = "jellyfin-nginx";

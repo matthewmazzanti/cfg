@@ -27,5 +27,4 @@
 
   # Storage for containers
   environment.persistence."/persist".directories = [ "/var/lib/containers" ];
-
 }
