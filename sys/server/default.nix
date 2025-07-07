@@ -5,6 +5,7 @@
     flake.modules.lanzaboote
     flake.modules.quadlet
     ./hardware.nix
+    ./jellyfin
   ];
 
   # Networking
