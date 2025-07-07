@@ -33,7 +33,10 @@
     enable = true;
     networks."00-enp7s0" = {
       matchConfig.Name = "enp7s0";
-      networkConfig.DHCP = true;
+      networkConfig = {
+        DHCP = true;
+        VLAN = [ "enp7s0.18" ];
+      };
     };
 
     netdevs."05-enp7s0.18" = {
