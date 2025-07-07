@@ -19,7 +19,7 @@
 
     pods.jellyfin-pod.podConfig = {
       name = "jellyfin-pod";
-      networks = [ "jellyfin:mac=a2:d9:5d:37:ef:10" ];
+      networks = [ "jellyfin:mac=5a:8d:e0:e1:dc:72" ];
       ip = "172.18.1.10";
       dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];
