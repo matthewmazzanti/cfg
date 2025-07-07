@@ -11,16 +11,17 @@
   virtualisation.quadlet = {
     networks.jellyfin.networkConfig = {
       driver = "macvlan";
-      subnets = [ "172.16.0.0/16" ];
-      gateways = [ "172.16.0.1" ];
-      ipRanges = [ "172.16.1.12/32" ];
+      subnets = [ "172.18.0.0/16" ];
+      gateways = [ "172.18.0.1" ];
+      ipRanges = [ "172.18.1.10/32" ];
+      options = [ "parent=enp1s0.18" ];
     };
 
     pods.jellyfin-pod.podConfig = {
       name = "jellyfin-pod";
       networks = [ "jellyfin:mac=a2:d9:5d:37:ef:10" ];
-      ip = "172.16.1.12";
-      dns = [ "172.16.0.1" ];
+      ip = "172.18.1.10";
+      dns = [ "172.18.0.1" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
     };
