@@ -27,4 +27,25 @@
 
   # Storage for containers
   environment.persistence."/persist".directories = [ "/var/lib/containers" ];
+
+  networking.useDHCP = false;
+  systemd.network = {
+    enable = true;
+    networks."00-enp7s0" = {
+      matchConfig.Name = "enp7s0";
+      networkConfig.DHCP = true;
+    };
+
+    netdevs."05-enp7s0.18" = {
+      netdevConfig = {
+        Name = "enp7s0.18";
+        Kind = "vlan";
+      };
+      vlanConfig.Id = 18;
+    };
+
+    networks."05-enp7s0.18" = {
+      matchConfig.Name = "enp7s0.18";
+    };
+  };
 }
