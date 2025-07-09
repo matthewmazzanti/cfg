@@ -1,0 +1,7 @@
+{
+  "nginx": "docker.io/library/nginx:latest@sha256:93230cd54060f497430c7a120e2347894846a81b6a5dd2110f7362c5423b4abc",
+  "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:e876528e4159974e844bbf3555e67ff48d73a78bf432b717dd9d178328230b40",
+  "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:d8f23d86505ec9ddfbf26d2b25b47272662c1f61d283593c8317c23c8baa0706",
+  "jellyfin": "docker.io/jellyfin/jellyfin:unstable@sha256:4eaf1499eb00cf0a494e02114ea6db607962a9225e354478d0a69a7b80cc5d23",
+  "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:78eccee0e28d618a2683d4ed348374395db26c363fa111d7e42694bcaf0a4d65"
+}

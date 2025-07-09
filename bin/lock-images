@@ -1,0 +1,311 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = [
+#   "httpx",
+# ]
+# ///
+
+
+"""
+Lock container image references by resolving their SHA256 digests.
+
+Supports:
+- docker.io (via registry-1.docker.io)
+- ghcr.io
+- quay.io
+
+Modes:
+- Argument-based mode: lock images provided via CLI args
+- JSON input mode: update digests in a shortname-to-image mapping file
+
+Auth tokens are batched and fetched in parallel per registry.
+
+Examples:
+    ./lock-images.py docker.io/library/nginx:alpine ghcr.io/foo/bar:latest
+    ./lock-images.py --json images.json --write
+"""
+
+from typing import Self, Iterable
+import argparse
+import asyncio
+import hashlib
+import httpx
+import json
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+
+# --- Data Model ---
+
+@dataclass(frozen=True)
+class ImageRef:
+    """
+    Represents a normalized container image reference.
+
+    Fields:
+    - registry: the container registry (e.g., ghcr.io, registry-1.docker.io)
+    - name: image path within the registry (e.g., user/image or library/nginx)
+    - tag: image tag (e.g., latest, v1.25)
+    - digest: optional existing digest (parsed from @sha256:...)
+    """
+    registry: str
+    name: str
+    tag: str
+    digest: str | None = None
+
+    @classmethod
+    def parse(cls, raw: str) -> "ImageRef":
+        """
+        Parses a Docker-style image reference string into its components.
+
+        Handles:
+        - Optional registry, tag, or digest
+        - Default docker.io registry normalization
+        - Adds "library/" prefix for official Docker Hub images
+        """
+        def is_registry(part: str) -> bool:
+            return "." in part or ":" in part or part == "localhost"
+
+        digest = None
+        name = None
+        tag = None
+        registry = None
+
+        # Split off @digest
+        if "@" in raw:
+            raw, digest = raw.split("@", 1)
+
+        # Split registry vs image path
+        match raw.split("/", 1):
+            case [reg, name] if is_registry(reg):
+                # First segment looks like a registry (e.g. ghcr.io, docker.io)
+                registry = reg
+                name = name
+            case [_, _]:
+                # Two segments, but not a registry — just image name
+                registry = None
+                name = raw
+            case [name]:
+                # One segment — image name only
+                registry = None
+            case _:
+                raise ValueError(raw)
+
+        # Split tag if present
+        if ":" in name:
+            name, tag = name.rsplit(":", 1)
+
+        # Normalize Docker Hub registry
+        if registry in (None, "docker.io"):
+            registry = "registry-1.docker.io"
+
+        if registry == "registry-1.docker.io" and "/" not in name:
+            name = f"library/{name}"
+
+        return cls(
+            registry=registry,
+            name=name,
+            tag=tag or "latest",
+            digest=digest,
+        )
+
+    def scope(self) -> str:
+        """Returns the registry auth scope for this image (repository:X:pull)."""
+        return f"repository:{self.name}:pull"
+
+    def manifest_url(self) -> str:
+        """Returns the URL to fetch the manifest for this image."""
+        return f"https://{self.registry}/v2/{self.name}/manifests/{self.tag}"
+
+    def format_locked(self, digest: str) -> str:
+        """Formats a Podman-compatible locked image string with tag and digest."""
+        display_reg = "docker.io" if self.registry == "registry-1.docker.io" else self.registry
+        return f"{display_reg}/{self.name}:{self.tag}@{digest}"
+
+
+# --- Auth Manager ---
+
+class AuthError(Exception):
+    """Raised when authentication fails or is unsupported."""
+    pass
+
+
+class AuthManager:
+    """
+    Handles authentication for multiple registries.
+
+    - Collects auth scopes from image references
+    - Fetches tokens per registry in parallel
+    - Provides cached token lookup
+    """
+    def __init__(self, images: Iterable[ImageRef], client: httpx.AsyncClient):
+        self._client = client
+        self._scopes: dict[str, set[str]] = {}
+        self._tokens: dict[str, str] = {}
+
+        # Collect scopes per registry
+        for img in images:
+            self._scopes.setdefault(img.registry, set()).add(img.scope())
+
+        # Anonymous token endpoints per registry
+        self._registry_auth: dict[str, tuple[str, str]] = {
+            "registry-1.docker.io": (
+                "https://auth.docker.io/token",
+                "registry.docker.io",
+            ),
+            "ghcr.io": ("https://ghcr.io/token", "ghcr.io"),
+            "quay.io": ("https://quay.io/v2/auth", "quay.io"),
+        }
+
+    async def fetch_one(self, registry: str, scopes: list[str]) -> tuple[str, str]:
+        """Fetch token for a single registry and return (registry, token)."""
+        if registry not in self._registry_auth:
+            raise AuthError(f"Unsupported registry: {registry}")
+
+        url, service = self._registry_auth[registry]
+        return registry, await self._fetch_token(url, service, sorted(scopes))
+
+    async def fetch_all(self) -> Self:
+        """
+        Fetch tokens for all registries in parallel and populate token cache.
+        """
+        tasks = [
+            self.fetch_one(reg, list(scopes))
+            for reg, scopes in self._scopes.items()
+        ]
+
+        for registry, token in await asyncio.gather(*tasks):
+            self._tokens[registry] = token
+
+        return self
+
+    async def _fetch_token(self, url: str, service: str, scopes: list[str]) -> str:
+        """Send token request and return token string."""
+        resp = await self._client.get(url, params={"service": service, "scope": scopes})
+        if resp.status_code != 200:
+            raise AuthError(f"Token request to {url} failed with status {resp.status_code}")
+
+        token = resp.json().get("token")
+        if not token:
+            raise AuthError(f"Token response from {url} missing 'token'")
+
+        return token
+
+    def get_token(self, registry: str) -> str:
+        """Returns cached token for a registry, or raises AuthError if missing."""
+        if registry not in self._tokens:
+            raise AuthError(f"Token for {registry} not fetched")
+        return self._tokens[registry]
+
+
+# --- Manifest Fetching ---
+
+async def fetch_digest(client: httpx.AsyncClient, ref: ImageRef, token: str) -> str:
+    """
+    Fetch the manifest and extract digest, verifying SHA256 checksum.
+
+    Raises:
+    - RuntimeError if digest missing or mismatched
+    """
+    headers = {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Authorization": f"Bearer {token}",
+    }
+    resp = await client.get(ref.manifest_url(), headers=headers)
+    resp.raise_for_status()
+
+    digest_header = resp.headers.get("Docker-Content-Digest")
+    if not digest_header:
+        raise RuntimeError(f"Missing digest header from {ref.manifest_url()}")
+
+    computed = "sha256:" + hashlib.sha256(resp.content).hexdigest()
+    if computed != digest_header:
+        raise RuntimeError(f"Digest mismatch\nHeader: {digest_header}\nComputed: {computed}")
+
+    return ref.format_locked(digest_header)
+
+
+# --- CLI and Orchestration ---
+
+async def main() -> None:
+    """Main CLI entrypoint: parses args and dispatches resolution mode."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("images", nargs="*", help="Image refs to lock (e.g. nginx:alpine)")
+    parser.add_argument("--json", type=Path, help="JSON input (shortname: ref)")
+    parser.add_argument("--write", action="store_true", help="Overwrite input JSON file")
+    args = parser.parse_args()
+
+    if args.json:
+        await resolve_from_json(args.json, args.write)
+    else:
+        if not args.images:
+            parser.error("Provide image args or use --json")
+        await resolve_from_args(args.images)
+
+async def resolve_from_json(path: Path, write: bool = False) -> None:
+    """
+    Load image refs from JSON file (shortname → ref),
+    resolve digests, and print or write updated file.
+    """
+    refs = {key: ImageRef.parse(val) for key, val in json.loads(path.read_text()).items()}
+
+    async with httpx.AsyncClient() as client:
+        auth = await AuthManager(refs.values(), client).fetch_all()
+
+        async def resolve_one(name: str, ref: ImageRef) -> tuple[str, str]:
+            token = auth.get_token(ref.registry)
+            return name, await fetch_digest(client, ref, token)
+
+        results = await asyncio.gather(*(resolve_one(k, v) for k, v in refs.items()))
+
+    updated = dict(results)
+
+    if not write:
+        json.dump(updated, sys.stdout, indent=2)
+        print()
+        return
+
+    with NamedTemporaryFile("w", delete=False) as f:
+        json.dump(updated, f, indent=2)
+        tmp_path = Path(f.name)
+
+    tmp_path.replace(path)
+
+def parse_image_args(raw_args: list[str]) -> list[ImageRef]:
+    """
+    Parses CLI image args into ImageRefs.
+    Deduplicates (registry, name, tag) while preserving input order.
+    """
+    seen: set[tuple[str, str, str]] = set()
+    result: list[ImageRef] = []
+
+    for raw in raw_args:
+        ref = ImageRef.parse(raw)
+        key = (ref.registry, ref.name, ref.tag)
+        if key not in seen:
+            seen.add(key)
+            result.append(ref)
+
+    return result
+
+async def resolve_from_args(images: list[str]) -> None:
+    """
+    Resolve a list of image strings and print locked versions to stdout.
+    """
+    refs = parse_image_args(images)
+
+    async with httpx.AsyncClient() as client:
+        auth = await AuthManager(refs, client).fetch_all()
+
+        async def resolve_one(ref: ImageRef) -> str:
+            token = auth.get_token(ref.registry)
+            return await fetch_digest(client, ref, token)
+
+        results = await asyncio.gather(*(resolve_one(ref) for ref in refs))
+        for line in results:
+            print(line)
+
+if __name__ == "__main__":
+    asyncio.run(main())

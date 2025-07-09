@@ -1,5 +1,5 @@
 nixpkgs: let
-  inherit (nixpkgs.lib) genAttrs;
+  inherit (nixpkgs.lib) genAttrs importJSON;
 in rec {
   # List of nixpkgs systems identifiers for flakes
   systems = ["aarch64-linux" "aarch64-darwin" "x86_64-linux"];
@@ -30,4 +30,5 @@ in rec {
     );
 
   keys = import ./keys;
+  images = importJSON ./images.json;
 }

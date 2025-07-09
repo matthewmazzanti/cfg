@@ -1,40 +1,46 @@
 { config, flake, ... }: {
   # Create filesystems for different containers in zfs
   fileSystems = {
-    "/var/lib/jellyfin" = {
-      device = "root-pool/state/services/jellyfin";
+    "/var/lib/gitea" = {
+      device = "root-pool/state/services/gitea";
+      fsType = "zfs";
+      options = [ "noatime" "nodiratime" ];
+    };
+
+    "/srv/git" = {
+      device = "data-pool/share/git";
       fsType = "zfs";
       options = [ "noatime" "nodiratime" ];
     };
   };
 
   virtualisation.quadlet = {
-    networks.jellyfin.networkConfig = {
+    networks.gitea.networkConfig = {
       driver = "macvlan";
-      subnets = [ "172.18.0.0/16" ];
-      gateways = [ "172.18.0.1" ];
-      ipRanges = [ "172.18.1.10/32" ];
-      options = [ "parent=enp7s0.18" ];
+      subnets = [ "172.16.0.0/16" ];
+      gateways = [ "172.16.0.1" ];
+      ipRanges = [ "172.16.1.12/32" ];
+      options = [ "parent=enp7s0" ];
     };
 
-    pods.jellyfin-pod.podConfig = {
-      name = "jellyfin-pod";
-      networks = [ "jellyfin:mac=5a:8d:e0:e1:dc:72" ];
-      ip = "172.18.1.10";
-      dns = [ "172.18.0.1" ];
+    pods.gitea-pod.podConfig = {
+      name = "gitea-pod";
+      networks = [ "gitea:mac=52:36:82:65:e6:72" ];
+      ip = "172.16.1.12";
+      dns = [ "172.16.0.1" ];
       uidMaps = [ "0:100000:65536" ];
       gidMaps = [ "0:100000:65536" ];
     };
 
     containers = {
-      jellyfin-nginx = {
+      gitea-nginx = {
         unitConfig = {
-          After = [ "var-lib-jellyfin.mount" ];
-          Requires = [ "var-lib-jellyfin.mount" ];
+          After = [ "var-lib-gitea.mount" ];
+          Requires = [ "var-lib-gitea.mount" ];
         };
         containerConfig = {
-          name = "jellyfin-nginx";
-          pod = "jellyfin-pod.pod";
+          name = "gitea-nginx";
+          pod = "gitea-pod.pod";
           image = flake.lib.images.nginx;
           dropCapabilities = ["ALL"];
           addCapabilities = [ "SETUID" "SETGID" "CHOWN" "NET_BIND_SERVICE" ];
@@ -43,29 +49,29 @@
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
-            "/var/lib/jellyfin/nginx/ssl:/etc/nginx/ssl:ro"
+            "/var/lib/gitea/nginx/ssl:/etc/nginx/ssl:ro"
           ];
           environments.TZ = config.time.timeZone;
         };
       };
 
-      jellyfin = {
+      gitea = {
         unitConfig = {
-          After = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
-          Requires = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
+          After = [ "var-lib-gitea.mount" "srv-git.mount" ];
+          Requires = [ "var-lib-gitea.mount" "srv-git.mount" ];
         };
         containerConfig = {
-          name = "jellyfin";
-          pod = "jellyfin-pod.pod";
-          image = flake.lib.images.jellyfin;
+          name = "gitea";
+          pod = "gitea-pod.pod";
+          image = flake.lib.images.gitea;
           # dropCapabilities = ["ALL"];
           # addCapabilities = [ "FOWNER" "NET_RAW" ];
           noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
-            "/var/lib/jellyfin/config:/config:rw"
-            "/var/lib/jellyfin/cache:/cache:rw"
+            "/var/lib/gitea/config:/config:rw"
+            "/var/lib/gitea/cache:/cache:rw"
             "/srv/share/media:/media:ro"
           ];
           environments.TZ = config.time.timeZone;

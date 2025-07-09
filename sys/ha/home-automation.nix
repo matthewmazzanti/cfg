@@ -49,7 +49,7 @@
         containerConfig = {
           name = "nginx";
           pod = "ha.pod";
-          image = "docker.io/library/nginx:alpine-slim@sha256:e4e764cb35f666f44dd4e1da4291a5f73bb8bff2a9464ccecd8a05a2b7226ad5";
+          image = flake.lib.images.nginx;
           dropCapabilities = ["ALL"];
           addCapabilities = [ "SETUID" "SETGID" "CHOWN" "NET_BIND_SERVICE" ];
           noNewPrivileges = true;
@@ -71,7 +71,7 @@
         containerConfig = {
           name = "hass";
           pod = "ha.pod";
-          image = "ghcr.io/home-assistant/home-assistant:stable@sha256:e876528e4159974e844bbf3555e67ff48d73a78bf432b717dd9d178328230b40";
+          image = flake.lib.images.hass;
           # dropCapabilities = ["ALL"];
           addCapabilities = [ "FOWNER" "NET_RAW" ];
           noNewPrivileges = true;
@@ -96,7 +96,7 @@
         containerConfig = {
           name = "zwave";
           pod = "ha.pod";
-          image = "zwavejs/zwave-js-ui:latest@sha256:52b6ee2c37fa1a3c13a8d8f59b45145b546ec31b5c85d5053e1279fc558c5a1e";
+          image = flake.lib.images.zwave;
           # dropCapabilities = ["ALL"];
           # addCapabilities = ["FOWNER" "NET_RAW"];
           noNewPrivileges = true;
