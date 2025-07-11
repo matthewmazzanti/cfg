@@ -73,8 +73,7 @@
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/gitea/data:/data:rw"
             "${./app.ini}:/data/gitea/conf/app.ini:ro"
-            "/var/lib/gitea/secret_key:/run/secrets/secret_key:ro"
-            "/var/lib/gitea/internal_token:/run/secrets/internal_token:ro"
+            "/var/lib/gitea/secrets:/run/secrets:ro"
             "/srv/git:/data/git:rw"
           ];
           environments.TZ = config.time.timeZone;
