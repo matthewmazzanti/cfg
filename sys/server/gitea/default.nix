@@ -28,8 +28,8 @@
       networks = [ "gitea:mac=52:36:82:65:e6:72" ];
       ip = "172.16.1.12";
       dns = [ "172.16.0.1" ];
-      uidMaps = [ "0:100000:65536" ];
-      gidMaps = [ "0:100000:65536" ];
+      uidMaps = [ "0:200000:65536" ];
+      gidMaps = [ "0:200000:65536" ];
     };
 
     containers = {
@@ -70,9 +70,11 @@
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
-            "/var/lib/gitea/config:/config:rw"
-            "/var/lib/gitea/cache:/cache:rw"
-            "/srv/share/media:/media:ro"
+            "/etc/localtime:/etc/localtime:ro"
+            "/var/lib/gitea/config:/data/gitea/gitea:rw"
+            "/var/lib/gitea/secret_key:/run/secrets/secret_key:ro"
+            "/var/lib/gitea/internal_token:/run/secrets/internal_token:ro"
+            "/srv/git:/data/git:rw"
           ];
           environments.TZ = config.time.timeZone;
         };

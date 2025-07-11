@@ -84,12 +84,13 @@ class ImageRef:
                 registry = reg
                 name = name
             case [_, _]:
-                # Two segments, but not a registry — just image name
+                # Two segments, not a registry — just image name
                 registry = None
                 name = raw
             case [name]:
                 # One segment — image name only
                 registry = None
+                name = name
             case _:
                 raise ValueError(raw)
 
@@ -185,7 +186,9 @@ class AuthManager:
         """Send token request and return token string."""
         resp = await self._client.get(url, params={"service": service, "scope": scopes})
         if resp.status_code != 200:
-            raise AuthError(f"Token request to {url} failed with status {resp.status_code}")
+            raise AuthError(
+                f"Token request to {url} failed with status {resp.status_code}"
+            )
 
         token = resp.json().get("token")
         if not token:
@@ -209,11 +212,13 @@ async def fetch_digest(client: httpx.AsyncClient, ref: ImageRef, token: str) -> 
     Raises:
     - RuntimeError if digest missing or mismatched
     """
-    headers = {
-        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
-        "Authorization": f"Bearer {token}",
-    }
-    resp = await client.get(ref.manifest_url(), headers=headers)
+    resp = await client.get(
+        ref.manifest_url(),
+        headers={
+            "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+            "Authorization": f"Bearer {token}",
+        }
+    )
     resp.raise_for_status()
 
     digest_header = resp.headers.get("Docker-Content-Digest")
@@ -222,7 +227,9 @@ async def fetch_digest(client: httpx.AsyncClient, ref: ImageRef, token: str) -> 
 
     computed = "sha256:" + hashlib.sha256(resp.content).hexdigest()
     if computed != digest_header:
-        raise RuntimeError(f"Digest mismatch\nHeader: {digest_header}\nComputed: {computed}")
+        raise RuntimeError(
+            f"Digest mismatch\nHeader: {digest_header}\nComputed: {computed}"
+        )
 
     return ref.format_locked(digest_header)
 
@@ -239,10 +246,12 @@ async def main() -> None:
 
     if args.json:
         await resolve_from_json(args.json, args.write)
-    else:
-        if not args.images:
-            parser.error("Provide image args or use --json")
-        await resolve_from_args(args.images)
+        return
+
+    if not args.images:
+        parser.error("Provide image args or use --json")
+
+    await resolve_from_args(args.images)
 
 async def resolve_from_json(path: Path, write: bool = False) -> None:
     """
