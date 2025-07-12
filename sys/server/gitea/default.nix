@@ -66,6 +66,7 @@
           image = flake.lib.images.gitea;
           # dropCapabilities = ["ALL"];
           # addCapabilities = [ "FOWNER" "NET_RAW" ];
+          addCapabilities = ["NET_BIND_SERVICE"];
           noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
