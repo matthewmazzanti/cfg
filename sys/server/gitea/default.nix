@@ -75,7 +75,7 @@
             "/var/lib/gitea/data:/var/lib/gitea:rw"
             "${./app.ini}:/var/lib/gitea/conf/app.ini:ro"
             "/var/lib/gitea/secrets:/run/secrets:ro"
-            "/srv/git:/srv/git:rw"
+            "/srv/git:/var/lib/gitea/git:rw"
           ];
           environments.TZ = config.time.timeZone;
         };
