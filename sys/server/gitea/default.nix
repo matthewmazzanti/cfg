@@ -73,7 +73,7 @@
           volumes = [
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/gitea/data:/var/lib/gitea:rw"
-            "${./app.ini}:/var/lib/gitea/conf/app.ini:ro"
+            "${./app.ini}:/etc/gitea/app.ini:ro"
             "/var/lib/gitea/secrets:/run/secrets:ro"
             "/srv/git:/var/lib/gitea/git:rw"
           ];
