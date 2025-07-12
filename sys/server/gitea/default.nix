@@ -72,10 +72,10 @@
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "/etc/localtime:/etc/localtime:ro"
-            "/var/lib/gitea/data:/data:rw"
-            "${./app.ini}:/data/gitea/conf/app.ini:ro"
+            "/var/lib/gitea/data:/var/lib/gitea:rw"
+            "${./app.ini}:/var/lib/gitea/conf/app.ini:ro"
             "/var/lib/gitea/secrets:/run/secrets:ro"
-            "/srv/git:/data/git:rw"
+            "/srv/git:/srv/git:rw"
           ];
           environments.TZ = config.time.timeZone;
         };
