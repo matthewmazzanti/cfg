@@ -66,7 +66,7 @@
           image = flake.lib.images.gitea;
           dropCapabilities = ["ALL"];
           addCapabilities = [ "NET_BIND_SERVICE" ];
-          sysctl = { "net.ipv4.ip_unprivileged_port_start" = 1024; };
+          sysctl = { "net.ipv4.ip_unprivileged_port_start" = "1024"; };
           noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
