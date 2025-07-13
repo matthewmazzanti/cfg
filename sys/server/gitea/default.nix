@@ -68,14 +68,14 @@
           addCapabilities = [ "NET_BIND_SERVICE" ];
           sysctl = { "net.ipv4.ip_unprivileged_port_start" = "1024"; };
           noNewPrivileges = true;
-          # readOnly = true;
-          # tmpfses = [ "/var/run" "/tmp" ];
+          readOnly = true;
+          tmpfses = [ "/tmp" ];
           volumes = [
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/gitea/data:/var/lib/gitea:rw"
             "${./app.ini}:/etc/gitea/app.ini:ro"
             "/var/lib/gitea/secrets:/run/secrets:ro"
-            "/srv/git:/var/lib/gitea/git:rw"
+            "/srv/git:/srv/git:rw"
           ];
           environments.TZ = config.time.timeZone;
         };
