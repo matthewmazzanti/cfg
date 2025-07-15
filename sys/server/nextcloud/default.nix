@@ -14,6 +14,8 @@
     };
   };
 
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
+
   virtualisation.quadlet = {
     networks.nextcloud.networkConfig.driver = "bridge";
 
