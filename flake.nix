@@ -21,7 +21,7 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
-    quadlet-nix.url = "github:matthewmazzanti/quadlet-nix";
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
