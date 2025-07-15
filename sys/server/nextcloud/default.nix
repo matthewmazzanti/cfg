@@ -46,7 +46,7 @@
             "/var/lib/nextcloud/html:/var/www/html:ro"
             "/srv/files:/var/www/html/data:ro"
           ];
-          publishPorts = ["80:80" "443:443"];
+          # publishPorts = ["80:80" "443:443"];
           networks = [ "nextcloud" ];
         };
       };
