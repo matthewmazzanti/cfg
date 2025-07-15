@@ -53,4 +53,6 @@
       matchConfig.Name = "enp7s0.18";
     };
   };
+
+  virtualisation.quadlet.autoEscape = true;
 }
