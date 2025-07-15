@@ -15,7 +15,7 @@
   };
 
   virtualisation.quadlet = {
-    networks.nextcloud.driver = "bridge";
+    networks.nextcloud.networkConfig.driver = "bridge";
 
     ## Define each container
     containers = {
