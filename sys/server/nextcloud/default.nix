@@ -42,6 +42,7 @@
           gidMaps = [ "0:300000:65536" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
+            "/var/lib/nextcloud/ssl:/etc/nginx/ssl:ro"
             "/var/lib/nextcloud/html:/var/www/html:ro"
             "/srv/files:/var/www/html/data:ro"
           ];
