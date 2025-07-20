@@ -7,7 +7,6 @@
     ./hardware.nix
     ./jellyfin
     ./gitea
-    ./nextcloud
   ];
 
   # Networking
@@ -36,7 +35,8 @@
     networks."00-enp7s0" = {
       matchConfig.Name = "enp7s0";
       networkConfig = {
-        DHCP = true;
+        DHCP = false;
+        Address = [ "172.16.1.10/24" ];
         VLAN = [ "enp7s0.18" ];
       };
     };
@@ -53,6 +53,18 @@
       matchConfig.Name = "enp7s0.18";
     };
   };
+
+  services.nginx = {
+    enable = false; # true;
+    recommendedGzipSettings = true;
+    recommendedOptimisation = true;
+    recommendedProxySettings = true;
+    recommendedTlsSettings = true;
+  };
+
+  networking.firewall.enp7s0.allowedTCPPorts = [ 22 80 443 2222 ];
+
+  services.openssh.listenAddresses = [ "172.16.1.10" ];
 
   virtualisation.quadlet.autoEscape = true;
 }

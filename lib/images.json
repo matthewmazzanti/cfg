@@ -1,8 +1,12 @@
 {
-  "nginx": "docker.io/library/nginx:latest@sha256:93230cd54060f497430c7a120e2347894846a81b6a5dd2110f7362c5423b4abc",
+  "nginx": "docker.io/library/nginx:latest@sha256:f5c017fb33c6db484545793ffb67db51cdd7daebee472104612f73a85063f889",
   "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:90e105ff097717556df4e87da3b825af85b181c763ca2b8d840aeae5d34a083c",
   "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:6db7cdfde1a037b5263e4434d0890619710772464ef72477d1be6c3c3c6b5419",
   "jellyfin": "docker.io/jellyfin/jellyfin:unstable@sha256:9e03dbf6931c84384474d3f0e86a54ea3a737749dc8f6d92691c05910aff37b4",
-  "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:78eccee0e28d618a2683d4ed348374395db26c363fa111d7e42694bcaf0a4d65",
-  "nextcloud": "docker.io/library/nextcloud:fpm-alpine@sha256:ad3f4f11f936721551a92bf82dbb147d217a7b8fdf4ef2e0e4eb4d2aedcfa429"
+  "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:37b35005c2ba9c21368c610ec07ccd5449cde766bb7ca6bab26543a99757394b",
+  "seafile": "docker.io/seafileltd/seafile-mc:13.0-latest@sha256:ee9deed5df890cf3534cebfb68e802e4e3f89dfb9246d53a73209146019f85c3",
+  "mariadb": "docker.io/library/mariadb:10@sha256:24bb6e3d8e46f4581ddcc2b2c22fd78c99c77ac4e3fb7c9aba3a5c4c4d934ca2",
+  "redis": "docker.io/library/redis:latest@sha256:a1e0a3b3a6cedd74d8ba44805b2497b93851a296f08a44962fedc03f1c490b47",
+  "onlyoffice": "docker.io/onlyoffice/documentserver:latest@sha256:6cf2c2727696954fb25f3f6061f195a6b1a366e1e7c66a3d53fb004322544d21",
+  "kanidm": "ghcr.io/kanidm/server"
 }
