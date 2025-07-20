@@ -35,7 +35,7 @@
       seafile-cache = {
         containerConfig = {
           image = flake.lib.images.redis;
-          name = "seafile-redis";
+          name = "seafile-cache";
           # TODO: Env file
           # REDIS_PASSWORD = "";
           environmentFiles = [ "/var/lib/seafile/cache.env" ];
@@ -55,20 +55,22 @@
           volumes = [ "/var/lib/seafile/data:/shared:rw" ];
           environments = {
             TIME_ZONE = config.time.timeZone;
-            SEAFILE_MYSQL_DB_HOST = "db";
-            SEAFILE_MYSQL_DB_PORT = "3306";
-            SEAFILE_MYSQL_DB_USER = "seafile";
-            SEAFILE_MYSQL_DB_CCNET_DB_NAME = "ccnet_db";
-            SEAFILE_MYSQL_DB_SEAFILE_DB_NAME = "seafile_db";
-            SEAFILE_MYSQL_DB_SEAHUB_DB_NAME = "seahub_db";
             SEAFILE_SERVER_HOSTNAME = "files.lan";
             SEAFILE_SERVER_PROTOCOL = "http";
             SITE_ROOT = "/";
             NON_ROOT = "false";
             SEAFILE_LOG_TO_STDOUT = "true";
             ENABLE_SEADOC = "false";
+            # Msyql config
+            SEAFILE_MYSQL_DB_HOST = "seafile-db";
+            SEAFILE_MYSQL_DB_PORT = "3306";
+            SEAFILE_MYSQL_DB_USER = "seafile";
+            SEAFILE_MYSQL_DB_CCNET_DB_NAME = "ccnet_db";
+            SEAFILE_MYSQL_DB_SEAFILE_DB_NAME = "seafile_db";
+            SEAFILE_MYSQL_DB_SEAHUB_DB_NAME = "seahub_db";
+            # Redis config
             CACHE_PROVIDER = "redis";
-            REDIS_HOST = "redis";
+            REDIS_HOST = "seafile-cache";
             REDIS_PORT = "6379";
           };
           # TODO: Env file
