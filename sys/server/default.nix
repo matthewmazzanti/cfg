@@ -6,7 +6,7 @@
     flake.modules.quadlet
     ./hardware.nix
     ./jellyfin
-    # ./gitea
+    ./gitea
   ];
 
   # Networking
@@ -27,8 +27,8 @@
   };
 
   environment.persistence."/persist".directories = [
-    "/var/lib/containers"
-    "/var/lib/ssl"
+    "/var/lib/containers" # for podman runtime/cache
+    "/var/lib/ssl" # for nginx certs
   ];
 
   networking.useDHCP = false;
