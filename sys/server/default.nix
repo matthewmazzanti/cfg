@@ -38,7 +38,9 @@
       matchConfig.Name = "enp7s0";
       networkConfig = {
         DHCP = false;
-        Address = [ "172.16.1.10/24" ];
+        Address = [ "172.16.1.10/16" ];
+        Gateway = [ "172.16.0.1" ];
+        DNS = [ "172.16.0.1" ];
         VLAN = [ "enp7s0.18" ];
       };
     };
