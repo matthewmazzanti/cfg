@@ -46,7 +46,7 @@
     };
   };
 
-  networking.firewall.enp7s0.allowedTCPPorts = [ 2222 ];
+  networking.firewall.interfaces.enp7s0.allowedTCPPorts = [ 2222 ];
 
   services.nginx.virtualHosts."git.lan" = {
     # HTTP → HTTPS redirection

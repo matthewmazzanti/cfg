@@ -6,7 +6,7 @@
     flake.modules.quadlet
     ./hardware.nix
     ./jellyfin
-    ./gitea
+    # ./gitea
   ];
 
   # Networking
@@ -55,14 +55,14 @@
   };
 
   services.nginx = {
-    enable = false; # true;
+    enable = true;
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
   };
 
-  networking.firewall.enp7s0.allowedTCPPorts = [ 22 80 443 2222 ];
+  networking.firewall.interfaces.enp7s0.allowedTCPPorts = [ 22 80 443 ];
 
   services.openssh.listenAddresses = [ "172.16.1.10" ];
 
