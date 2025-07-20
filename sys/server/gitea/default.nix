@@ -33,7 +33,7 @@
           "/srv/git:/srv/git:rw"
         ];
         networks = [ "gitea" ];
-        ports = [ "127.0.0.1:16001:8000" "172.16.1.10:2222:2222" ];
+        publishPorts = [ "127.0.0.1:16001:8000" "172.16.1.10:2222:2222" ];
         environments.TZ = config.time.timeZone;
 
         uidMaps = [ "0:200000:65536" ];
