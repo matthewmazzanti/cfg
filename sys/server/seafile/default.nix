@@ -51,7 +51,7 @@
         containerConfig = {
           image = flake.lib.images.seafile;
           name = "seafile";
-          ports = [ "127.0.0.1:16002:80" ];
+          publishPorts = [ "127.0.0.1:16002:80" ];
           volumes = [ "/var/lib/seafile/data:/shared:rw" ];
           environments = {
             TIME_ZONE = config.time.timeZone;
