@@ -64,7 +64,9 @@
 
   networking.firewall.interfaces.enp7s0.allowedTCPPorts = [ 22 80 443 ];
 
-  services.openssh.listenAddresses = [ "172.16.1.10" ];
+  services.openssh.listenAddresses = [{
+    addr = "172.16.1.10";
+  }];
 
   virtualisation.quadlet.autoEscape = true;
 }
