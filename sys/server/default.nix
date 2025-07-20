@@ -6,7 +6,7 @@
     flake.modules.quadlet
     ./hardware.nix
     ./jellyfin
-    ./gitea
+    # ./gitea
   ];
 
   # Networking
@@ -26,8 +26,10 @@
     packages = [ flake.packages."nvim/nix" ];
   };
 
-  # Storage for containers
-  environment.persistence."/persist".directories = [ "/var/lib/containers" ];
+  environment.persistence."/persist".directories = [
+    "/var/lib/containers"
+    "/var/lib/ssl"
+  ];
 
   networking.useDHCP = false;
   systemd.network = {

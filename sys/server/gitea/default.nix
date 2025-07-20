@@ -56,7 +56,6 @@
     ];
     forceSSL = true;
 
-    ssl = true;
     sslCertificate = "/var/lib/ssl/git.lan/git.lan.crt";
     sslCertificateKey = "/var/lib/ssl/git.lan/git.lan.key";
 
