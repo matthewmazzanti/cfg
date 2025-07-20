@@ -2,13 +2,7 @@
   # Create filesystems for different containers in zfs
   fileSystems = {
     "/var/lib/seafile" = {
-      device = "root-pool/state/services/seafile";
-      fsType = "zfs";
-      options = [ "noatime" "nodiratime" ];
-    };
-
-    "/srv/files" = {
-      device = "data-pool/share/files";
+      device = "data-pool/services/seafile";
       fsType = "zfs";
       options = [ "noatime" "nodiratime" ];
     };
@@ -57,7 +51,7 @@
         containerConfig = {
           image = flake.lib.images.seafile;
           name = "seafile";
-          ports = [ "127.0.0.1:80:80" ];
+          ports = [ "127.0.0.1:16002:80" ];
           volumes = [ "/var/lib/seafile/data:/shared:rw" ];
           environments = {
             TIME_ZONE = config.time.timeZone;
