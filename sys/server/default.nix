@@ -6,7 +6,7 @@
     flake.modules.quadlet
     ./hardware.nix
     ./jellyfin
-    # ./gitea
+    ./gitea
   ];
 
   # Networking
