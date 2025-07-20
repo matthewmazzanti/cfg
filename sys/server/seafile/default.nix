@@ -61,6 +61,9 @@
             NON_ROOT = "false";
             SEAFILE_LOG_TO_STDOUT = "false";
             ENABLE_SEADOC = "false";
+            ENABLE_SEAFILE_AI = "false";
+            ENABLE_NOTIFICATION_SERVER = "false";
+
             # Msyql config
             SEAFILE_MYSQL_DB_HOST = "seafile-db";
             SEAFILE_MYSQL_DB_PORT = "3306";

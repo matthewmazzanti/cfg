@@ -7,7 +7,7 @@
     ./hardware.nix
     ./jellyfin
     ./gitea
-    ./seafile
+    # ./seafile
   ];
 
   # Networking
