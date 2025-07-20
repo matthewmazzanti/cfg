@@ -59,7 +59,7 @@
             SEAFILE_SERVER_PROTOCOL = "http";
             SITE_ROOT = "/";
             NON_ROOT = "false";
-            SEAFILE_LOG_TO_STDOUT = "true";
+            SEAFILE_LOG_TO_STDOUT = "false";
             ENABLE_SEADOC = "false";
             # Msyql config
             SEAFILE_MYSQL_DB_HOST = "seafile-db";
