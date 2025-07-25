@@ -1,12 +1,11 @@
 {
-  "nginx": "docker.io/library/nginx:latest@sha256:f5c017fb33c6db484545793ffb67db51cdd7daebee472104612f73a85063f889",
-  "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:90e105ff097717556df4e87da3b825af85b181c763ca2b8d840aeae5d34a083c",
-  "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:6db7cdfde1a037b5263e4434d0890619710772464ef72477d1be6c3c3c6b5419",
-  "jellyfin": "docker.io/jellyfin/jellyfin:unstable@sha256:9e03dbf6931c84384474d3f0e86a54ea3a737749dc8f6d92691c05910aff37b4",
+  "nginx": "docker.io/library/nginx:latest@sha256:84ec966e61a8c7846f509da7eb081c55c1d56817448728924a87ab32f12a72fb",
+  "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:9682a29fdfde74dd67c78d724105a9c11cb2affaf350192b0a89447f958547df",
+  "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:0a19f8704bf65b14706a2944ffb5aa66d0d7886ca428dba2b29b93277f61ebd3",
+  "jellyfin": "docker.io/jellyfin/jellyfin:unstable@sha256:ba8630eb28cc311729c2a4122efe29d44254afb721a21d4ceb5972d4349bc2ef",
   "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:37b35005c2ba9c21368c610ec07ccd5449cde766bb7ca6bab26543a99757394b",
-  "seafile": "docker.io/seafileltd/seafile-mc:13.0-latest@sha256:ee9deed5df890cf3534cebfb68e802e4e3f89dfb9246d53a73209146019f85c3",
-  "mariadb": "docker.io/library/mariadb:10@sha256:24bb6e3d8e46f4581ddcc2b2c22fd78c99c77ac4e3fb7c9aba3a5c4c4d934ca2",
-  "redis": "docker.io/library/redis:latest@sha256:a1e0a3b3a6cedd74d8ba44805b2497b93851a296f08a44962fedc03f1c490b47",
   "onlyoffice": "docker.io/onlyoffice/documentserver:latest@sha256:6cf2c2727696954fb25f3f6061f195a6b1a366e1e7c66a3d53fb004322544d21",
-  "kanidm": "ghcr.io/kanidm/server"
+  "kanidm": "docker.io/kanidm/server:latest@sha256:e23a20e68cbda5ee8be2eca06a0097e20c820be015ac730ed10112ed7a7debe6",
+  "owncloud": "docker.io/owncloud/server:latest@sha256:ce545e72b13f0c3c19fd083aed1ec12facd91ee87993397fd883e853830dc7e9",
+  "postgres": "docker.io/library/postgres:17-alpine@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa"
 }
