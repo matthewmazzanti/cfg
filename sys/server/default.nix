@@ -8,6 +8,7 @@
     ./jellyfin
     ./gitea
     # ./seafile
+    ./owncloud
   ];
 
   # Networking

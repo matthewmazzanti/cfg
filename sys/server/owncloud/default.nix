@@ -33,14 +33,15 @@
             OWNCLOUD_DB_TYPE = "pgsql";
             OWNCLOUD_DB_NAME = "owncloud";
             OWNCLOUD_DB_USERNAME = "owncloud";
-            # OWNCLOUD_DB_PASSWORD = "owncloud";
             OWNCLOUD_DB_HOST = "owncloud-db";
-            # TODO: Env file
-            # OWNCLOUD_ADMIN_USERNAME = ${ADMIN_USERNAME};
-            # OWNCLOUD_ADMIN_PASSWORD = ${ADMIN_PASSWORD};
             OWNCLOUD_REDIS_ENABLED = true;
             OWNCLOUD_REDIS_HOST = "owncloud-cache";
           };
+          # TODO: Env file
+          # OWNCLOUD_DB_PASSWORD = "owncloud";
+          # OWNCLOUD_ADMIN_USERNAME = ${ADMIN_USERNAME};
+          # OWNCLOUD_ADMIN_PASSWORD = ${ADMIN_PASSWORD};
+          environmentFiles = [ "/var/lib/owncloud/owncloud.env" ];
           healthCmd = "/usr/bin/healthcheck";
           healthInterval = "30s";
           healthTimeout = "10s";
@@ -59,10 +60,11 @@
           environments = {
             POSTGRES_DB = "owncloud";
             POSTGRES_USER = "owncloud";
-            POSTGRES_PASSWORD = "owncloud";
           };
+          # POSTGRES_PASSWORD = "owncloud";
+          environmentFiles = [ "/var/lib/owncloud/db.env" ];
           volumes = [
-            "/srv/owncloud/postgres:/var/lib/postgresql/data:Z"
+            "/var/lib/owncloud/db:/var/lib/postgresql/data:rw"
           ];
           healthCmd = builtins.toJSON ["pg_isready" "-U" "owncloud" ];
           healthInterval = "10s";
@@ -80,7 +82,7 @@
           image = flake.lib.images.redis;
           name = "owncloud-cache";
           exec = ["--databases" "1"];
-          volumes = [ "/srv/owncloud/redis:/data:Z" ];
+          volumes = [ "/var/lib/owncloud/cache:/data:rw" ];
           healthCmd = builtins.toJSON [ "redis-cli" "ping" ];
           healthInterval = "10s";
           healthTimeout = "5s";
@@ -90,6 +92,7 @@
     };
   };
 
+  /*
   networking.firewall.interfaces.enp7s0.allowedTCPPorts = [ 2222 ];
 
   services.nginx.virtualHosts."git.lan" = {
@@ -108,4 +111,5 @@
       proxyWebsockets = true;
     };
   };
+  */
 }
