@@ -66,6 +66,7 @@
           volumes = [
             "/var/lib/owncloud/db:/var/lib/postgresql/data:rw"
           ];
+          networks = [ "owncloud" ];
           healthCmd = builtins.toJSON ["pg_isready" "-U" "owncloud" ];
           healthInterval = "10s";
           healthTimeout = "5s";
@@ -83,6 +84,7 @@
           name = "owncloud-cache";
           exec = ["--databases" "1"];
           volumes = [ "/var/lib/owncloud/cache:/data:rw" ];
+          networks = [ "owncloud" ];
           healthCmd = builtins.toJSON [ "redis-cli" "ping" ];
           healthInterval = "10s";
           healthTimeout = "5s";
