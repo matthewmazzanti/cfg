@@ -45,7 +45,7 @@
           healthCmd = "/usr/bin/healthcheck";
           healthInterval = "30s";
           healthTimeout = "10s";
-          healthRetries = "5";
+          healthRetries = 5;
         };
       };
 
