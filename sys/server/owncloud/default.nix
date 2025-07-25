@@ -34,7 +34,7 @@
             OWNCLOUD_DB_NAME = "owncloud";
             OWNCLOUD_DB_USERNAME = "owncloud";
             OWNCLOUD_DB_HOST = "owncloud-db";
-            OWNCLOUD_REDIS_ENABLED = true;
+            OWNCLOUD_REDIS_ENABLED = "true";
             OWNCLOUD_REDIS_HOST = "owncloud-cache";
           };
           # TODO: Env file
