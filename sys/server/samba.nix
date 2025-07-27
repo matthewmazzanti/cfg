@@ -25,7 +25,7 @@
 
     settings = {
       global = {
-        "interfaces" = "lo";
+        "interfaces" = "lo enp7s0";
         "bind interfaces only" = "yes";
 
         # Protocol and Transport Hardening
