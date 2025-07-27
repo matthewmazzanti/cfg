@@ -52,16 +52,18 @@
         "printcap name"   = "/dev/null";
 
         # ACLs and permissions
-        "valid users"         = "mmazzanti";
-        "force group"         = "samba";
-        "force user"          = "samba";
-        "create mask"         = "0660";
-        "directory mask"      = "0770";
-        "inherit permissions" = "yes";
-        "inherit acls"        = "yes";
-        "vfs objects"         = "acl_xattr";
-        "unix extensions"     = "yes";
-        "map acl inherit"     = "yes";
+        "valid users"          = "mmazzanti";
+        "force group"          = "samba";
+        "force user"           = "samba";
+        "force create mode"    = "0660";
+        "create mask"          = "0660";
+        "force directory mode" = "0770";
+        "directory mask"       = "0770";
+        "inherit permissions"  = "yes";
+        "inherit acls"         = "yes";
+        "vfs objects"          = "acl_xattr";
+        "unix extensions"      = "yes";
+        "map acl inherit"      = "yes";
 
         # Fix samba setting +x for files
         "ea support"           = "yes";
