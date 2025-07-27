@@ -2,11 +2,6 @@
   "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:9682a29fdfde74dd67c78d724105a9c11cb2affaf350192b0a89447f958547df",
   "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:0a19f8704bf65b14706a2944ffb5aa66d0d7886ca428dba2b29b93277f61ebd3",
   "nginx": "docker.io/library/nginx:latest@sha256:84ec966e61a8c7846f509da7eb081c55c1d56817448728924a87ab32f12a72fb",
-  "postgres": "docker.io/library/postgres:alpine@sha256:6567bca8d7bc8c82c5922425a0baee57be8402df92bae5eacad5f01ae9544daa",
-  "redis": "docker.io/library/redis:alpine@sha256:25c0ae32c6c2301798579f5944af53729766a18eff5660bbef196fc2e6214a9c",
-  "kanidm": "docker.io/kanidm/server:latest@sha256:e23a20e68cbda5ee8be2eca06a0097e20c820be015ac730ed10112ed7a7debe6",
   "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:37b35005c2ba9c21368c610ec07ccd5449cde766bb7ca6bab26543a99757394b",
-  "owncloud": "docker.io/owncloud/server:latest@sha256:ce545e72b13f0c3c19fd083aed1ec12facd91ee87993397fd883e853830dc7e9",
-  "onlyoffice": "docker.io/onlyoffice/documentserver:latest@sha256:6cf2c2727696954fb25f3f6061f195a6b1a366e1e7c66a3d53fb004322544d21",
   "jellyfin": "docker.io/jellyfin/jellyfin:unstable@sha256:ba8630eb28cc311729c2a4122efe29d44254afb721a21d4ceb5972d4349bc2ef"
 }

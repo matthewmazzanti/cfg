@@ -7,8 +7,6 @@
     ./hardware.nix
     ./jellyfin
     ./gitea
-    # ./seafile
-    ./owncloud
   ];
 
   # Networking
