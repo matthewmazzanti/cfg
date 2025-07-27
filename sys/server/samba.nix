@@ -44,7 +44,7 @@
         # Fully Disable Guest / Anonymous Access
         "map to guest"     = "never";
         "auth methods"     = "sam";
-        "guest account"    = "invaliduser";
+        "guest account"    = "nobody";
         "restrict anonymous" = "2";
 
         # Disable Browsing and Printer Exposure
