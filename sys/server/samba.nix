@@ -62,7 +62,13 @@
         "vfs objects"         = "acl_xattr";
         "unix extensions"     = "yes";
         "map acl inherit"     = "yes";
-        "ea support"          = "yes";
+
+        # Fix samba setting +x for files
+        "ea support"           = "yes";
+        "store dos attributes" = "yes";
+        "map archive"          = "no";
+        "map hidden"           = "no";
+        "map system"           = "no";
 
         # Misc security defaults, override in shares
         "writeable"  = "no";
