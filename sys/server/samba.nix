@@ -67,10 +67,17 @@
 
         # Fix samba setting +x for files
         "ea support"           = "yes";
-        "store dos attributes" = "yes";
-        "map archive"          = "no";
-        "map hidden"           = "no";
-        "map system"           = "no";
+        "nt acl support"        = "no";  # No Windows-style ACLs
+        "dos filemode"          = "no";  # Prevent clients from chmod'ing via SMB
+        "store dos attributes"  = "no";  # Don't store DOS metadata in xattrs
+        "map archive"           = "no";  # Prevent `+x` reuse for archive bit
+        "map hidden"            = "no";
+        "map system"            = "no";
+
+        # Performance?
+        "write cache size" = "16777216";  # 1 MB
+        "strict sync" = "no";
+        "sync always" = "no";
 
         # Misc security defaults, override in shares
         "writeable"  = "no";
@@ -91,6 +98,9 @@
 
         # Time Machine–specific settings
         "unix extensions" = "no";
+        "nt acl support" = "yes";
+        "store dos attributes" = "yes";
+        "ea support" = "yes";
         "fruit:aapl" = "yes";
         "fruit:time machine" = "yes";
         "fruit:time machine max size" = "1099511627776";  # 1TiB
