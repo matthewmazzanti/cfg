@@ -100,6 +100,8 @@
     };
   };
 
+  networking.firewall.allowedTCPPorts = [ 445 ];
+
   users.users = {
     samba = {
       isSystemUser = true;
