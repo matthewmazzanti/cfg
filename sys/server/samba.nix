@@ -39,7 +39,6 @@
         "disable netbios" = "yes";
         "smb ports"       = "445";
         "ntlm auth"       = "no";
-        "lanman auth"     = "no";
 
         # Fully Disable Guest / Anonymous Access
         "map to guest"     = "never";
