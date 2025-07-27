@@ -102,4 +102,5 @@
     };
     mmazzanti.extraGroups = [ "samba" ];
   };
+  users.groups.samba = {};
 }
