@@ -25,15 +25,16 @@
 
     settings = {
       global = {
+        # Network binding
         "interfaces" = "lo enp7s0";
         "bind interfaces only" = "yes";
 
         # Protocol and Transport Hardening
-        "server min protocol"  = "SMB3_11";
-        "client min protocol"  = "SMB3_11";
-        "client signing"       = "mandatory";
-        "server signing"       = "mandatory";
-        "smb encrypt"          = "required";
+        "server min protocol" = "SMB3_11";
+        "client min protocol" = "SMB3_11";
+        "client signing"      = "mandatory";
+        "server signing"      = "mandatory";
+        "smb encrypt"         = "required";
 
         # Disable Legacy Protocols
         "disable netbios" = "yes";
@@ -51,43 +52,54 @@
         "printing"        = "bsd";
         "printcap name"   = "/dev/null";
 
-        # ACLs and permissions
-        "valid users"          = "mmazzanti";
-        "force group"          = "samba";
-        "force user"           = "samba";
-        "force create mode"    = "0660";
-        "create mask"          = "0660";
-        "force directory mode" = "0770";
-        "directory mask"       = "0770";
-        "inherit permissions"  = "yes";
-        "inherit acls"         = "yes";
-        "vfs objects"          = "acl_xattr";
-        "unix extensions"      = "yes";
-        "map acl inherit"      = "yes";
+        # Filesystem + macOS compatibility
+        "vfs objects"        = "catia fruit streams_xattr acl_xattr";
+        "fruit:metadata"     = "stream";
+        "fruit:resource"     = "stream";
+        "fruit:locking"      = "netatalk";
+        "fruit:posix_rename" = "yes";
+        "fruit:aapl"         = "yes";
 
-        # Fix samba setting +x for files
-        "ea support"           = "yes";
-        "nt acl support"        = "no";  # No Windows-style ACLs
-        "dos filemode"          = "no";  # Prevent clients from chmod'ing via SMB
-        "store dos attributes"  = "no";  # Don't store DOS metadata in xattrs
-        "map archive"           = "no";  # Prevent `+x` reuse for archive bit
-        "map hidden"            = "no";
-        "map system"            = "no";
+        # Extended attributes / metadata control
+        "ea support"      = "yes";
+        "unix extensions" = "yes";
+        "map acl inherit" = "yes";
+        "inherit acls"    = "yes";
 
-        # Performance?
-        "write cache size" = "16777216";  # 1 MB
-        "strict sync" = "no";
-        "sync always" = "no";
+        # Disable Windows-style ACLs and metadata
+        "nt acl support"       = "no";
+        "dos filemode"         = "no";
+        "store dos attributes" = "no";
+        "map archive"          = "no";
+        "map hidden"           = "no";
+        "map system"           = "no";
 
-        # Misc security defaults, override in shares
+        # Performance
+        "write cache size" = "16777216";  # 16 MB
+        # "strict sync" = "no";
+        # "sync always" = "no";
+
+        # Default security posture — overridden per-share
         "writeable"  = "no";
         "browseable" = "no";
       };
 
       files = {
-        path = "/srv/files";
-        writable  = "yes";
-        browseable = "yes";
+        "path" = "/srv/files";
+
+        # Per-share access and security
+        "writable"    = "yes";
+        "browseable"  = "yes";
+        "valid users" = "mmazzanti";
+        "force user"  = "samba";
+        "force group" = "samba";
+
+        # Permissions
+        "create mask"          = "0660";
+        "force create mode"    = "0660";
+        "directory mask"       = "0770";
+        "force directory mode" = "0770";
+        "inherit permissions"  = "yes";
       };
 
       /*
