@@ -76,8 +76,8 @@
 
         # Performance
         "write cache size" = "262144";  # 16 MB
-        "strict sync" = "no";
-        "sync always" = "no";
+        # "strict sync" = "no";
+        # "sync always" = "no";
 
         # Default security posture — overridden per-share
         "writeable"  = "no";
