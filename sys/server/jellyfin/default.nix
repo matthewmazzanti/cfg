@@ -6,6 +6,12 @@
       fsType = "zfs";
       options = [ "noatime" "nodiratime" ];
     };
+
+    "/srv/media" = {
+      device = "data-pool/share/media";
+      fsType = "zfs";
+      options = ["noatime" "nodiratime" ];
+    };
   };
 
   virtualisation.quadlet = {
@@ -51,8 +57,8 @@
 
       jellyfin = {
         unitConfig = {
-          After = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
-          Requires = [ "var-lib-jellyfin.mount" "srv-share-media.mount" ];
+          After = [ "var-lib-jellyfin.mount" "srv-media.mount" ];
+          Requires = [ "var-lib-jellyfin.mount" "srv-media.mount" ];
         };
         containerConfig = {
           name = "jellyfin";
@@ -66,7 +72,7 @@
           volumes = [
             "/var/lib/jellyfin/config:/config:rw"
             "/var/lib/jellyfin/cache:/cache:rw"
-            "/srv/share/media:/media:ro"
+            "/srv/media:/media:ro"
           ];
           environments.TZ = config.time.timeZone;
         };

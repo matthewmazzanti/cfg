@@ -93,12 +93,6 @@
       options = ["noatime" "nodiratime" ];
     };
 
-    "/srv/share/media" = {
-      device = "data-pool/share/media";
-      fsType = "zfs";
-      options = ["noatime" "nodiratime" ];
-    };
-
     "/srv/share/documents" = {
       device = "data-pool/share/documents";
       fsType = "zfs";
