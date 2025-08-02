@@ -1,4 +1,4 @@
-{ flake, ... }: {
+{ pkgs, flake, ... }: {
   imports = [
     flake.modules.base
     flake.modules.impermanence
@@ -19,7 +19,9 @@
   services.zfs.trim.enable = true;
 
   # Packages
-  # environment.systemPackages = with pkgs; [];
+  environment.systemPackages = with pkgs; [
+    hdparm
+  ];
 
   # User config
   users.users.mmazzanti = {
