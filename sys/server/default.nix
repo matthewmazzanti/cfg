@@ -8,6 +8,7 @@
     ./jellyfin
     ./gitea
     ./samba.nix
+    ./kiwix.nix
   ];
 
   # Networking
