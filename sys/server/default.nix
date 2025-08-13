@@ -22,6 +22,7 @@
   # Packages
   environment.systemPackages = with pkgs; [
     hdparm
+    plocate
   ];
 
   # User config
