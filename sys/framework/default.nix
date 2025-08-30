@@ -1,7 +1,7 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-{ flake, ... }: {
+{ pkgs, flake, ... }: {
   imports = [
     flake.modules.base
     flake.modules.impermanence
@@ -9,6 +9,7 @@
     ./hardware.nix
   ];
 
+  nixpkgs.config.allowUnfree = true;
 
   # Networking
   networking.hostName = "framework";
@@ -24,7 +25,17 @@
   services.zfs.trim.enable = true;
 
   # Packages
-  # environment.systemPackages = with pkgs; [];
+  environment.systemPackages = with pkgs; [
+    firefox
+    # TODO: Remove when https://github.com/NixOS/nixpkgs/pull/422792 is merged
+    _1password-gui-beta
+  ];
+
+  # Environment variables
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+
+  };
 
   # User config
   users.users.mmazzanti = {
@@ -33,6 +44,13 @@
   };
 
   # Auto login as mmazzanti
-  services.getty.autologinUser = "mmazzanti";
-  services.getty.autologinOnce = true;
+  # services.getty.autologinUser = "mmazzanti";
+  # services.getty.autologinOnce = true;
+
+  services = {
+    displayManager.gdm.enable = true;
+    displayManager.autoLogin.enable = true;
+    displayManager.autoLogin.user = "mmazzanti";
+    desktopManager.gnome.enable = true;
+  };
 }

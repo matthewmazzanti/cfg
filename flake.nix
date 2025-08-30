@@ -2,6 +2,14 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs";
+
+    # TODO: Remove when https://github.com/NixOS/nixpkgs/pull/422792 is merged
+    nixpkgs-1password = {
+      type = "github";
+      owner = "bdd"; # TODO: Think the 3 letters here confuses nix
+      repo = "nixpkgs";
+      ref = "_1p-gui-wayland";
+    };
     # Old system compat
     nixpkgs-old.url = "nixpkgs/nixos-24.05";
 
