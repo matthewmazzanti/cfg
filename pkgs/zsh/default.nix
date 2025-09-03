@@ -7,15 +7,23 @@
 }: let
   wrapZsh = callPackage ./wrapper.nix {};
 
-  fshPlugin = ''${zsh-fast-syntax-highlighting}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh'';
+  fsh = zsh-fast-syntax-highlighting.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      # Make the "not writable" test always false so it never overrides
+      # FAST_WORK_DIR
+      substituteInPlace fast-syntax-highlighting.plugin.zsh \
+        --replace 'if [[ ! -w $FAST_WORK_DIR ]]; then' 'if false; then'
+    '';
+  });
+  fshPlugin = "${fsh}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
   fshTheme = stdenvNoCC.mkDerivation {
     name = "fsh-theme";
     nativeBuildInputs = [zsh];
     buildCommand = ''
       zsh << EOF
-        source "${fshPlugin}"
         FAST_WORK_DIR="$out"
         mkdir -p "$out"
+        source "${fshPlugin}"
         fast-theme "${./config/fsh-colors.ini}"
       EOF
     '';

@@ -71,7 +71,7 @@ in {
   users.users.mmazzanti.packages =
     (with pkgs; [
       # Terminal utilities
-      bat fd fzf git ripgrep tree jq yq visidata htop unixtools.watch
+      bat fd fzf git ripgrep tree jq yq visidata htop unixtools.watch direnv
       # Networking
       nmap httpie wget curl
       # Languages
@@ -95,7 +95,6 @@ in {
       cleanScript
 
       # Customized tools
-      custom."direnv/dev"
       custom."less/dev"
       custom."nvim/dev"
       custom."nvim/ai"

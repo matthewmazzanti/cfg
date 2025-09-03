@@ -39,7 +39,6 @@ in {
       custom."nvim/dev"
       custom."short-pwd/default"
       custom."zsh/dev"
-      custom."direnv/dev"
     ];
 
   environment.darwinConfig = "$HOME/src/nix/cfg";
