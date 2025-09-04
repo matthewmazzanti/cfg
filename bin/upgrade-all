@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "==> Upgrading systems"
+for name in "$@"; do
+    echo "-- Upgrading $name"
+    ssh -tt "$name" 'sudo nixos-rebuild switch --flake ~/src/nix/cfg'
+done
