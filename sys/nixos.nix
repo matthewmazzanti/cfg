@@ -2,8 +2,19 @@
   self,
   inputs,
 }: let
-  inherit (inputs.nixpkgs.lib) nixosSystem;
   system = "x86_64-linux";
+
+  nixosSystem = inputs.nixpkgs.lib.nixosSystem;
+
+  _1password-overlay = final: prev: let
+    pkgs = import inputs.nixpkgs-1password {
+      inherit (prev) system;
+      config.allowUnfree = true;
+    };
+  in {
+    inherit (pkgs) _1password-gui-beta;
+  };
+
   flake = {
     inherit inputs;
     packages = self.packages.${system};
@@ -52,7 +63,11 @@ in {
   framework = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
-    modules = [ ./framework ];
+    modules = [
+      # TODO: Remove when https://github.com/NixOS/nixpkgs/pull/422792 is merged
+      { nixpkgs.overlays = [ _1password-overlay ]; }
+      ./framework
+    ];
   };
 
   server = nixosSystem {
