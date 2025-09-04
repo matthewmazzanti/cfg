@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""
+ssh_do_async.py — run a command on multiple servers via ssh (asyncio)
+
+Usage:
+  ssh_do_async.py [-t|--tty | -p|--parallel] server1 server2 ... -- command...
+Examples:
+  ssh_do_async.py host1 host2 -- uptime
+  ssh_do_async.py -t host1 host2 -- htop
+  ssh_do_async.py --parallel host1 host2 host3 -- uname -a
+  # Heredoc / stdin:
+  ssh_do_async.py host1 host2 <<'CMD'
+  uname -a
+  whoami
+  CMD
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import sys
+from dataclasses import dataclass
+from typing import AsyncIterator
+
+
+@dataclass(slots=True)
+class Result:
+    """Container for the result of running a command on a single server."""
+    server: str  # hostname of the server
+    rc: int      # return code from ssh command
+    out: str     # captured stdout
+    err: str     # captured stderr
+
+
+@dataclass(slots=True)
+class Execution:
+    """Configuration and execution context for running ssh commands."""
+    tty: bool
+    parallel: bool
+    timeout: int
+    servers: list[str]
+    command: list[str]
+    stdin_data: bytes | None
+
+    def build_ssh_cmd(self, server: str) -> list[str]:
+        """Build the ssh command line for the given server."""
+        base = ["ssh", "-o", f"ConnectTimeout={self.timeout}"]
+        if self.tty:
+            base.append("-t")
+        base.append(server)
+        base.extend(self.command)
+        return base
+
+    async def run_one(self, server: str, use_stdin: bool) -> Result:
+        """Run the configured command on a single server and capture output."""
+        if use_stdin:
+            proc = await asyncio.create_subprocess_exec(
+                *self.build_ssh_cmd(server),
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            out_b, err_b = await proc.communicate(input=self.stdin_data)
+        else:
+            proc = await asyncio.create_subprocess_exec(
+                *self.build_ssh_cmd(server),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            out_b, err_b = await proc.communicate()
+
+        rc = 0 if proc.returncode is None else proc.returncode
+        return Result(
+            server=server,
+            rc=rc,
+            out=out_b.decode(errors="replace"),
+            err=err_b.decode(errors="replace"),
+        )
+
+
+# ------------------------- printing & orchestration -------------------------
+
+def _print_block(text: str, *, file=sys.stdout) -> None:
+    """Print a block of text, preserving trailing newlines."""
+    if not text:
+        return
+    if text.endswith("\n"):
+        print(text, end="", file=file)
+    else:
+        print(text, file=file)
+
+def print_grouped(exec_cfg: Execution, result: Result) -> None:
+    """Print the results from a single server in a grouped, labeled block."""
+    label = " ".join(exec_cfg.command) if exec_cfg.command else "<stdin>"
+    header = f">>> {result.server}: {label} (rc={result.rc})"
+    print(header)
+    if not result.out and not result.err:
+        print("[no output]")
+    else:
+        _print_block(result.out)
+        _print_block(result.err, file=sys.stderr)
+    print()
+
+async def iter_results(exec_cfg: Execution) -> AsyncIterator[Result]:
+    """Run commands across all servers, yielding results in input order."""
+    use_stdin = exec_cfg.stdin_data is not None
+    if exec_cfg.parallel:
+        tasks = {
+            srv: asyncio.create_task(exec_cfg.run_one(srv, use_stdin))
+            for srv in exec_cfg.servers
+        }
+        for srv in exec_cfg.servers:
+            yield await tasks[srv]
+    else:
+        for srv in exec_cfg.servers:
+            yield await exec_cfg.run_one(srv, use_stdin)
+
+
+# ------------------------- CLI parsing -------------------------
+
+def parse_args() -> Execution:
+    """Parse command-line arguments and construct an Execution context."""
+    parser = argparse.ArgumentParser(
+        description="Run a command on multiple servers via ssh (asyncio)",
+        usage="%(prog)s [-t|--tty | -p|--parallel] [--timeout N] servers... [-- command...]",
+    )
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-t", "--tty", action="store_true", help="force pseudo-TTY allocation (ssh -t)")
+    group.add_argument("-p", "--parallel", action="store_true", help="run all hosts concurrently")
+
+    parser.add_argument("--timeout", type=int, default=3, help="connection timeout in seconds (default: 3)")
+    parser.add_argument("rest", nargs=argparse.REMAINDER, help="servers... [-- command...]")
+
+    ns = parser.parse_args()
+    rest: list[str] = ns.rest or []
+
+    if "--" in rest:
+        sep = rest.index("--")
+        servers = rest[:sep]
+        remainder = rest[sep + 1 :]
+    else:
+        servers = rest
+        remainder = []
+
+    if not servers:
+        parser.error("provide at least one server before '--'")
+
+    # Detect stdin content once
+    if sys.stdin is not None and not sys.stdin.isatty():
+        data = sys.stdin.buffer.read()
+        stdin_data = data if data else None
+    else:
+        stdin_data = None
+
+    if not remainder and stdin_data is None:
+        parser.error("provide '-- command...' or pipe a script on stdin")
+
+    return Execution(
+        tty=ns.tty,
+        parallel=ns.parallel,
+        timeout=ns.timeout,
+        servers=servers,
+        command=remainder,
+        stdin_data=stdin_data,
+    )
+
+
+# ------------------------- entry point -------------------------
+
+async def main() -> int:
+    """Entry point: parse arguments, run tasks, and return exit status."""
+    exec_cfg = parse_args()
+
+    failures = 0
+    async for res in iter_results(exec_cfg):
+        print_grouped(exec_cfg, res)
+        if res.rc != 0:
+            failures += 1
+
+    return failures > 0
+
+if __name__ == "__main__":
+    raise SystemExit(asyncio.run(main()))
