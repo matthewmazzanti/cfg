@@ -64,7 +64,6 @@
 
   # Allow ssh from interactive computers
   users.users.mmazzanti.openssh.authorizedKeys.keys = with flake.lib.keys.ssh; [
-    lambda
     beta
     framework
   ];
