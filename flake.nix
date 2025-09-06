@@ -3,9 +3,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs";
 
-    # Old system compat
-    nixpkgs-old.url = "nixpkgs/nixos-24.05";
-
     darwin.url = "github:lnl7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -20,17 +17,9 @@
 
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 
-    disko.url = "github:nix-community/disko";
-    disko.inputs.nixpkgs.follows = "nixpkgs";
-
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
-
-    home-manager-old.url = "github:nix-community/home-manager/release-24.05";
-    home-manager-old.inputs.nixpkgs.follows = "nixpkgs-old";
-
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     # Home assistant plugins
     slider-entity-row.url = "github:thomasloven/lovelace-slider-entity-row";
@@ -39,15 +28,7 @@
     pyscript.flake = false;
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    darwin,
-    home-manager,
-    home-manager-old,
-    nixos-hardware,
-    ...
-  } @ inputs: let
+  outputs = { self, nixpkgs, ... }@inputs: let
     lib = import ./lib nixpkgs;
   in {
     inherit lib;
@@ -71,10 +52,6 @@
       ];
     });
 
-    darwinConfigurations = import ./sys/darwin.nix {
-      inherit self inputs;
-    };
-
     nixosModules = {
       quadlet = inputs.quadlet-nix.nixosModules.quadlet;
       impermanence = import ./modules/nixos/impermanence.nix;
@@ -83,6 +60,10 @@
     };
 
     nixosConfigurations = import ./sys/nixos.nix {
+      inherit self inputs;
+    };
+
+    darwinConfigurations = import ./sys/darwin.nix {
       inherit self inputs;
     };
   };

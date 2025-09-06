@@ -13,50 +13,10 @@
     modules = self.nixosModules;
   };
 in {
-  lambda = nixosSystem {
-    inherit system;
-    specialArgs.custom = self.packages.${system};
-    modules = [
-      ({pkgs, ...}: {
-        imports = [inputs.home-manager.nixosModules.home-manager];
-
-        nix.extraOptions = "experimental-features = nix-command flakes";
-
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs.custom = self.packages.${pkgs.system};
-        };
-      })
-      ./lambda
-    ];
-  };
-
-  omega = nixosSystem {
-    inherit system;
-    specialArgs.custom = self.packages.${system};
-    modules = [
-      ({pkgs, ...}: {
-        imports = [inputs.home-manager-old.nixosModules.home-manager];
-
-        nix.extraOptions = "experimental-features = nix-command flakes";
-
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs.custom = self.packages.${pkgs.system};
-        };
-      })
-      ./omega
-    ];
-  };
-
   framework = nixosSystem {
     inherit system;
     specialArgs.flake = flake;
-    modules = [
-      ./framework
-    ];
+    modules = [ ./framework ];
   };
 
   server = nixosSystem {
