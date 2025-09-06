@@ -229,22 +229,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-1password": {
-      "locked": {
-        "lastModified": 1751811877,
-        "narHash": "sha256-3zqXduUO70BFtDQe62NUOqR5LorbBaorzHlH1MTZ8cs=",
-        "owner": "bdd",
-        "repo": "nixpkgs",
-        "rev": "cea6d77f662d2b06b714c44d5df4a7eae7df9ed7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "bdd",
-        "ref": "_1p-gui-wayland",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-old": {
       "locked": {
         "lastModified": 1735563628,
@@ -359,7 +343,6 @@
         "lanzaboote": "lanzaboote",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-1password": "nixpkgs-1password",
         "nixpkgs-old": "nixpkgs-old",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "pyscript": "pyscript",

@@ -27,7 +27,7 @@
   # Packages
   environment.systemPackages = with pkgs; [
     firefox
-    # TODO: Remove when https://github.com/NixOS/nixpkgs/pull/422792 is merged
+    # TODO: Switch back to stable, at some point
     _1password-gui-beta
   ];
 
