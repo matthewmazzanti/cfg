@@ -62,6 +62,6 @@
 
     nixosConfigurations = sys.nixos;
     darwinConfigurations = sys.darwin;
-    homeConfigurations = sys.darwin;
+    homeConfigurations = sys.home;
   };
 }

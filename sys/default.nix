@@ -1,5 +1,7 @@
 { self, inputs }:
 let
+  lib = inputs.nixpkgs.lib;
+
   # ---- Systems ----
   linux  = "x86_64-linux";
   darwin = "aarch64-darwin";
@@ -13,14 +15,15 @@ let
   };
 
   # ---- Pkgs via legacyPackages + overlay (no extra import) ----
-  systemPkgs = builtins.genAttrs systems (system:
-    inputs.nixpkgs.legacyPackages.${system}.appendOverlays [
-      unfreeOverlay
-    ]
+  systemPkgs = lib.genAttrs systems (system:
+    import inputs.nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    }
   );
 
   # ---- Flake args passed under specialArgs.flake ----
-  flakeArgs = builtins.genAttrs systems (system: {
+  flakeArgs = lib.genAttrs systems (system: {
     inherit inputs;
     packages = self.packages.${system};
     lib      = self.lib;
@@ -76,7 +79,7 @@ in rec {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
     modules = [
-      ./nixos/framework
+      ./framework
       # (hmServiceLinux {
       #   username = "mmazzanti";
       #   config   = home."mmazzanti@framework";
@@ -87,43 +90,43 @@ in rec {
   home."mmazzanti@framework" = hmConfig {
     pkgs = systemPkgs.${linux};
     extraSpecialArgs.flake = flakeArgs.${linux};
-    modules = [ ./sys/framework/home.nix ];
+    modules = [ ./framework/home.nix ];
   };
 
   nixos.server = nixosSystem {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
-    modules = [ ./nixos/server ];
+    modules = [ ./server ];
   };
 
   nixos.ha = nixosSystem {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
-    modules = [ ./nixos/ha ];
+    modules = [ ./ha ];
   };
 
   nixos.print = nixosSystem {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
-    modules = [ ./nixos/print ];
+    modules = [ ./print ];
   };
 
   nixos.live = nixosSystem {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
-    modules = [ ./nixos/live ];
+    modules = [ ./live ];
   };
 
   # ---------------- Darwin ---------------
   darwin.beta = darwinSystem {
     pkgs = systemPkgs.${darwin};
     specialArgs.flake = flakeArgs.${darwin};
-    modules = [ ./darwin/beta ];
+    modules = [ ./beta ];
   };
 
   darwin.delta = darwinSystem {
     pkgs = systemPkgs.${darwin};
     specialArgs.flake = flakeArgs.${darwin};
-    modules = [ ./darwin/delta ];
+    modules = [ ./delta ];
   };
 }
