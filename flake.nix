@@ -30,6 +30,7 @@
 
   outputs = { self, nixpkgs, ... }@inputs: let
     lib = import ./lib nixpkgs;
+    sys = import ./sys { inherit self inputs; };
   in {
     inherit lib;
 
@@ -59,12 +60,8 @@
       base = import ./modules/nixos/base.nix;
     };
 
-    nixosConfigurations = import ./sys/nixos.nix {
-      inherit self inputs;
-    };
-
-    darwinConfigurations = import ./sys/darwin.nix {
-      inherit self inputs;
-    };
+    nixosConfigurations = sys.nixos;
+    darwinConfigurations = sys.darwin;
+    homeConfigurations = sys.darwin;
   };
 }

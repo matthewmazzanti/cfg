@@ -9,8 +9,6 @@
     ./hardware.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
-
   # Networking
   networking.hostName = "framework";
   networking.networkmanager.enable = true;
@@ -29,6 +27,8 @@
     firefox
     # TODO: Switch back to stable, at some point
     _1password-gui-beta
+    ghostty
+    wl-clipboard
   ];
 
   # Environment variables
@@ -52,4 +52,6 @@
     displayManager.autoLogin.user = "mmazzanti";
     desktopManager.gnome.enable = true;
   };
+
+  fonts.packages = [ pkgs.fira-code ];
 }

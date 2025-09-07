@@ -1,6 +1,6 @@
 {
   pkgs,
-  custom,
+  flake,
   ...
 }: let
   updateScript = pkgs.writeShellScriptBin "update" ''
@@ -36,9 +36,9 @@ in {
     ])
     ++ [
       updateScript
-      custom."nvim/dev"
-      custom."short-pwd/default"
-      custom."zsh/dev"
+      flake.packages."nvim/dev"
+      flake.packages."short-pwd/default"
+      flake.packages."zsh/dev"
     ];
 
   environment.darwinConfig = "$HOME/src/nix/cfg";

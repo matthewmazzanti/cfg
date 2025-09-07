@@ -95,11 +95,11 @@ in {
       cleanScript
 
       # Customized tools
-      custom."less/dev"
-      custom."nvim/dev"
-      custom."nvim/ai"
-      custom."short-pwd/default"
-      custom."zsh/dev"
+      flake.packages."less/dev"
+      flake.packages."nvim/dev"
+      flake.packages."nvim/ai"
+      flake.packages."short-pwd/default"
+      flake.packages."zsh/dev"
     ];
 
   homebrew = {
@@ -168,8 +168,6 @@ in {
   };
 
   networking.hostName = hostname;
-
-  nixpkgs.config.allowUnfree = true;
 
   # Auto upgrade nix package and the daemon service.
   # optional, useful when the builder has a faster internet connection than yours
