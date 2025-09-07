@@ -30,6 +30,8 @@
     nushell
     # TODO: Switch back to stable, at some point
     _1password-gui-beta
+    flake.packages.home-manager
+    nixos-rebuild-ng
   ];
 
   # Environment variables
