@@ -37,11 +37,13 @@
     packages = lib.eachSystem ({
       pkgs,
       system,
-    }: (
-      import ./pkgs {
+    }:
+      (import ./pkgs {
         inherit pkgs system inputs;
+      }) // {
+        home-manager = inputs.home-manager.packages.${system}.default;
       }
-    ));
+    );
 
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [

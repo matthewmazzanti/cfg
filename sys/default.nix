@@ -7,13 +7,6 @@ let
   darwin = "aarch64-darwin";
   systems = [ linux darwin ];
 
-  # ---- Overlay that flips allowUnfree ----
-  unfreeOverlay = _: prev: {
-    config = (prev.config or {}) // {
-      allowUnfree = true;
-    };
-  };
-
   # ---- Pkgs via legacyPackages + overlay (no extra import) ----
   systemPkgs = lib.genAttrs systems (system:
     import inputs.nixpkgs {

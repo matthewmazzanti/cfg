@@ -25,10 +25,11 @@
   # Packages
   environment.systemPackages = with pkgs; [
     firefox
-    # TODO: Switch back to stable, at some point
-    _1password-gui-beta
     ghostty
     wl-clipboard
+    nushell
+    # TODO: Switch back to stable, at some point
+    _1password-gui-beta
   ];
 
   # Environment variables
