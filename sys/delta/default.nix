@@ -33,6 +33,7 @@ in {
       curl
       nix-tree
       coreutils
+      direnv
     ])
     ++ [
       updateScript
