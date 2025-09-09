@@ -42,12 +42,12 @@ script:
 
   multicast_switch_set:
     alias: Multicast Switch Set
-    description: Set a state for a Group of ZWave switches via multicast
+    description: Set a state for a group of Z-Wave switches via multicast (skips ones already matching)
     mode: parallel
     fields:
       entity_id:
-        description: List of ZWave entity IDs
-        required: True
+        description: List of Z-Wave switch entity IDs
+        required: true
         selector:
           entity:
             multiple: true
@@ -55,18 +55,99 @@ script:
               domain: switch
               integration: zwave
       value:
-        description: State to set
-        required: True
+        description: Desired state
+        required: true
         selector:
           boolean:
     sequence:
-      - action: zwave_js.multicast_set_value
-        target:
-          entity_id: "{{ entity_id }}"
+      - variables:
+          # desired HA state string from boolean
+          desired: "{{ 'on' if value else 'off' }}"
+          targets: >-
+            {{ expand(entity_id)
+               | rejectattr('state', 'equalto', desired)
+               | map(attribute='entity_id') | list }}
+      - service: system_log.write
         data:
-          command_class: "37"
-          property: targetValue
-          value: "{{ value }}"
+          level: debug
+          message: >-
+            multicast_switch_set → value={{ value }},
+            desired="{{ desired }}",
+            targets={{ targets }}
+      - choose:
+          # multiple targets → multicast
+          - conditions: "{{ targets | length > 1 }}"
+            sequence:
+              - service: zwave_js.multicast_set_value
+                target:
+                  entity_id: "{{ targets }}"
+                data:
+                  command_class: "37"
+                  property: targetValue
+                  value: "{{ value }}"
+          # single target → direct switch service
+          - conditions: "{{ targets | length == 1 }}"
+            sequence:
+              - service: "switch.turn_{{ 'on' if value else 'off' }}"
+                target:
+                  entity_id: "{{ targets[0] }}"
+
+  multicast_light_set:
+    alias: Multicast Light Set
+    description: Turn on or dim a group of ZWave lights via multicast
+    mode: parallel
+    fields:
+      entity_id:
+        description: List of ZWave entity IDs
+        required: true
+        selector:
+          entity:
+            multiple: true
+            filter:
+              domain: light
+              integration: zwave
+      value:
+        description: Brightness to set for light group (0–99)
+        required: true
+        selector:
+          number:
+            min: 0
+            max: 99
+            step: 1
+    sequence:
+      - variables:
+          # Convert Z-Wave 0–99 to HA brightness 0–255
+          desired_byte: "{{ (255 * (value | int) / 99) | round | int }}"
+          targets: >-
+            {{ expand(entity_id)
+               | rejectattr('attributes.brightness', 'equalto', desired_byte)
+               | map(attribute='entity_id') | list }}
+      - service: system_log.write
+        data:
+          level: debug
+          message: >-
+            multicast_light_set → value={{ value }},
+            brightness={{ brightness }},
+            targets={{ targets }}
+      - choose:
+          # multiple targets → multicast
+          - conditions: "{{ targets | length > 1 }}"
+            sequence:
+              - service: zwave_js.multicast_set_value
+                target:
+                  entity_id: "{{ targets }}"
+                data:
+                  command_class: "38"
+                  property: targetValue
+                  value: "{{ value }}"
+          # single target → direct light service with desired_byte
+          - conditions: "{{ targets | length == 1 }}"
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: "{{ targets[0] }}"
+                data:
+                  brightness: "{{ desired_byte }}"
 
   multicast_switch_toggle:
     alias: Multicast Switch Toggle
@@ -88,36 +169,6 @@ script:
           entity_id: "{{ entity_id }}"
         data:
           value: "{{ 'on' not in entity_id | map('states') }}"
-
-  multicast_light_set:
-    alias: Multicast Light On
-    description: Turn on a Group of ZWave lights via multicast
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of ZWave entity IDs
-        required: True
-        selector:
-          entity:
-            multiple: true
-            filter:
-              domain: light
-              integration: zwave
-      value:
-        description: Brightness to set for light group
-        selector:
-          number:
-            min: 0
-            max: 99
-            step: 1
-    sequence:
-      - action: zwave_js.multicast_set_value
-        target:
-          entity_id: "{{ entity_id }}"
-        data:
-          command_class: "38"
-          property: targetValue
-          value: "{{ value }}"
 
   multicast_light_toggle:
     alias: Multicast Light Toggle
