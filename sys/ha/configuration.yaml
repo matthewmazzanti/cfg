@@ -463,50 +463,53 @@ automation:
         target:
           entity_id: switch.espresso_machine
 
-  - id: pico_living_room_1
-    alias: Living Room Pico 1 Handler
+  - id: turn_on_mbr_lamp_at_sunset
+    alias: "MBR Lamp: On at sunset"
+    description: "Turn on the master bedroom lamp at sunset"
+    mode: single
     trigger:
-      - platform: event
-        event_type: lutron_caseta_button_event
-        event_data:
-          area_name: Living Room
-          device_name: Living Room 1
-          action: press
+      - platform: sun
+        event: sunset
     action:
-      - variables:
-          button: "{{trigger.event.data.button_number}}"
-          device: "{{trigger.event.data.device_name}}"
-      - choose:
-          - conditions: "{{button == 2}}" # Top Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Top Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 4}}" # Bottom Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Bottom Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 5}}" # Up Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Up Arrow Pressed!"
-                  level: debug
-          - conditions: "{{button == 3}}" # Middle Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Middle Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 6}}" # Bottom Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Bottom Arrow Pressed!"
-                  level: debug
+      - service: switch.turn_on
+        target:
+          entity_id: switch.mbr_lamp
+
+  # ---------------- Pico Remote Template ----------------
+  # Copy/paste and replace the placeholders (id, alias, area/device names, etc.)
+  #
+  # Buttons (Lutron Caseta):
+  #   2 = Top Button
+  #   3 = Middle Button
+  #   4 = Bottom Button
+  #   5 = Up Arrow
+  #   6 = Down Arrow
+  #
+  # Usage:
+  #   - Change `id` and `alias` to something unique.
+  #   - Set `area_name` and `device_name` to match your Pico remote.
+  #   - Replace `system_log.write` actions with your desired service calls.
+  # - id: pico_<area>_<device>      # <-- Unique identifier
+  #   alias: <Area> Pico <Device> Handler
+  #   trigger:
+  #     - platform: event
+  #       event_type: lutron_caseta_button_event
+  #       event_data:
+  #         area_name: <Area Name>        # e.g. "Living Room"
+  #         device_name: <Device Name>    # e.g. "Living Room 1"
+  #         action: press
+  #   action:
+  #     - variables:
+  #         button: "{{ trigger.event.data.button_number }}"
+  #         device: "{{ trigger.event.data.device_name }}"
+  #         buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
+  #     - choose:
+  #         - conditions: "{{ button == buttons.top }}"
+  #           sequence:
+  #             - action: system_log.write
+  #               data:
+  #                 message: "Pico {{ device }} Top Button Pressed!"
+  #                 level: debug
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
@@ -521,31 +524,14 @@ automation:
       - variables:
           button: "{{trigger.event.data.button_number}}"
           device: "{{trigger.event.data.device_name}}"
+          buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - conditions: "{{button == 2}}" # Top Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Top Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 4}}" # Bottom Button
+          - conditions: "{{button == buttons.top}}"
             sequence:
               - action: script.first_floor_low_lights_on
-          - conditions: "{{button == 5}}" # Up Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Up Arrow Pressed!"
-                  level: debug
-          - conditions: "{{button == 3}}" # Middle Button
+          - conditions: "{{button == buttons.bottom}}"
             sequence:
               - action: script.first_floor_all_off
-          - conditions: "{{button == 6}}" # Bottom Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Bottom Arrow Pressed!"
-                  level: debug
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
@@ -560,36 +546,13 @@ automation:
       - variables:
           button: "{{trigger.event.data.button_number}}"
           device: "{{trigger.event.data.device_name}}"
+          buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - conditions: "{{button == 2}}" # Top Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Top Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 4}}" # Bottom Button
+          - conditions: "{{button == buttons.bottom}}" # Bottom Button
             sequence:
               - action: switch.toggle
                 data:
                   entity_id: switch.mbr_lamp
-          - conditions: "{{button == 5}}" # Up Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Up Arrow Pressed!"
-                  level: debug
-          - conditions: "{{button == 3}}" # Middle Button
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Middle Button Pressed!"
-                  level: debug
-          - conditions: "{{button == 6}}" # Bottom Arrow
-            sequence:
-              - action: system_log.write
-                data:
-                  message: "Pico {{device}} Bottom Arrow Pressed!"
-                  level: debug
 
   - id: living_room_lights_scenes
     alias: Living Room Lights Scenes
