@@ -36,6 +36,7 @@
     gptfdisk # sgdisk
     usbutils # lsusb
     nftables # firewall control
+    ghostty.terminfo
   ];
 
   # Users may only be specified via nix
