@@ -387,7 +387,7 @@ automation:
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
-          device_name: Living Room 2
+          device_name: Living Room 1
           action: press
     action:
       - variables:
