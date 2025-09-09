@@ -138,7 +138,7 @@ script:
         target:
           entity_id: "{{ entity_id }}"
         data:
-          value: "{{ 0 if 'on' in entity_id | map('states') else 99 }}"
+          value: "{{ 99 if 'off' in entity_id | map('states') else 0 }}"
 
   living_room_low_lights_off:
     alias: Living Room Lights Off
@@ -293,9 +293,31 @@ script:
             - light.kitchen_lights
             - light.dining_table_lights
 
-  first_floor_morning_on:
-    alias: First Floor Morning On
-    description: Turn all of the first floor on in the morning
+  first_floor_low_lights_on:
+    alias: First Floor Low Lights On
+    description: Turn low lights on
+    mode: queued
+    sequence:
+      - action: script.multicast_switch_set
+        target:
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+            - switch.under_cabinet_lights
+        data:
+          value: true
+
+      - action: script.multicast_light_set
+        target:
+          entity_id:
+            - light.island_lights
+        data:
+          value: 99
+
+
+  first_floor_all_on:
+    alias: First Floor All On
+    description: Turn all of the first floor lights on
     mode: queued
     sequence:
       - action: script.multicast_switch_set
@@ -318,7 +340,7 @@ script:
         data:
           value: 99
 
-  first_floor_evening_off:
+  first_floor_all_off:
     alias: First Floor Evening Off
     description: Turn all of the first floor off in the evening
     mode: queued
@@ -463,9 +485,10 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - action: switch.toggle
+              - action: system_log.write
                 data:
-                  entity_id: switch.living_room_bookshelf_lamp
+                  message: "Pico {{device}} Bottom Button Pressed!"
+                  level: debug
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
@@ -474,9 +497,10 @@ automation:
                   level: debug
           - conditions: "{{button == 3}}" # Middle Button
             sequence:
-              - action: light.toggle
-                target:
-                  entity_id: light.living_room_lights
+              - action: system_log.write
+                data:
+                  message: "Pico {{device}} Middle Button Pressed!"
+                  level: debug
           - conditions: "{{button == 6}}" # Bottom Arrow
             sequence:
               - action: system_log.write
@@ -506,11 +530,7 @@ automation:
                   level: debug
           - conditions: "{{button == 4}}" # Bottom Button
             sequence:
-              - action: script.entities_toggle
-                target:
-                  entity_id:
-                    - light.island_lights
-                    - switch.living_room_corner_lamp
+              - action: script.first_floor_low_lights_on
           - conditions: "{{button == 5}}" # Up Arrow
             sequence:
               - action: system_log.write
@@ -519,7 +539,7 @@ automation:
                   level: debug
           - conditions: "{{button == 3}}" # Middle Button
             sequence:
-              - action: script.kitchen_ceiling_lights_toggle
+              - action: script.first_floor_all_off
           - conditions: "{{button == 6}}" # Bottom Arrow
             sequence:
               - action: system_log.write
@@ -587,11 +607,15 @@ automation:
       - choose:
           - conditions: "{{direction == 'up' and count == 2}}"
             sequence:
-              - action: script.first_floor_morning_on
+              - action: script.first_floor_low_lights_on
+
+          - conditions: "{{direction == 'up' and count == 3}}"
+            sequence:
+              - action: script.first_floor_all_on
 
           - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
-              - action: script.first_floor_evening_off
+              - action: script.first_floor_all_off
 
   - id: sink_lights_scenes
     alias: Sink Lights Scenes
