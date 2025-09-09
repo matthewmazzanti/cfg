@@ -5,7 +5,11 @@ http:
   trusted_proxies: 127.0.0.1
 
 logger:
-  default: info
+  # default: info
+  logs:
+    homeassistant.components.automation: info
+    homeassistant.components.script: info
+    homeassistant.components.system_log: debug
 
 sun:
 # Enable Apple TV
@@ -40,9 +44,10 @@ script:
         target:
           entity_id: "{{ entity_id }}"
 
+  # {{{ Multicast Stuff
   multicast_switch_set:
     alias: Multicast Switch Set
-    description: Set a state for a group of Z-Wave switches via multicast (skips ones already matching)
+    description: Set a state for a group of Z-Wave switches via multicast
     mode: parallel
     fields:
       entity_id:
@@ -55,18 +60,19 @@ script:
               domain: switch
               integration: zwave
       value:
-        description: Desired state
+        description: Desired state (true=on, false=off)
         required: true
         selector:
           boolean:
     sequence:
       - variables:
-          # desired HA state string from boolean
+          entity_id: "{{ entity_id if entity_id is iterable else [entity_id] }}"
           desired: "{{ 'on' if value else 'off' }}"
           targets: >-
             {{ expand(entity_id)
                | rejectattr('state', 'equalto', desired)
-               | map(attribute='entity_id') | list }}
+               | map(attribute='entity_id')
+               | list }}
       - service: system_log.write
         data:
           level: debug
@@ -75,7 +81,7 @@ script:
             desired="{{ desired }}",
             targets={{ targets }}
       - choose:
-          # multiple targets → multicast
+          # multicast branch
           - conditions: "{{ targets | length > 1 }}"
             sequence:
               - service: zwave_js.multicast_set_value
@@ -85,7 +91,7 @@ script:
                   command_class: "37"
                   property: targetValue
                   value: "{{ value }}"
-          # single target → direct switch service
+          # single target branch
           - conditions: "{{ targets | length == 1 }}"
             sequence:
               - service: "switch.turn_{{ 'on' if value else 'off' }}"
@@ -94,11 +100,11 @@ script:
 
   multicast_light_set:
     alias: Multicast Light Set
-    description: Turn on or dim a group of ZWave lights via multicast
+    description: Turn on or dim a group of Z-Wave lights via multicast
     mode: parallel
     fields:
       entity_id:
-        description: List of ZWave entity IDs
+        description: List of Z-Wave light entity IDs
         required: true
         selector:
           entity:
@@ -107,7 +113,7 @@ script:
               domain: light
               integration: zwave
       value:
-        description: Brightness to set for light group (0–99)
+        description: Brightness to set (0–99, Z-Wave scale)
         required: true
         selector:
           number:
@@ -116,21 +122,21 @@ script:
             step: 1
     sequence:
       - variables:
-          # Convert Z-Wave 0–99 to HA brightness 0–255
-          desired_byte: "{{ (255 * (value | int) / 99) | round | int }}"
+          entity_id: "{{ entity_id if entity_id is iterable else [entity_id] }}"
+          brightness: "{{ (255 * (value | int) / 99) | round | int }}"
           targets: >-
             {{ expand(entity_id)
-               | rejectattr('attributes.brightness', 'equalto', desired_byte)
+               | rejectattr('attributes.brightness', 'equalto', brightness)
                | map(attribute='entity_id') | list }}
       - service: system_log.write
         data:
           level: debug
           message: >-
             multicast_light_set → value={{ value }},
-            brightness={{ brightness }},
+            brightness="{{ brightness }}",
             targets={{ targets }}
       - choose:
-          # multiple targets → multicast
+          # multicast branch
           - conditions: "{{ targets | length > 1 }}"
             sequence:
               - service: zwave_js.multicast_set_value
@@ -140,14 +146,14 @@ script:
                   command_class: "38"
                   property: targetValue
                   value: "{{ value }}"
-          # single target → direct light service with desired_byte
+          # single target branch
           - conditions: "{{ targets | length == 1 }}"
             sequence:
               - service: light.turn_on
                 target:
                   entity_id: "{{ targets[0] }}"
                 data:
-                  brightness: "{{ desired_byte }}"
+                  brightness: "{{ brightness }}"
 
   multicast_switch_toggle:
     alias: Multicast Switch Toggle
@@ -190,159 +196,7 @@ script:
           entity_id: "{{ entity_id }}"
         data:
           value: "{{ 99 if 'off' in entity_id | map('states') else 0 }}"
-
-  living_room_low_lights_off:
-    alias: Living Room Lights Off
-    description: Turn off small side lamps in living room
-    mode: queued
-    sequence:
-      - action: script.multicast_switch_set
-        target:
-          entity_id:
-            - switch.living_room_corner_lamp
-            - switch.living_room_bookshelf_lamp
-        data:
-          value: false
-
-  living_room_low_lights_on:
-    alias: Living Room Lights On
-    description: Turn on small side lamps in living room
-    mode: queued
-    sequence:
-      - action: script.multicast_switch_set
-        target:
-          entity_id:
-            - switch.living_room_corner_lamp
-            - switch.living_room_bookshelf_lamp
-        data:
-          value: true
-
-  living_room_low_lights_toggle:
-    alias: Living Room Lights Toggle
-    description: Toggle small side lamps in living room
-    mode: queued
-    sequence:
-      - action: script.multicast_switch_toggle
-        target:
-          entity_id:
-            - switch.living_room_corner_lamp
-            - switch.living_room_bookshelf_lamp
-
-  kitchen_low_lights_off:
-    alias: Kitchen Lights Off
-    description: Turn off lower lights in kitchen
-    mode: queued
-    sequence:
-      - action: homeassistant.turn_off
-        target:
-          entity_id:
-            - switch.under_cabinet_lights
-            - light.island_lights
-
-  kitchen_low_lights_on:
-    alias: Kitchen Lights On
-    description: Turn on lower lights in kitchen
-    mode: queued
-    sequence:
-      - action: homeassistant.turn_on
-        target:
-          entity_id:
-            - switch.under_cabinet_lights
-            - light.island_lights
-
-  kitchen_low_lights_toggle:
-    alias: Kitchen Lights Toggle
-    description: Toggle lower level lights in kitchen
-    mode: queued
-    sequence:
-      - action: script.entities_toggle
-        target:
-          entity_id:
-            - switch.under_cabinet_lights
-            - light.island_lights
-
-  kitchen_ceiling_lights_on:
-    alias: Kitchen Ceiling Lights On
-    description: Turn on all ceiling lights in the kitchen
-    mode: queued
-    sequence:
-      - action: script.multicast_light_set
-        target:
-          entity_id:
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
-        data:
-          value: 99
-
-  kitchen_ceiling_lights_off:
-    alias: Kitchen Ceiling Lights Off
-    description: Turn off all ceiling lights in the kitchen
-    mode: queued
-    sequence:
-      - action: script.multicast_light_set
-        target:
-          entity_id:
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
-        data:
-          value: 0
-
-  kitchen_ceiling_lights_toggle:
-    alias: Kitchen Ceiling Lights toggle
-    description: Toggle all ceiling lights in the kitchen
-    mode: queued
-    sequence:
-      - action: script.multicast_light_toggle
-        target:
-          entity_id:
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
-
-  ceiling_lights_off:
-    alias: Ceiling Lights Off
-    description: Turn Off First Floor Ceiling Lights
-    mode: queued
-    sequence:
-      - action: script.multicast_light_set
-        target:
-          entity_id:
-            - light.living_room_lights
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
-        data:
-          value: 0
-
-  ceiling_lights_on:
-    alias: Ceiling Lights On
-    description: Turn On First Floor Ceiling Lights
-    mode: queued
-    sequence:
-      - action: script.multicast_light_set
-        target:
-          entity_id:
-            - light.living_room_lights
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
-        data:
-          value: 99
-
-  ceiling_lights_toggle:
-    alias: Ceiling Lights Toggle
-    description: Toggle First Floor Ceiling Lights
-    mode: queued
-    sequence:
-      - action: script.multicast_light_toggle
-        target:
-          entity_id:
-            - light.living_room_lights
-            - light.sink_lights_2
-            - light.kitchen_lights
-            - light.dining_table_lights
+  #}}}
 
   first_floor_low_lights_on:
     alias: First Floor Low Lights On
@@ -526,41 +380,25 @@ automation:
         target:
           entity_id: switch.mbr_lamp
 
-  # ---------------- Pico Remote Template ----------------
-  # Copy/paste and replace the placeholders (id, alias, area/device names, etc.)
-  #
-  # Buttons (Lutron Caseta):
-  #   2 = Top Button
-  #   3 = Middle Button
-  #   4 = Bottom Button
-  #   5 = Up Arrow
-  #   6 = Down Arrow
-  #
-  # Usage:
-  #   - Change `id` and `alias` to something unique.
-  #   - Set `area_name` and `device_name` to match your Pico remote.
-  #   - Replace `system_log.write` actions with your desired service calls.
-  # - id: pico_<area>_<device>      # <-- Unique identifier
-  #   alias: <Area> Pico <Device> Handler
-  #   trigger:
-  #     - platform: event
-  #       event_type: lutron_caseta_button_event
-  #       event_data:
-  #         area_name: <Area Name>        # e.g. "Living Room"
-  #         device_name: <Device Name>    # e.g. "Living Room 1"
-  #         action: press
-  #   action:
-  #     - variables:
-  #         button: "{{ trigger.event.data.button_number }}"
-  #         device: "{{ trigger.event.data.device_name }}"
-  #         buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
-  #     - choose:
-  #         - conditions: "{{ button == buttons.top }}"
-  #           sequence:
-  #             - action: system_log.write
-  #               data:
-  #                 message: "Pico {{ device }} Top Button Pressed!"
-  #                 level: debug
+  - id: pico_living_room_1
+    alias: Living Room Pico 2 Handler
+    trigger:
+      - platform: event
+        event_type: lutron_caseta_button_event
+        event_data:
+          area_name: Living Room
+          device_name: Living Room 2
+          action: press
+    action:
+      - variables:
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
+          buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
+      - choose:
+          - conditions: "{{button == buttons.bottom}}"
+            sequence:
+              - action: switch.toggle
+                entity_id: switch.living_room_bookshelf_lamp
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
@@ -630,69 +468,3 @@ automation:
           - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
               - action: script.first_floor_all_off
-
-  - id: sink_lights_scenes
-    alias: Sink Lights Scenes
-    trigger:
-      - platform: event
-        event_type: zwave_js_value_notification
-        event_data:
-          command_class_name: Central Scene
-          device_id: 28b76d6993826e7dd89939ab3fccb403
-    action:
-      - variables:
-          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
-          count: "{{trigger.event.data.value_raw - 1}}"
-
-      - choose:
-          - conditions: "{{direction == 'up' and count == 2}}"
-            sequence:
-              - action: script.kitchen_ceiling_lights_on
-
-          - conditions: "{{direction == 'down' and count == 2}}"
-            sequence:
-              - action: script.kitchen_ceiling_lights_off
-
-  - id: under_cabinet_lights_scenes
-    alias: Under Cabinet Lights Scenes
-    trigger:
-      - platform: event
-        event_type: zwave_js_value_notification
-        event_data:
-          command_class_name: Central Scene
-          device_id: bd1c6a735198db9c6254448325a0bfc6
-    action:
-      - variables:
-          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
-          count: "{{trigger.event.data.value_raw - 1}}"
-
-      - choose:
-          - conditions: "{{direction == 'up' and count == 2}}"
-            sequence:
-              - action: script.kitchen_low_lights_on
-
-          - conditions: "{{direction == 'down' and count == 2}}"
-            sequence:
-              - action: script.kitchen_low_lights_off
-
-  - id: island_lights_scenes
-    alias: Under Cabinet Lights Scenes
-    trigger:
-      - platform: event
-        event_type: zwave_js_value_notification
-        event_data:
-          command_class_name: Central Scene
-          device_id: 5c4b7b4db1d411ee1e5bac8ec7f1a091
-    action:
-      - variables:
-          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
-          count: "{{trigger.event.data.value_raw - 1}}"
-
-      - choose:
-          - conditions: "{{direction == 'up' and count == 2}}"
-            sequence:
-              - action: script.kitchen_ceiling_lights_on
-
-          - conditions: "{{direction == 'down' and count == 2}}"
-            sequence:
-              - action: script.kitchen_ceiling_lights_off
