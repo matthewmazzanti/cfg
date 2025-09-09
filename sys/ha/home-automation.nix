@@ -103,7 +103,7 @@
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [ "/var/lib/zwave/store:/usr/src/app/store" ];
-          devices = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_e015830c1ba4eb11a4f62a259da30875-if00-port0:/dev/zwave" ];
+          devices = [ "/dev/serial/by-id/usb-Nabu_Casa_ZWA-2_80B54EE5C748-if00:/dev/zwave" ];
           environments = {
             TZ = config.time.timeZone;
             TRUST_PROXY = "127.0.0.1";
