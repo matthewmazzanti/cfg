@@ -1,7 +1,11 @@
-{ ... }: {
-  home.username = "mmazzanti";
-  home.homeDirectory = "/home/mmazzanti";
+{ pkgs, ... }: {
+  home = {
+  username = "mmazzanti";
+  homeDirectory = "/home/mmazzanti";
+
+  packages = [ pkgs.eza ];
 
   # Match this to the version of Home Manager you're using
-  home.stateVersion = "24.05";
+  stateVersion = "24.05";
+  };
 }

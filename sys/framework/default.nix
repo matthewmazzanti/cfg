@@ -32,6 +32,7 @@
     _1password-gui-beta
     flake.packages.home-manager
     nixos-rebuild-ng
+    direnv
   ];
 
   # Environment variables

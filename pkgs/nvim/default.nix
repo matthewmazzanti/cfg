@@ -101,6 +101,7 @@
       vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
+    nu = two-space;
     terraform = two-space;
     typescript = two-space;
     typescriptreact = two-space;
@@ -127,6 +128,7 @@
     json5
     lua
     nix
+    nu
     python
     rst
     rust

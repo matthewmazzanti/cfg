@@ -52,6 +52,7 @@
         uv
         alejandra
         neovim-unwrapped.lua
+        gcc
       ];
     });
 
