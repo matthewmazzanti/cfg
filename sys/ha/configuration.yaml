@@ -243,12 +243,9 @@ automation:
           device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - conditions: "{{button == buttons.top}}"
-            sequence:
-              - action: script.first_floor_low_lights_toggle
           - conditions: "{{button == buttons.bottom}}"
             sequence:
-              - action: script.first_floor_all_off
+              - action: script.first_floor_low_lights_toggle
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
