@@ -40,6 +40,14 @@ script:
             - switch.living_room_bookshelf_lamp
             - switch.under_cabinet_lights
             - light.island_lights
+      - action: multicast_exec.set
+        data:
+          target_state: false
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
 
   first_floor_low_lights_toggle:
     alias: First Floor Low Lights Toggle
