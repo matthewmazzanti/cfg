@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 from dataclasses import dataclass
 from typing import Final
 
@@ -160,43 +161,58 @@ class MulticastManager:
             light_targets.extend(zw_lights)
             zw_lights.clear()
 
-        # Execute
+        # Execute (schedule all calls in parallel)
+        tasks = []
+
         if zw_switches:
             data = {
                 ATTR_ENTITY_ID: zw_switches,
-                "command_class": 37,      # SWITCH_BINARY
+                "command_class": 37,  # SWITCH_BINARY
                 "property": "targetValue",
                 "value": target_state,
             }
             _LOGGER.debug("Exec: zwave_js.multicast_set_value (switches) %s", data)
-            await self.hass.services.async_call("zwave_js", "multicast_set_value", data, blocking=False)
+            tasks.append(self.hass.services.async_call(
+                "zwave_js", "multicast_set_value", data, blocking=False
+            ))
 
         if zw_lights:
             value = self._ha_to_zwave_level(brightness) if target_state else 0
             data = {
                 ATTR_ENTITY_ID: zw_lights,
-                "command_class": 38,      # SWITCH_MULTILEVEL
+                "command_class": 38,  # SWITCH_MULTILEVEL
                 "property": "targetValue",
                 "value": value,
             }
             _LOGGER.debug("Exec: zwave_js.multicast_set_value (lights) %s", data)
-            await self.hass.services.async_call("zwave_js", "multicast_set_value", data, blocking=False)
+            tasks.append(self.hass.services.async_call(
+                "zwave_js", "multicast_set_value", data, blocking=False
+            ))
 
         if ha_targets:
             svc = "turn_on" if target_state else "turn_off"
             data = {ATTR_ENTITY_ID: ha_targets}
             _LOGGER.debug("Exec: homeassistant.%s %s", svc, data)
-            await self.hass.services.async_call("homeassistant", svc, data, blocking=False)
+            tasks.append(self.hass.services.async_call(
+                "homeassistant", svc, data, blocking=False
+            ))
 
         if light_targets:
             if target_state:
                 data = {ATTR_ENTITY_ID: light_targets, "brightness": brightness}
                 _LOGGER.debug("Exec: light.turn_on %s", data)
-                await self.hass.services.async_call("light", "turn_on", data, blocking=False)
+                tasks.append(self.hass.services.async_call(
+                    "light", "turn_on", data, blocking=False
+                ))
             else:
                 data = {ATTR_ENTITY_ID: light_targets}
                 _LOGGER.debug("Exec: light.turn_off %s", data)
-                await self.hass.services.async_call("light", "turn_off", data, blocking=False)
+                tasks.append(self.hass.services.async_call(
+                    "light", "turn_off", data, blocking=False
+                ))
+
+        if tasks:
+            await asyncio.gather(*tasks)
 
     async def apply_toggle(
         self,
