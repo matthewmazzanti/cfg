@@ -52,6 +52,14 @@ script:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
             - light.island_lights
+      - action: multicast_exec.set
+        data:
+          target_state: false
+          entity_id:
+            - light.living_room_lights
+            - light.sink_lights_2
+            - light.kitchen_lights
+            - light.dining_table_lights
 
 
   first_floor_all_on:
