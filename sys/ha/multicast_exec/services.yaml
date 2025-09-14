@@ -1,0 +1,53 @@
+set:
+  name: Multicast Set
+  description: Plan & set a group using multicast for Z-Wave where possible.
+  fields:
+    entity_id:
+      name: Entities
+      description: List of entities (lights, switches, etc.)
+      required: true
+      selector:
+        entity:
+          multiple: true
+    target_state:
+      name: Target state
+      required: true
+      selector:
+        boolean:
+    brightness:
+      name: Brightness (lights only)
+      description: Used only when turning lights on
+      required: false
+      default: 255
+      selector:
+        number:
+          min: 0
+          max: 255
+          mode: slider
+
+toggle:
+  name: Multicast Toggle (with bias)
+  description: If all match bias, flip; else set to bias.
+  fields:
+    entity_id:
+      name: Entities
+      required: true
+      selector:
+        entity:
+          multiple: true
+    state_bias:
+      name: Bias
+      description: Preferred state (true=on, false=off)
+      required: false
+      default: true
+      selector:
+        boolean:
+    brightness:
+      name: Brightness (lights only)
+      required: false
+      default: 255
+      selector:
+        number:
+          min: 0
+          max: 255
+          mode: slider

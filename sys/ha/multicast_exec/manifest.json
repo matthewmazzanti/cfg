@@ -1,0 +1,10 @@
+{
+  "domain": "multicast_exec",
+  "name": "Multicast Exec",
+  "version": "0.1.0",
+  "documentation": "https://example.invalid/multicast_exec",
+  "requirements": [],
+  "codeowners": ["@your-github"],
+  "iot_class": "local_push",
+  "loggers": ["custom_components.multicast_exec"]
+}

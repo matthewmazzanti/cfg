@@ -81,9 +81,8 @@
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/hass:/config:rw"
             "${./configuration.yaml}:/config/configuration.yaml:ro"
-            "${./pyscript/multicast.py}:/config/pyscript/multicast.py:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
-            "${flake.inputs.pyscript}/custom_components/pyscript:/config/custom_components/pyscript:ro"
+            "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
           ];
           environments.TZ = config.time.timeZone;
         };
