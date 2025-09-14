@@ -10,7 +10,7 @@ logger:
     homeassistant.components.automation: info
     homeassistant.components.script: info
     homeassistant.components.system_log: debug
-    custom_components.pyscript: debug
+    custom_components.multicast_exec: debug
 
 sun:
 # Enable Apple TV
