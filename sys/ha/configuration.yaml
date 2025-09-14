@@ -27,199 +27,31 @@ resources:
     type: js
 
 script:
-  entities_toggle:
-    alias: Toggle Entities
-    description: Toggle a group of entities
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of entity IDs
-        example: '["light.living_room", "switch.fan"]'
-        required: true
-        selector:
-          entity:
-            multiple: true
-    sequence:
-      - variables:
-          any_on: "{{ 'on' in entity_id | map('states') }}"
-      - action: "{{ 'homeassistant.turn_off' if any_on else 'homeassistant.turn_on' }}"
-        target:
-          entity_id: "{{ entity_id }}"
-
-  # {{{ Multicast Stuff
-  multicast_switch_set:
-    alias: Multicast Switch Set
-    description: Set a state for a group of Z-Wave switches via multicast
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of Z-Wave switch entity IDs
-        required: true
-        selector:
-          entity:
-            multiple: true
-            filter:
-              domain: switch
-              integration: zwave
-      value:
-        description: Desired state (true=on, false=off)
-        required: true
-        selector:
-          boolean:
-    sequence:
-      - variables:
-          entity_id: "{{ entity_id if entity_id is iterable else [entity_id] }}"
-          desired: "{{ 'on' if value else 'off' }}"
-          targets: >-
-            {{ expand(entity_id)
-               | rejectattr('state', 'equalto', desired)
-               | map(attribute='entity_id')
-               | list }}
-      - service: system_log.write
-        data:
-          level: debug
-          message: >-
-            multicast_switch_set → value={{ value }},
-            desired="{{ desired }}",
-            targets={{ targets }}
-      - choose:
-          # multicast branch
-          - conditions: "{{ targets | length > 1 }}"
-            sequence:
-              - service: zwave_js.multicast_set_value
-                target:
-                  entity_id: "{{ targets }}"
-                data:
-                  command_class: "37"
-                  property: targetValue
-                  value: "{{ value }}"
-          # single target branch
-          - conditions: "{{ targets | length == 1 }}"
-            sequence:
-              - service: "switch.turn_{{ 'on' if value else 'off' }}"
-                target:
-                  entity_id: "{{ targets[0] }}"
-
-  multicast_light_set:
-    alias: Multicast Light Set
-    description: Turn on or dim a group of Z-Wave lights via multicast
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of Z-Wave light entity IDs
-        required: true
-        selector:
-          entity:
-            multiple: true
-            filter:
-              domain: light
-              integration: zwave
-      value:
-        description: Brightness to set (0–99, Z-Wave scale)
-        required: true
-        selector:
-          number:
-            min: 0
-            max: 99
-            step: 1
-    sequence:
-      - variables:
-          entity_id: "{{ entity_id if entity_id is iterable else [entity_id] }}"
-          brightness: "{{ (255 * (value | int) / 99) | round | int }}"
-          targets: >-
-            {{ expand(entity_id)
-               | rejectattr('attributes.brightness', 'equalto', brightness)
-               | map(attribute='entity_id') | list }}
-      - service: system_log.write
-        data:
-          level: debug
-          message: >-
-            multicast_light_set → value={{ value }},
-            brightness="{{ brightness }}",
-            targets={{ targets }}
-      - choose:
-          # multicast branch
-          - conditions: "{{ targets | length > 1 }}"
-            sequence:
-              - service: zwave_js.multicast_set_value
-                target:
-                  entity_id: "{{ targets }}"
-                data:
-                  command_class: "38"
-                  property: targetValue
-                  value: "{{ value }}"
-          # single target branch
-          - conditions: "{{ targets | length == 1 }}"
-            sequence:
-              - service: light.turn_on
-                target:
-                  entity_id: "{{ targets[0] }}"
-                data:
-                  brightness: "{{ brightness }}"
-
-  multicast_switch_toggle:
-    alias: Multicast Switch Toggle
-    description: Toggle a group of zwave switches via multicast
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of ZWave entity IDs
-        required: True
-        selector:
-          entity:
-            multiple: true
-            filter:
-              domain: switch
-              integration: zwave
-    sequence:
-      - action: script.multicast_switch_set
-        target:
-          entity_id: "{{ entity_id }}"
-        data:
-          value: "{{ 'on' not in entity_id | map('states') }}"
-
-  multicast_light_toggle:
-    alias: Multicast Light Toggle
-    description: Toggle a group of zwave lights via multicast
-    mode: parallel
-    fields:
-      entity_id:
-        description: List of ZWave entity IDs
-        required: True
-        selector:
-          entity:
-            multiple: true
-            filter:
-              domain: light
-              integration: zwave
-    sequence:
-      - action: script.multicast_light_set
-        target:
-          entity_id: "{{ entity_id }}"
-        data:
-          value: "{{ 99 if 'off' in entity_id | map('states') else 0 }}"
-  #}}}
-
   first_floor_low_lights_on:
     alias: First Floor Low Lights On
-    description: Turn low lights on
+    description: Turn Low Lights On
     mode: queued
     sequence:
-      - action: script.multicast_switch_set
-        target:
+      - action: multicast_exec.set
+        data:
+          target_state: true
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
             - switch.under_cabinet_lights
-        data:
-          value: true
-
-      - action: script.multicast_light_set
-        target:
-          entity_id:
             - light.island_lights
+
+  first_floor_low_lights_toggle:
+    alias: First Floor Low Lights Toggle
+    description: Toggle Low Lights
+    mode: queued
+    sequence:
+      - action: multicast_exec.toggle
         data:
-          value: 99
+          entity_id:
+            - switch.living_room_corner_lamp
+            - switch.living_room_bookshelf_lamp
+            - light.island_lights
 
 
   first_floor_all_on:
@@ -227,49 +59,35 @@ script:
     description: Turn all of the first floor lights on
     mode: queued
     sequence:
-      - action: script.multicast_switch_set
-        target:
+      - action: multicast_exec.set
+        data:
+          target_state: true
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
             - switch.under_cabinet_lights
-        data:
-          value: true
-
-      - action: script.multicast_light_set
-        target:
-          entity_id:
             - light.island_lights
             - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
-        data:
-          value: 99
 
   first_floor_all_off:
     alias: First Floor Evening Off
     description: Turn all of the first floor off in the evening
     mode: queued
     sequence:
-      - action: script.multicast_switch_set
-        target:
+      - action: multicast_exec.set
+        data:
+          target_state: false
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
-        data:
-          value: false
-
-      - action: script.multicast_light_set
-        target:
-          entity_id:
             - light.island_lights
             - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
-        data:
-          value: 0
 
 
 automation:
@@ -419,7 +237,7 @@ automation:
       - choose:
           - conditions: "{{button == buttons.top}}"
             sequence:
-              - action: script.first_floor_low_lights_on
+              - action: script.first_floor_low_lights_toggle
           - conditions: "{{button == buttons.bottom}}"
             sequence:
               - action: script.first_floor_all_off
