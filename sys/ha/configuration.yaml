@@ -73,9 +73,9 @@ script:
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
+            - light.living_room_lights
             - switch.under_cabinet_lights
             - light.island_lights
-            - light.living_room_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
@@ -91,8 +91,8 @@ script:
           entity_id:
             - switch.living_room_corner_lamp
             - switch.living_room_bookshelf_lamp
-            - light.island_lights
             - light.living_room_lights
+            - light.island_lights
             - light.sink_lights_2
             - light.kitchen_lights
             - light.dining_table_lights
