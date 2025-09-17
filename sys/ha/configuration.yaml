@@ -89,7 +89,7 @@ script:
             - light.dining_table_lights
 
   first_floor_all_off:
-    alias: First Floor Evening Off
+    alias: First Floor All Off
     description: Turn all of the first floor off in the evening
     mode: queued
     sequence:
@@ -235,6 +235,16 @@ automation:
             sequence:
               - action: switch.toggle
                 entity_id: switch.living_room_bookshelf_lamp
+              - action: multicast_exec.set
+                data:
+                  target_state: false
+                  entity_id:
+                    - switch.living_room_corner_lamp
+                    - light.living_room_lights
+                    - light.island_lights
+                    - light.sink_lights_2
+                    - light.kitchen_lights
+                    - light.dining_table_lights
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
