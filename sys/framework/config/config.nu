@@ -1,10 +1,3 @@
-export def --wrapped l [...args] {
-    eza --classify --group-directories-first ...$args
-}
-
-export def --wrapped t [...args] {
-    l --tree ...$args
-}
 
 $env.config.edit_mode = "vi"
 $env.config.show_banner = false
@@ -24,9 +17,9 @@ $env.PROMPT_COMMAND = {||
   let host = ^hostname
   | decode utf-8
   | if ($env.TERM != "linux") {
-    $in | str substring 0..<1 | greek-letter
+    str substring 0..<1 | greek-letter
   } else {
-    $in | str substring 0..<2
+    str substring 0..<2
   }
 
   # TODO: Shorten dynamically based on terminal width - requires nushell to
@@ -43,13 +36,43 @@ $env.PROMPT_COMMAND = {||
 $env.PROMPT_COMMAND_RIGHT = ""
 
 
+$env.prompt.ran_command = false
+
+def --env pre_execution [] {
+  let cmd = commandline | str trim
+  if $cmd != '' and not ($cmd starts-with 'clear') {
+    $env.prompt.ran_command = true
+  }
+}
+
+def --env pre_prompt [] {
+  # Check if we ran anything
+  if not $env.prompt.ran_command {
+    return
+  }
+  $env.prompt.ran_command = false
+
+  # Print error code in red
+  if $env.LAST_EXIT_CODE > 0  {
+    print $"(ansi red)[(ansi light_red)error: ($env.LAST_EXIT_CODE)(ansi red)](ansi reset)"
+  }
+
+  # Add newline between command runs
+  print ''
+}
 
 $env.config = ($env.config | upsert hooks {
-  pre_prompt: [
-    {||
-      if $env.LAST_EXIT_CODE > 0  {
-        print $"(ansi red)[error: ($env.LAST_EXIT_CODE)](ansi reset)"
-      }
-    }
-  ]
+  pre_execution: [ pre_execution ],
+  pre_prompt: [ pre_prompt ]
 })
+
+def --wrapped wrapped_ls [...args] {
+    eza --classify --group-directories-first ...$args
+}
+
+def --wrapped tree [...args] {
+    wrapped_ls --tree ...$args
+}
+
+alias l = ls
+alias ls = wrapped_ls

@@ -6,8 +6,7 @@ export def build-path-converter [sep: string] {
 }
 
 export def convert-env [] {
-  $in
-  | items {|key value|
+  items {|key value|
     let from_string = ($env.ENV_CONVERSIONS | get -o $key).from_string?
     if ($from_string | is-empty) {
       { $key: $value }
@@ -28,8 +27,7 @@ export def sh-env [] {
   #   filenames).
   # - `env -0` prints each KEY=VAL pair separated by a NUL character for safe
   #   parsing.
-  $in
-  | path expand
+  path expand
   | append ''
   | str join (char nul)
   | ^/bin/sh -e -c r#'
