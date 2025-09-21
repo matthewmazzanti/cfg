@@ -35,7 +35,7 @@ $env.ENV_CONVERSIONS = do {
     # -------------------------
     # Nix-specific
     # -------------------------
-    NIX_PATH: $path,                   # Nixpkgs channels, flakes fallback
+    # NIX_PATH: $path,                   # Nixpkgs channels, flakes fallback
     NIX_PROFILES: (build-path-converter ' '), # Active Nix profiles (stacked, e.g. user + system),
 
     # -------------------------

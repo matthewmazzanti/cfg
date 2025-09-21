@@ -230,22 +230,6 @@
         "type": "github"
       }
     },
-    "pyscript": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1754292606,
-        "narHash": "sha256-CH/giR1yprEloN+tK+FM2eIffN0TiEMdVIlFmaWUpHI=",
-        "owner": "custom-components",
-        "repo": "pyscript",
-        "rev": "46809fa5f9dc08e3cea38c9fc6cc030ec2cb19b7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "custom-components",
-        "repo": "pyscript",
-        "type": "github"
-      }
-    },
     "quadlet-nix": {
       "locked": {
         "lastModified": 1754008153,
@@ -269,7 +253,6 @@
         "lanzaboote": "lanzaboote",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable_2",
-        "pyscript": "pyscript",
         "quadlet-nix": "quadlet-nix",
         "slider-entity-row": "slider-entity-row",
         "vim-easyclip": "vim-easyclip"
