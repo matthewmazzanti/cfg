@@ -43,7 +43,10 @@
   # User config
   users.users.mmazzanti = {
     extraGroups = [ "networkmanager" ];
-    packages = [ flake.packages."nvim/nix" ];
+    packages = [
+      flake.packages."nvim/nix"
+      flake.packages.nu
+    ];
   };
 
   # Auto login as mmazzanti

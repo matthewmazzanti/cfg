@@ -38,6 +38,7 @@
     nftables # firewall control
     ghostty.terminfo
   ];
+  environment.sessionVariables.EDITOR = "vim";
 
   # Users may only be specified via nix
   users.mutableUsers = false;
