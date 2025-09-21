@@ -29,7 +29,7 @@ $env.ENV_CONVERSIONS = do {
     # -------------------------
     INFOPATH: $path,                   # GNU info docs (from Nix profiles)
     LIBEXEC_PATH: $path,               # Aux executables (`libexec` bins from packages)
-    LS_COLORS: $path,                  # Color scheme for `ls --color`
+    # LS_COLORS: $path,                  # Color scheme for `ls --color`
     TERMINFO_DIRS: $path,              # ncurses/terminfo databases (needed for tmux, alacritty, etc.),
 
     # -------------------------
@@ -43,6 +43,24 @@ $env.ENV_CONVERSIONS = do {
     # -------------------------
     PATH: $path,                       # Executable search path (composed from Nix profiles + system)
     SESSION_MANAGER: $path,            # Mostly an X11 legacy var; not used in pure Wayland sessions,
+    LS_COLORS: {
+      from_string: {|value|
+        $value
+        | split row ':'
+        | parse '{key}={value}'
+        | each {|row|
+          { $row.key: ($row.value | split row ';') }
+        }
+        | into record
+      },
+      to_string: {|value|
+        $value
+        | items {|key value|
+          $"($key)=($value | str join ';')"
+        }
+        | str join ':'
+      }
+    }
   }
 }
 

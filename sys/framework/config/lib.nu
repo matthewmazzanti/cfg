@@ -7,12 +7,17 @@ export def build-path-converter [sep: string] {
 
 export def convert-env [] {
   items {|key value|
+    let default = { $key: $value }
+    if ($value == null) {
+      return $default
+    }
+
     let from_string = ($env.ENV_CONVERSIONS | get -o $key).from_string?
     if ($from_string | is-empty) {
-      { $key: $value }
-    } else {
-      { $key: (do $from_string $value) }
+      return $default
     }
+
+    { $key: (do $from_string $value) }
   }
   | into record
 }
@@ -44,6 +49,31 @@ export def sh-env [] {
   | reject --optional __NU_SCRIPT_PATH SHLVL PWD OLDPWD _ TERM
 }
 
+export def --env direnv_hook [] {
+  let env_diff = direnv export json | from json
+  if ($env_diff | is-empty) {
+    return
+  }
+
+  mut hide = []
+  mut load = {}
+  for row in ($env_diff | transpose key value) {
+    if $row.value == null {
+      $hide = $hide | append $row.key
+    } else {
+      $load = $load | insert $row.key $row.value
+    }
+  }
+
+  if ($load | is-not-empty) {
+    $load | convert-env | load-env
+  }
+
+  for key in $hide {
+    hide-env $key
+  }
+}
+
 export def tilde-home [] {
   let input = $in
   match (do -i { $input | path relative-to $nu.home-path }) {
@@ -53,9 +83,7 @@ export def tilde-home [] {
   }
 }
 
-export def short-dir [
-  --keep (-k): int = 3
-] {
+export def short-dir [ --keep (-k): int = 3 ] {
   let segs = ($in | split row (char path_sep))
 
   let short = $segs | slice ..<(-1 * $keep) | each {|seg|
