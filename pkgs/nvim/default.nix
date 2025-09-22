@@ -37,7 +37,10 @@
       ++ optionals opts.langs.haskell [haskell-language-server]
       ++ optionals opts.langs.web [nodePackages.typescript-language-server]
       ++ optionals opts.langs.lua [lua-language-server]
-      ++ optionals opts.langs.nix [nil]
+      ++ optionals opts.langs.nix [
+        # nil
+        nixd
+      ]
       ++ optionals opts.langs.python [pyright]
       ++ optionals opts.langs.rust [rust-analyzer]
       ++ optionals opts.langs.shell [bash-language-server]
@@ -45,6 +48,13 @@
   );
 
   ftplugin = let
+    four-space = ''
+      vim.opt_local.tabstop = 4
+      vim.opt_local.shiftwidth = 4
+      vim.opt_local.softtabstop = 4
+      vim.opt_local.expandtab = true
+    '';
+
     two-space = ''
       vim.opt_local.tabstop = 2
       vim.opt_local.shiftwidth = 2
@@ -65,6 +75,7 @@
 
     # Four space languages
     python = ''
+      ${four-space}
       vim.opt_local.colorcolumn = "89"
       vim.opt_local.textwidth = 88
     '';
@@ -101,7 +112,7 @@
       vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
-    nu = two-space;
+    nu = four-space;
     terraform = two-space;
     typescript = two-space;
     typescriptreact = two-space;

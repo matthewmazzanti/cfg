@@ -62,4 +62,5 @@
 
   fonts.packages = [ pkgs.fira-code ];
   services.fwupd.enable = true;
+  services.fprintd.enable = true;
 }

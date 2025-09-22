@@ -44,8 +44,9 @@ end
 local servers = {
   "ccls",
   "gopls",
-  "nil_ls",
+  -- "nil_ls",
   "ts_ls",
+  "nixd"
 }
 
 for _, server in ipairs(servers) do
@@ -111,7 +112,7 @@ local symbol
 if vim.env.TERM == "linux" then
   symbol = "*"
 else
-  symbol = "⏺"
+  symbol = "●"
 end
 
 vim.diagnostic.config({
