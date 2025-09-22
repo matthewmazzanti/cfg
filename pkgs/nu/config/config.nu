@@ -55,7 +55,7 @@ $env.PROMPT_COMMAND_RIGHT = {||
 
 
 def --wrapped wrapped_ls [...args] {
-    eza --classify --group-directories-first --binary ...$args
+    ^eza --classify --group-directories-first --binary ...$args
 }
 
 def --wrapped tree [...args] {
