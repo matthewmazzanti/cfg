@@ -16,6 +16,9 @@
 
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 
+    ghostty.url = "github:ghostty-org/ghostty";
+    ghostty.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -39,6 +42,7 @@
         inherit pkgs system inputs;
       }) // {
         home-manager = inputs.home-manager.packages.${system}.default;
+        ghostty = inputs.ghostty.packages.${system}.default;
       }
     );
 
