@@ -64,4 +64,6 @@
   fonts.packages = [ pkgs.fira-code ];
   services.fwupd.enable = true;
   services.fprintd.enable = true;
+  virtualisation.podman.enable = true;
+  users.users.mmazzanti.autoSubUidGidRange = true;
 }
