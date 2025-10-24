@@ -19,7 +19,6 @@ $env.PROMPT_COMMAND = do {
   use ./lib.nu [short-dir tilde-home color-path greek-letter]
 
   {||
-
     let colors = (if (is-admin) {
       { host: (ansi teal), seg: (ansi red), sep: (ansi light_red) }
     } else {
@@ -50,7 +49,7 @@ $env.PROMPT_COMMAND_RIGHT = {||
     return ""
   }
 
-  $"(ansi red)[error: (ansi light_red)($env.LAST_EXIT_CODE)(ansi red)](ansi reset)"
+  $"(ansi red)[(ansi light_red)error: ($env.LAST_EXIT_CODE)(ansi red)](ansi reset)"
 }
 
 
@@ -64,3 +63,5 @@ def --wrapped tree [...args] {
 
 alias list = ls
 alias ls = wrapped_ls
+
+let cfg = "~/src/nix/cfg" |path expand
