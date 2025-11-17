@@ -54,7 +54,6 @@
         [[ -n "$GHOSTTY_RESOURCES_DIR" ]] || return
         local file="$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
         [[ -f "$file" ]] || return
-        echo "sourcing shell integration"
         source "$file"
     }
 
