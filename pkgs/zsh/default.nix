@@ -31,23 +31,31 @@
 
   zshrc = ''
     if [[ -f "/opt/homebrew/bin/brew" ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
 
     if command -v direnv &> /dev/null; then
-      eval "$(direnv hook zsh)"
+        eval "$(direnv hook zsh)"
     fi
 
-    function () {
-      local cachedir="$HOME/.cache/zsh"
-      local dumpfile="$cachedir/zcompdump"
+    () {
+        local cachedir="$HOME/.cache/zsh"
+        local dumpfile="$cachedir/zcompdump"
 
-      if [ ! -d "$cachedir" ]; then
-        mkdir -p "$cachedir"
-      fi
+        if [ ! -d "$cachedir" ]; then
+          mkdir -p "$cachedir"
+        fi
 
-      autoload -Uz compinit && compinit -C -d "$dumpfile"
-      autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
+        autoload -Uz compinit && compinit -C -d "$dumpfile"
+        autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
+    }
+
+    () {
+        [[ -n "$GHOSTTY_RESOURCES_DIR" ]] || return
+        local file="$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+        [[ -f "$file" ]] || return
+        echo "sourcing shell integration"
+        source "$file"
     }
 
     # Zsh completion has this dumb thing where it will SSH into remote servers
@@ -89,7 +97,7 @@
     cfg="$HOME/src/nix/cfg"
 
     if [[ -f "$HOME/.zshrc" ]]; then
-      source "$HOME/.zshrc"
+        source "$HOME/.zshrc"
     fi
   '';
 in
