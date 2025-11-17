@@ -15,7 +15,7 @@
         --replace 'if [[ ! -w $FAST_WORK_DIR ]]; then' 'if false; then'
     '';
   });
-  fshPlugin = "${fsh}/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh";
+  fshPlugin = "${fsh}/share/zsh/site-functions/fast-syntax-highlighting.plugin.zsh";
   fshTheme = stdenvNoCC.mkDerivation {
     name = "fsh-theme";
     nativeBuildInputs = [zsh];
