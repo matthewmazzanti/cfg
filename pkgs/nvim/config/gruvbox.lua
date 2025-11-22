@@ -6,6 +6,7 @@
 local gruvbox = require("gruvbox")
 
 vim.opt.background = "dark"
+vim.opt.termguicolors = true
 
 gruvbox.setup({
   undercurl = true,
