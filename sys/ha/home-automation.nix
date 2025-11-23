@@ -1,8 +1,6 @@
 { config, flake, ... }: {
   # Bluetooth + BlueZ
-  hardware.bluetooth.enable = true;
-
-  services.bluez = {
+  hardware.bluetooth = {
     enable = true;
     settings = {
       General = {
