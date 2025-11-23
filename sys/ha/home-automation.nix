@@ -1,6 +1,21 @@
 { config, flake, ... }: {
+  # Bluetooth + BlueZ
+  hardware.bluetooth.enable = true;
+
+  services.bluez = {
+    enable = true;
+    settings = {
+      General = {
+        Experimental = true;     # needed for some BLE features / passive scan
+        ControllerMode = "dual"; # BR/EDR + LE
+      };
+    };
+  };
+
   # Storage for containers
-  environment.persistence."/persist".directories = [ "/var/lib/containers" ];
+  environment.persistence."/persist".directories = [
+    "/var/lib/containers"
+  ];
 
   # Create filesystems for different containers in zfs
   fileSystems = {
@@ -83,6 +98,7 @@
             "${./configuration.yaml}:/config/configuration.yaml:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
+            "/run/dbus:/run/dbus:ro"
           ];
           environments.TZ = config.time.timeZone;
         };
