@@ -91,7 +91,9 @@
           noNewPrivileges = true;
           # readOnly = true;
           # tmpfses = [ "/var/run" "/tmp" ];
+
           volumes = [
+            "/etc/machine-id:/etc/machine-id:ro"
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/hass:/config:rw"
             "${./configuration.yaml}:/config/configuration.yaml:ro"
@@ -99,7 +101,10 @@
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
             "/run/dbus:/run/dbus:ro"
           ];
-          environments.TZ = config.time.timeZone;
+          environments = {
+            TZ = config.time.timeZone;
+            DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket";
+          };
         };
       };
 
