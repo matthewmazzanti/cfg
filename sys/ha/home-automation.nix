@@ -15,6 +15,7 @@
   # Storage for containers
   environment.persistence."/persist".directories = [
     "/var/lib/containers"
+    "/var/lib/bluetooth"
   ];
 
   # Create filesystems for different containers in zfs
