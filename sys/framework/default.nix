@@ -26,8 +26,8 @@
   # Packages
   environment.systemPackages = with pkgs; [
     firefox
-    # ghostty
-    flake.packages.ghostty
+    ghostty
+    # flake.packages.ghostty
     wl-clipboard
     nushell
     # TODO: Switch back to stable, at some point

@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  custom,
   flake,
   ...
 }: let
@@ -71,14 +70,14 @@ in {
   users.users.mmazzanti.packages =
     (with pkgs; [
       # Terminal utilities
-      bat fd fzf git ripgrep tree jq yq visidata htop unixtools.watch direnv
+      bat fd fzf git ripgrep tree jq yq htop unixtools.watch direnv # visidata
       # Networking
       nmap httpie wget curl
       # Languages
       rustc cargo go ruby python313 uv nodejs
 
       # Misc
-      pass tio wakeonlan openssh pv m1ddc
+      pass tio wakeonlan openssh pv # m1ddc
       # MacOS replacement tools
       coreutils time gnused time openssh helix clang
 
