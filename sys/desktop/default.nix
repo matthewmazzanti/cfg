@@ -34,6 +34,8 @@
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
+    steam
+    discord
   ];
 
   # Environment variables
