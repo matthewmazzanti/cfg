@@ -62,5 +62,5 @@
   services.getty.autologinUser = "mmazzanti";
 
   # Allow system to stay active with closed lid, if power if attached
-  services.logind.lidSwitchExternalPower = "ignore";
+  services.logind.settings.Login.HandleLidSwitchExternalPower = "ignore";
 }
