@@ -34,9 +34,9 @@
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
-    steam
     discord
   ];
+
 
   # Environment variables
   environment.sessionVariables = {
@@ -61,4 +61,7 @@
 
   fonts.packages = [ pkgs.fira-code ];
   services.fwupd.enable = true;
+
+  # For video drivers and stuff
+  programs.steam.enable = true;
 }
