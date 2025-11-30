@@ -41,6 +41,18 @@ in {
     modules = [ ./framework/home.nix ];
   };
 
+  nixos.desktop = nixosSystem {
+    pkgs = systemPkgs.${linux};
+    specialArgs.flake = flakeArgs.${linux};
+    modules = [ ./desktop ];
+  };
+
+  home."mmazzanti@desktop" = hmConfig {
+    pkgs = systemPkgs.${linux};
+    extraSpecialArgs.flake = flakeArgs.${linux};
+    modules = [ ./desktop/home.nix ];
+  };
+
   nixos.server = nixosSystem {
     pkgs = systemPkgs.${linux};
     specialArgs.flake = flakeArgs.${linux};
