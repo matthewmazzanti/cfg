@@ -31,7 +31,7 @@
     wl-clipboard
     nushell
     # TODO: Switch back to stable, at some point
-    _1password-gui-beta
+    _1password-gui
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
