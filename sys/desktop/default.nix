@@ -53,10 +53,13 @@
   };
 
   services = {
-    displayManager.gdm.enable = true;
+    # displayManager.gdm.enable = true;
+    # desktopManager.gnome.enable = true;
+    desktopManager.plasma6.enable = true;
+    displayManager.sddm.enable = true;
+
     displayManager.autoLogin.enable = true;
     displayManager.autoLogin.user = "mmazzanti";
-    desktopManager.gnome.enable = true;
   };
 
   fonts.packages = [ pkgs.fira-code ];
