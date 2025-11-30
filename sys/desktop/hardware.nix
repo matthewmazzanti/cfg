@@ -19,8 +19,8 @@
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
 
-  boot.initrd.luks.devices."628f1975-48cf-4d5b-bea2-e56bdb788994" = {
-    device = "/dev/disk/by-uuid/628f1975-48cf-4d5b-bea2-e56bdb788994";
+  boot.initrd.luks.devices."8da62c32-7525-4ce6-a493-b4fc149e5421" = {
+    device = "/dev/disk/by-uuid/8da62c32-7525-4ce6-a493-b4fc149e5421";
     bypassWorkqueues = true;
     allowDiscards = true;
   };
