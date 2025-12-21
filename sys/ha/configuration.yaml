@@ -335,7 +335,7 @@ template:
         unique_id: front_sun_tilt
         unit_of_measurement: "%"
         state: >
-          {% from 'macros.jinja' import tilt %}
+          {% from 'macros.jinja' import elevation_to_tilt %}
           {% set sun_el = states('sensor.front_sun_elevation') | float(0) %}
           {{ elevation_to_tilt(sun_el) | round(0) }}
 
@@ -362,7 +362,7 @@ template:
         unique_id: side_sun_tilt
         unit_of_measurement: "%"
         state: >
-          {% from 'macros.jinja' import tilt %}
+          {% from 'macros.jinja' import elevation_to_tilt %}
           {% set sun_el = states('sensor.side_sun_elevation') | float(0) %}
           {{ elevation_to_tilt(sun_el) | round(0) }}
 
@@ -389,6 +389,6 @@ template:
         unique_id: back_sun_tilt
         unit_of_measurement: "%"
         state: >
-          {% from 'macros.jinja' import tilt %}
+          {% from 'macros.jinja' import elevation_to_tilt %}
           {% set sun_el = states('sensor.back_sun_elevation') | float(0) %}
           {{ elevation_to_tilt(sun_el) | round(0) }}
