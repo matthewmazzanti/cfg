@@ -25,6 +25,89 @@ resources:
   - url: "/local/slider-entity-row/slider-entity-row.js"
     type: js
 
+template:
+  - sensor:
+      # ========= FRONT =========
+      - name: "Front Sun Offset"
+        unique_id: front_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 95.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Front Sun Elevation"
+        unique_id: front_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.front_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      - name: "Front Sun Tilt"
+        unique_id: front_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import elevation_to_tilt %}
+          {% set sun_el = states('sensor.front_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
+
+      # ========= SIDE =========
+      - name: "Side Sun Offset"
+        unique_id: side_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 185.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Side Sun Elevation"
+        unique_id: side_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.side_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      - name: "Side Sun Tilt"
+        unique_id: side_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import elevation_to_tilt %}
+          {% set sun_el = states('sensor.side_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
+
+      # ========= BACK =========
+      - name: "Back Sun Offset"
+        unique_id: back_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 275.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Back Sun Elevation"
+        unique_id: back_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.back_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      - name: "Back Sun Tilt"
+        unique_id: back_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import elevation_to_tilt %}
+          {% set sun_el = states('sensor.back_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
+
 script:
   first_floor_low_lights_on:
     alias: First Floor Low Lights On
@@ -310,85 +393,70 @@ automation:
           - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
               - action: script.first_floor_all_off
-template:
-  - sensor:
-      # ========= FRONT =========
-      - name: "Front Sun Offset"
-        unique_id: front_sun_offset
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 95.0 %}
-          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
-          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
 
-      - name: "Front Sun Elevation"
-        unique_id: front_sun_elevation
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_elevation %}
-          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
-          {% set off_h  = states('sensor.front_sun_offset') | float %}
-          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
 
-      - name: "Front Sun Tilt"
-        unique_id: front_sun_tilt
-        unit_of_measurement: "%"
-        state: >
-          {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.front_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+  - id: blinds_front_sun_tilt
+    alias: "Blinds: Front Sun Tilt"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.front_sun_tilt
+      - platform: state
+        entity_id: sun.sun
+    condition:
+      # --- Sun position gate (rising-aware) ---
+      - condition: template
+        value_template: >
+          {% from 'macros.jinja' import sun_active_band %}
+          {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
+    action:
+      - variables:
+          covers:
+            - cover.living_room_tv_left
 
-      # ========= SIDE =========
-      - name: "Side Sun Offset"
-        unique_id: side_sun_offset
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 185.0 %}
-          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
-          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+          move_covers: >
+            {% from 'macros.jinja' import entities_tilt_delta %}
+            {% set target_tilt = states('sensor.front_sun_tilt') | float(none) %}
+            {{ entities_tilt_delta(covers, target_tilt, threshold=4) }}
 
-      - name: "Side Sun Elevation"
-        unique_id: side_sun_elevation
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_elevation %}
-          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
-          {% set off_h  = states('sensor.side_sun_offset') | float %}
-          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+      - condition: template
+        value_template: "{{ move_covers | length > 0 }}"
 
-      - name: "Side Sun Tilt"
-        unique_id: side_sun_tilt
-        unit_of_measurement: "%"
-        state: >
-          {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.side_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+      - service: cover.set_cover_tilt_position
+        data:
+          entity_id: "{{ move_covers }}"
+          tilt_position: "{{ states('sensor.front_sun_tilt') | int }}"
 
-      # ========= BACK =========
-      - name: "Back Sun Offset"
-        unique_id: back_sun_offset
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 275.0 %}
-          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
-          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
 
-      - name: "Back Sun Elevation"
-        unique_id: back_sun_elevation
-        unit_of_measurement: "°"
-        state: >
-          {% from 'macros.jinja' import relative_sun_elevation %}
-          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
-          {% set off_h  = states('sensor.back_sun_offset') | float %}
-          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+  - id: blinds_side_sun_tilt
+    alias: "Blinds: Side Sun Tilt"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.side_sun_tilt
+      - platform: state
+        entity_id: sun.sun
+    condition:
+      # --- Sun position gate (rising-aware) ---
+      - condition: template
+        value_template: >
+          {% from 'macros.jinja' import sun_active_band %}
+          {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
+    action:
+      - variables:
+          covers:
+            - cover.living_room_fire_left
+            - cover.living_room_fire_right
 
-      - name: "Back Sun Tilt"
-        unique_id: back_sun_tilt
-        unit_of_measurement: "%"
-        state: >
-          {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.back_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+          move_covers: >
+            {% from 'macros.jinja' import entities_tilt_delta %}
+            {% set target_tilt = states('sensor.side_sun_tilt') | float(none) %}
+            {{ entities_tilt_delta(covers, target_tilt, threshold=4) }}
+
+      - condition: template
+        value_template: "{{ move_covers | length > 0 }}"
+
+      - service: cover.set_cover_tilt_position
+        data:
+          entity_id: "{{ move_covers }}"
+          tilt_position: "{{ states('sensor.side_sun_tilt') | int }}"
