@@ -58,8 +58,8 @@
   {% set ns = namespace(out=[]) %}
 
   {% for e in entities %}
-    {% set cur = state_attr(e, 'current_tilt_position') | float(none) %}
-    {% if target is not none and current is not none and (target - curr) | abs > threshold %}
+    {% set curr = state_attr(e, 'current_tilt_position') | float(none) %}
+    {% if target is not none and curr is not none and (target - curr) | abs > threshold %}
       {% set ns.out = ns.out + [e] %}
     {% endif %}
   {% endfor %}
