@@ -110,11 +110,8 @@
           name = "hass";
           pod = "ha.pod";
           image = flake.lib.images.hass;
-          # dropCapabilities = ["ALL"];
           addCapabilities = [ "FOWNER" "NET_RAW" "NET_ADMIN" ];
           noNewPrivileges = true;
-          # readOnly = true;
-          # tmpfses = [ "/var/run" "/tmp" ];
 
           volumes = [
             "/etc/machine-id:/etc/machine-id:ro"

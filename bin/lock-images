@@ -204,6 +204,14 @@ class AuthManager:
 
 
 # --- Manifest Fetching ---
+ACCEPT_MANIFESTS = ", ".join([
+    # Multi-arch / index types (Home Assistant stable is usually one of these)
+    "application/vnd.oci.image.index.v1+json",
+    "application/vnd.docker.distribution.manifest.list.v2+json",
+    # Single-arch manifest types
+    "application/vnd.oci.image.manifest.v1+json",
+    "application/vnd.docker.distribution.manifest.v2+json",
+])
 
 async def fetch_digest(client: httpx.AsyncClient, ref: ImageRef, token: str) -> str:
     """
@@ -215,7 +223,7 @@ async def fetch_digest(client: httpx.AsyncClient, ref: ImageRef, token: str) -> 
     resp = await client.get(
         ref.manifest_url(),
         headers={
-            "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+            "Accept": ACCEPT_MANIFESTS,
             "Authorization": f"Bearer {token}",
         }
     )
@@ -258,7 +266,10 @@ async def resolve_from_json(path: Path, write: bool = False) -> None:
     Load image refs from JSON file (shortname → ref),
     resolve digests, and print or write updated file.
     """
-    refs = {key: ImageRef.parse(val) for key, val in json.loads(path.read_text()).items()}
+    refs = {
+        key: ImageRef.parse(val)
+        for key, val in json.loads(path.read_text()).items()
+    }
 
     async with httpx.AsyncClient() as client:
         auth = await AuthManager(refs.values(), client).fetch_all()
