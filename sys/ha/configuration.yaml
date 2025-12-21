@@ -310,3 +310,61 @@ automation:
           - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
               - action: script.first_floor_all_off
+template:
+  - sensor:
+      # ========= FRONT =========
+      - name: "Front Sun Offset"
+        unique_id: front_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 180.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Front Sun Elevation"
+        unique_id: front_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.front_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      # ========= SIDE =========
+      - name: "Side Sun Offset"
+        unique_id: side_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 90.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Side Sun Elevation"
+        unique_id: side_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.side_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      # ========= BACK =========
+      - name: "Back Sun Offset"
+        unique_id: back_sun_offset
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_offset %}
+          {% set win_az = 0.0 %}
+          {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
+          {{ relative_sun_offset(sun_az, win_az) | round(2) }}
+
+      - name: "Back Sun Elevation"
+        unique_id: back_sun_elevation
+        unit_of_measurement: "°"
+        state: >
+          {% from 'macros.jinja' import relative_sun_elevation %}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set off_h  = states('sensor.back_sun_offset') | float %}
+          {{ relative_sun_elevation(sun_el, off_h) | round(2) }}

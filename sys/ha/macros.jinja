@@ -1,0 +1,17 @@
+{% macro to_rad(deg) -%}
+  {{ deg * pi / 180 }}
+{%- endmacro %}
+
+{% macro from_rad(rad) -%}
+  {{ rad * 180 / pi }}
+{%- endmacro %}
+
+{# Signed horizontal offset from window normal in [-180, 180] #}
+{% macro relative_sun_offset(sun_az, win_az) -%}
+  {{ ((sun_az - win_az + 540) % 360) - 180 }}
+{%- endmacro %}
+
+{# Window-relative vertical angle (fully defined; no guards/policy) #}
+{% macro relative_sun_elevation(sun_el, offset_h) -%}
+  {{ from_rad(atan(tan(to_rad(sun_el)) * cos(to_rad(offset_h)))) }}
+{%- endmacro %}

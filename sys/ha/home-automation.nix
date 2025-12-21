@@ -117,6 +117,7 @@
             "/etc/localtime:/etc/localtime:ro"
             "/var/lib/hass:/config:rw"
             "${./configuration.yaml}:/config/configuration.yaml:ro"
+            "${./macros.jinja}:/config/custom_templates/macros.jinja:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
             "/run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro"
