@@ -35,6 +35,6 @@
   {% elif sun_el > 90 %}
     50
   {% else %}
-    {{ (sun_el + MAX_TILT) * 100 / (MAX_TILT * 2) }}
+    {{ (MAX_TILT - sun_el) * 100 / (MAX_TILT * 2) }}
   {% endif %}
 {%- endmacro %}
