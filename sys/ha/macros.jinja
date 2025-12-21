@@ -32,7 +32,7 @@
   {%- set MAX_TILT = 81 -%}
   {%- if sun_el < 0 -%}
     0
-  {%- elif sun_el > 90 -%}
+  {%- elif sun_el > MAX_TILT -%}
     50
   {%- else -%}
     {{ (MAX_TILT - sun_el) * 100 / (MAX_TILT * 2) }}
