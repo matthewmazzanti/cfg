@@ -13,7 +13,7 @@
 
 {# Window-relative vertical angle (fully defined; no guards/policy) #}
 {% macro relative_sun_elevation(sun_el, win_off) -%}
-  {% set rad_el = to_rad(sun_el) %}
-  {% set rad_off = to_rad(win_off) %}
+  {% set rad_el = to_rad(sun_el) | float %}
+  {% set rad_off = to_rad(win_off) | float %}
   {{ from_rad(atan2(sin(rad_el), cos(rad_el) * cos(rad_off))) }}
 {%- endmacro %}
