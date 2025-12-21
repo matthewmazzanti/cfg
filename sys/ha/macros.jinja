@@ -1,3 +1,11 @@
+{% macro clamp(v, lo, hi) -%}
+  {{ [lo, [v, hi] | min] | max }}
+{%- endmacro %}
+
+{% macro map_range(v, in_min, in_max, out_min, out_max) -%}
+  {{ (v - in_min) * (out_max - out_min) / (in_max - in_min) + out_min }}
+{%- endmacro %}
+
 {% macro to_rad(deg) -%}
     {{ deg * pi / 180 }}
 {%- endmacro %}
@@ -17,4 +25,16 @@
   {%- set rad_off = to_rad(win_off) -%}
   {%- set calc = atan2(sin(rad_el), cos(rad_el) * cos(rad_off)) -%}
   {{ from_rad(calc) }}
+{%- endmacro %}
+
+{# Window-relative elevation to cover percent #}
+{% macro elevation_to_tilt(sun_el) -%}
+  {% set MAX_TILT = 81 %}
+  {% if sun_el < 0 %}
+    0
+  {% elif sun_el > 90 %}
+    50
+  {% else %}
+    {{ (sun_el + MAX_TILT) * 100 / (MAX_TILT * 2) }}
+  {% endif %}
 {%- endmacro %}

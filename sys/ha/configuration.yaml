@@ -331,6 +331,14 @@ template:
           {% set off_h  = states('sensor.front_sun_offset') | float %}
           {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
 
+      - name: "Front Sun Tilt"
+        unique_id: front_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import tilt %}
+          {% set sun_el = states('sensor.front_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
+
       # ========= SIDE =========
       - name: "Side Sun Offset"
         unique_id: side_sun_offset
@@ -350,6 +358,14 @@ template:
           {% set off_h  = states('sensor.side_sun_offset') | float %}
           {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
 
+      - name: "Side Sun Tilt"
+        unique_id: side_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import tilt %}
+          {% set sun_el = states('sensor.side_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
+
       # ========= BACK =========
       - name: "Back Sun Offset"
         unique_id: back_sun_offset
@@ -368,3 +384,11 @@ template:
           {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
           {% set off_h  = states('sensor.back_sun_offset') | float %}
           {{ relative_sun_elevation(sun_el, off_h) | round(2) }}
+
+      - name: "Back Sun Tilt"
+        unique_id: back_sun_tilt
+        unit_of_measurement: "%"
+        state: >
+          {% from 'macros.jinja' import tilt %}
+          {% set sun_el = states('sensor.back_sun_elevation') | float(0) %}
+          {{ elevation_to_tilt(sun_el) | round(0) }}
