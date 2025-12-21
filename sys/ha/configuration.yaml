@@ -227,10 +227,10 @@ script:
 automation:
   - id: set_day_temp
     alias: Set Day Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "08:00"
-    action:
+    actions:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -240,12 +240,12 @@ automation:
 
   - id: set_transition_temp
     alias: Set Transition Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "07:00"
           - "22:00"
-    action:
+    actions:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -255,10 +255,10 @@ automation:
 
   - id: set_night_temp
     alias: Set Day Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "23:00"
-    action:
+    actions:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -268,8 +268,8 @@ automation:
 
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "00:00"
           - "01:00"
@@ -277,7 +277,7 @@ automation:
           - "03:00"
           - "04:00"
           - "05:00"
-    action:
+    actions:
       - action: media_player.turn_off
         target:
           entity_id:
@@ -285,8 +285,8 @@ automation:
 
   - id: turn_off_living_room_apple_tv
     alias: Turn off Apple TVs
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "00:00"
           - "01:00"
@@ -294,7 +294,7 @@ automation:
           - "03:00"
           - "04:00"
           - "05:00"
-    action:
+    actions:
       - action: media_player.turn_off
         target:
           entity_id:
@@ -302,22 +302,22 @@ automation:
 
   - id: turn_on_espresso_machine
     alias: Turn on Espresso Machine
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "06:00"
-    action:
+    actions:
       - action: switch.turn_on
         target:
           entity_id: switch.espresso_machine
 
   - id: turn_off_espresso_machine
     alias: Turn off Espresso Machine
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "19:00"
           - "00:00"
-    action:
+    actions:
       - action: switch.turn_off
         target:
           entity_id: switch.espresso_machine
@@ -326,24 +326,24 @@ automation:
     alias: "MBR Lamp: On at sunset"
     description: "Turn on the master bedroom lamp at sunset"
     mode: single
-    trigger:
-      - platform: sun
+    triggers:
+      - trigger: sun
         event: sunset
-    action:
+    actions:
       - service: switch.turn_on
         target:
           entity_id: switch.mbr_lamp
 
   - id: pico_living_room_1
     alias: Living Room Pico 2 Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
           device_name: Living Room 1
-          action: press
-    action:
+          actions: press
+    actions:
       - variables:
           button: "{{trigger.event.data.button_number}}"
           device: "{{trigger.event.data.device_name}}"
@@ -366,14 +366,14 @@ automation:
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
           device_name: Living Room 2
-          action: press
-    action:
+          actions: press
+    actions:
       - variables:
           button: "{{trigger.event.data.button_number}}"
           device: "{{trigger.event.data.device_name}}"
@@ -385,14 +385,14 @@ automation:
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Master Bedroom
           device_name: Master Bedroom
-          action: press
-    action:
+          actions: press
+    actions:
       - variables:
           button: "{{trigger.event.data.button_number}}"
           device: "{{trigger.event.data.device_name}}"
@@ -406,13 +406,13 @@ automation:
 
   - id: living_room_lights_scenes
     alias: Living Room Lights Scenes
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: zwave_js_value_notification
         event_data:
           command_class_name: Central Scene
           device_id: a5c1c236b6340ae8db83857c10e1bd8e
-    action:
+    actions:
       - variables:
           direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
           count: "{{trigger.event.data.value_raw - 1}}"
@@ -434,18 +434,18 @@ automation:
   - id: blinds_front_sun_tilt
     alias: "Blinds: Front Sun Tilt"
     mode: single
-    trigger:
-      - platform: state
+    triggers:
+      - trigger: state
         entity_id: sensor.front_sun_tilt
-      - platform: state
+      - trigger: state
         entity_id: sun.sun
-    condition:
+    conditions:
       # --- Sun position gate (rising-aware) ---
       - condition: template
         value_template: >
           {% from 'macros.jinja' import sun_active_band %}
           {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
-    action:
+    actions:
       - variables:
           covers:
             - cover.living_room_tv_left
@@ -468,18 +468,18 @@ automation:
   - id: blinds_side_sun_tilt
     alias: "Blinds: Side Sun Tilt"
     mode: single
-    trigger:
-      - platform: state
+    triggers:
+      - trigger: state
         entity_id: sensor.side_sun_tilt
-      - platform: state
+      - trigger: state
         entity_id: sun.sun
-    condition:
+    conditions:
       # --- Sun position gate (rising-aware) ---
       - condition: template
         value_template: >
           {% from 'macros.jinja' import sun_active_band %}
           {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
-    action:
+    actions:
       - variables:
           covers:
             - cover.living_room_fire_left
