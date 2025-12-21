@@ -318,7 +318,7 @@ template:
         unit_of_measurement: "°"
         state: >
           {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 180.0 %}
+          {% set win_az = 95.0 %}
           {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
           {{ relative_sun_offset(sun_az, win_az) | round(2) }}
 
@@ -337,7 +337,7 @@ template:
         unit_of_measurement: "°"
         state: >
           {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 90.0 %}
+          {% set win_az = 185.0 %}
           {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
           {{ relative_sun_offset(sun_az, win_az) | round(2) }}
 
@@ -356,7 +356,7 @@ template:
         unit_of_measurement: "°"
         state: >
           {% from 'macros.jinja' import relative_sun_offset %}
-          {% set win_az = 0.0 %}
+          {% set win_az = 275.0 %}
           {% set sun_az = state_attr('sun.sun', 'azimuth') | float %}
           {{ relative_sun_offset(sun_az, win_az) | round(2) }}
 
