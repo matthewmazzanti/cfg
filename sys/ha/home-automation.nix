@@ -123,7 +123,7 @@
             "${./configuration.yaml}:/config/configuration.yaml:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
-            "/run/dbus:/run/dbus:ro"
+            "/run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro"
           ];
           environments = {
             TZ = config.time.timeZone;
