@@ -13,5 +13,5 @@
 
 {# Window-relative vertical angle (fully defined; no guards/policy) #}
 {% macro relative_sun_elevation(sun_el, offset_h) -%}
-  {{ from_rad(atan(tan(to_rad(sun_el)) * abs(cos(to_rad(offset_h))))) }}
+  {{ from_rad(atan(tan(to_rad(sun_el)) * cos(to_rad(offset_h) | abs))) }}
 {%- endmacro %}
