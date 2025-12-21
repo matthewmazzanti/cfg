@@ -42,16 +42,11 @@
 {# True if the sun is high enough to track blinds.
   Uses different thresholds for morning vs evening.
 #}
-{% macro sun_active_band(sunrise_min=12, sunset_min=6) -%}
+{% macro sun_active_band(sunrise_min, sunset_min) -%}
   {%- set sun_el = state_attr("sun.sun", "elevation") | float(-90) -%}
   {%- set rising = state_attr("sun.sun", "rising") -%}
   {%- set min_el = sunrise_min if rising else sunset_min -%}
   {{ sun_el > min_el }}
-{%- endmacro %}
-
-{# True if the difference between target and current exceeds the given threshold. #}
-{% macro significant_delta(target, current, threshold=5) -%}
-  {{ target is not none and current is not none and (target - current) | abs > threshold }}
 {%- endmacro %}
 
 {#
@@ -59,12 +54,12 @@
   return a list of entity_ids whose current_tilt_position differs
   significantly from the target.
 #}
-{% macro entities_tilt_delta(entities, target, threshold=5) -%}
+{% macro entities_tilt_delta(entities, target, threshold) -%}
   {% set ns = namespace(out=[]) %}
 
   {% for e in entities %}
     {% set cur = state_attr(e, 'current_tilt_position') | float(none) %}
-    {% if significant_delta(target, cur, threshold) %}
+    {% if target is not none and current is not none and (target - curr) | abs > threshold %}
       {% set ns.out = ns.out + [e] %}
     {% endif %}
   {% endfor %}
