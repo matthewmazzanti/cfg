@@ -103,8 +103,8 @@
 
       hass = {
         unitConfig = {
-          After = [ "var-lib-hass.mount" ];
-          Requires = [ "var-lib-hass.mount" ];
+          After = [ "var-lib-hass.mount" "bluetooth.service" ];
+          Requires = [ "var-lib-hass.mount" "bluetooth.service" ];
         };
         containerConfig = {
           name = "hass";
@@ -112,7 +112,6 @@
           image = flake.lib.images.hass;
           addCapabilities = [ "FOWNER" "NET_RAW" "NET_ADMIN" ];
           noNewPrivileges = true;
-
           volumes = [
             "/etc/machine-id:/etc/machine-id:ro"
             "/etc/localtime:/etc/localtime:ro"
