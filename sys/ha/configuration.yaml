@@ -51,8 +51,8 @@ template:
         unit_of_measurement: "%"
         state: >
           {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.front_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+          {% set win_el = states('sensor.front_sun_elevation') | float %}
+          {{ elevation_to_tilt(win_el) | round(0) }}
 
       # ========= SIDE =========
       - name: "Side Sun Offset"
@@ -78,8 +78,9 @@ template:
         unit_of_measurement: "%"
         state: >
           {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.side_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
+          {% set win_el = states('sensor.side_sun_elevation') | float %}
+          {{ elevation_to_tilt(win_el) | round(0) }}
 
       # ========= BACK =========
       - name: "Back Sun Offset"
@@ -105,8 +106,8 @@ template:
         unit_of_measurement: "%"
         state: >
           {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = states('sensor.back_sun_elevation') | float(0) %}
-          {{ elevation_to_tilt(sun_el) | round(0) }}
+          {% set win_el = states('sensor.side_sun_elevation') | float %}
+          {{ elevation_to_tilt(win_el) | round(0) }}
 
 script:
   first_floor_low_lights_on:
@@ -439,12 +440,6 @@ automation:
         entity_id: sensor.front_sun_tilt
       - trigger: state
         entity_id: sun.sun
-    conditions:
-      # --- Sun position gate (rising-aware) ---
-      - condition: template
-        value_template: >
-          {% from 'macros.jinja' import sun_active_band %}
-          {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
     actions:
       - variables:
           covers:
@@ -473,12 +468,6 @@ automation:
         entity_id: sensor.side_sun_tilt
       - trigger: state
         entity_id: sun.sun
-    conditions:
-      # --- Sun position gate (rising-aware) ---
-      - condition: template
-        value_template: >
-          {% from 'macros.jinja' import sun_active_band %}
-          {{ sun_active_band(sunrise_min=10, sunset_min=10) }}
     actions:
       - variables:
           covers:
