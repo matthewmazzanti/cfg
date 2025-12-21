@@ -2,10 +2,34 @@
   # Bluetooth + BlueZ
   hardware.bluetooth = {
     enable = true;
+    powerOnBoot = true;
     settings = {
       General = {
-        Experimental = true;     # needed for some BLE features / passive scan
-        ControllerMode = "dual"; # BR/EDR + LE
+        # Enable BlueZ userspace experimental features.
+        # Required for reliable BLE GATT operations used by SwitchBot
+        # (improves LE scanning, connection handling, and write semantics).
+        Experimental = true;
+
+        # Enable kernel-side Bluetooth experimental paths.
+        # Improves LE connection parameter negotiation and reconnect behavior
+        # for devices that rapidly connect/write/disconnect (e.g. SwitchBot).
+        KernelExperimental = true;
+
+        # Restrict the controller to Bluetooth Low Energy only.
+        # Disables BR/EDR (classic Bluetooth), reducing firmware scheduling
+        # contention and improving LE latency on headless automation hosts.
+        ControllerMode = "le";
+
+        # Use stable per-device BLE identities instead of rotating addresses.
+        # Prevents SwitchBot devices from "disappearing" or being rediscovered
+        # after reboot, reducing scan time and connection delays.
+        Privacy = "device";
+
+        # Automatically repair broken or dropped BLE pairings using
+        # the Just-Works model.
+        # SwitchBot devices frequently lose bonding state; this avoids
+        # manual re-pairing and prevents silent reconnect failures.
+        JustWorksRepairing = "always";
       };
     };
   };
