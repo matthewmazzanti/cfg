@@ -227,8 +227,8 @@ script:
 automation:
   - id: set_day_temp
     alias: Set Day Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "08:00"
     action:
       - action: climate.set_temperature
@@ -240,8 +240,8 @@ automation:
 
   - id: set_transition_temp
     alias: Set Transition Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "07:00"
           - "22:00"
@@ -255,8 +255,8 @@ automation:
 
   - id: set_night_temp
     alias: Set Day Temp
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "23:00"
     action:
       - action: climate.set_temperature
@@ -268,8 +268,8 @@ automation:
 
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "00:00"
           - "01:00"
@@ -285,8 +285,8 @@ automation:
 
   - id: turn_off_living_room_apple_tv
     alias: Turn off Apple TVs
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "00:00"
           - "01:00"
@@ -302,8 +302,8 @@ automation:
 
   - id: turn_on_espresso_machine
     alias: Turn on Espresso Machine
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at: "06:00"
     action:
       - action: switch.turn_on
@@ -312,8 +312,8 @@ automation:
 
   - id: turn_off_espresso_machine
     alias: Turn off Espresso Machine
-    trigger:
-      - platform: time
+    triggers:
+      - trigger: time
         at:
           - "19:00"
           - "00:00"
@@ -326,8 +326,8 @@ automation:
     alias: "MBR Lamp: On at sunset"
     description: "Turn on the master bedroom lamp at sunset"
     mode: single
-    trigger:
-      - platform: sun
+    triggers:
+      - trigger: sun
         event: sunset
     action:
       - service: switch.turn_on
@@ -336,8 +336,8 @@ automation:
 
   - id: pico_living_room_1
     alias: Living Room Pico 2 Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
@@ -366,8 +366,8 @@ automation:
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
@@ -385,8 +385,8 @@ automation:
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Master Bedroom
@@ -406,8 +406,8 @@ automation:
 
   - id: living_room_lights_scenes
     alias: Living Room Lights Scenes
-    trigger:
-      - platform: event
+    triggers:
+      - trigger: event
         event_type: zwave_js_value_notification
         event_data:
           command_class_name: Central Scene
@@ -434,10 +434,10 @@ automation:
   - id: blinds_front_sun_tilt
     alias: "Blinds: Front Sun Tilt"
     mode: single
-    trigger:
-      - platform: state
+    triggers:
+      - trigger: state
         entity_id: sensor.front_sun_tilt
-      - platform: state
+      - trigger: state
         entity_id: sun.sun
     action:
       - variables:
@@ -462,10 +462,10 @@ automation:
   - id: blinds_side_sun_tilt
     alias: "Blinds: Side Sun Tilt"
     mode: single
-    trigger:
-      - platform: state
+    triggers:
+      - trigger: state
         entity_id: sensor.side_sun_tilt
-      - platform: state
+      - trigger: state
         entity_id: sun.sun
     action:
       - variables:
