@@ -78,7 +78,6 @@ template:
         unit_of_measurement: "%"
         state: >
           {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set sun_el = state_attr('sun.sun', 'elevation') | float %}
           {% set win_el = states('sensor.side_sun_elevation') | float %}
           {{ elevation_to_tilt(win_el) | round(0) }}
 
@@ -106,7 +105,7 @@ template:
         unit_of_measurement: "%"
         state: >
           {% from 'macros.jinja' import elevation_to_tilt %}
-          {% set win_el = states('sensor.side_sun_elevation') | float %}
+          {% set win_el = states('sensor.back_sun_elevation') | float %}
           {{ elevation_to_tilt(win_el) | round(0) }}
 
 script:
@@ -228,10 +227,10 @@ script:
 automation:
   - id: set_day_temp
     alias: Set Day Temp
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at: "08:00"
-    actions:
+    action:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -241,12 +240,12 @@ automation:
 
   - id: set_transition_temp
     alias: Set Transition Temp
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at:
           - "07:00"
           - "22:00"
-    actions:
+    action:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -256,10 +255,10 @@ automation:
 
   - id: set_night_temp
     alias: Set Day Temp
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at: "23:00"
-    actions:
+    action:
       - action: climate.set_temperature
         target:
           entity_id: climate.thermostat
@@ -269,8 +268,8 @@ automation:
 
   - id: turn_off_master_bedroom_apple_tv
     alias: Turn off Apple TVs
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at:
           - "00:00"
           - "01:00"
@@ -278,7 +277,7 @@ automation:
           - "03:00"
           - "04:00"
           - "05:00"
-    actions:
+    action:
       - action: media_player.turn_off
         target:
           entity_id:
@@ -286,8 +285,8 @@ automation:
 
   - id: turn_off_living_room_apple_tv
     alias: Turn off Apple TVs
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at:
           - "00:00"
           - "01:00"
@@ -295,7 +294,7 @@ automation:
           - "03:00"
           - "04:00"
           - "05:00"
-    actions:
+    action:
       - action: media_player.turn_off
         target:
           entity_id:
@@ -303,22 +302,22 @@ automation:
 
   - id: turn_on_espresso_machine
     alias: Turn on Espresso Machine
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at: "06:00"
-    actions:
+    action:
       - action: switch.turn_on
         target:
           entity_id: switch.espresso_machine
 
   - id: turn_off_espresso_machine
     alias: Turn off Espresso Machine
-    triggers:
-      - trigger: time
+    trigger:
+      - platform: time
         at:
           - "19:00"
           - "00:00"
-    actions:
+    action:
       - action: switch.turn_off
         target:
           entity_id: switch.espresso_machine
@@ -327,27 +326,27 @@ automation:
     alias: "MBR Lamp: On at sunset"
     description: "Turn on the master bedroom lamp at sunset"
     mode: single
-    triggers:
-      - trigger: sun
+    trigger:
+      - platform: sun
         event: sunset
-    actions:
+    action:
       - service: switch.turn_on
         target:
           entity_id: switch.mbr_lamp
 
   - id: pico_living_room_1
     alias: Living Room Pico 2 Handler
-    triggers:
-      - trigger: event
+    trigger:
+      - platform: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
           device_name: Living Room 1
-          actions: press
-    actions:
+          action: press
+    action:
       - variables:
-          button: "{{trigger.data.button_number}}"
-          device: "{{trigger.data.device_name}}"
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}"
@@ -367,17 +366,17 @@ automation:
 
   - id: pico_living_room_2
     alias: Living Room Pico 2 Handler
-    triggers:
-      - trigger: event
+    trigger:
+      - platform: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Living Room
           device_name: Living Room 2
-          actions: press
-    actions:
+          action: press
+    action:
       - variables:
-          button: "{{trigger.data.button_number}}"
-          device: "{{trigger.data.device_name}}"
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}"
@@ -386,17 +385,17 @@ automation:
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
-    triggers:
-      - trigger: event
+    trigger:
+      - platform: event
         event_type: lutron_caseta_button_event
         event_data:
           area_name: Master Bedroom
           device_name: Master Bedroom
-          actions: press
-    actions:
+          action: press
+    action:
       - variables:
-          button: "{{trigger.data.button_number}}"
-          device: "{{trigger.data.device_name}}"
+          button: "{{trigger.event.data.button_number}}"
+          device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}" # Bottom Button
@@ -407,16 +406,16 @@ automation:
 
   - id: living_room_lights_scenes
     alias: Living Room Lights Scenes
-    triggers:
-      - trigger: event
+    trigger:
+      - platform: event
         event_type: zwave_js_value_notification
         event_data:
           command_class_name: Central Scene
           device_id: a5c1c236b6340ae8db83857c10e1bd8e
-    actions:
+    action:
       - variables:
-          direction: "{{'up' if trigger.data.property_key == '001' else 'down'}}"
-          count: "{{trigger.data.value_raw - 1}}"
+          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.event.data.value_raw - 1}}"
 
       - choose:
           - conditions: "{{direction == 'up' and count == 2}}"
@@ -435,12 +434,12 @@ automation:
   - id: blinds_front_sun_tilt
     alias: "Blinds: Front Sun Tilt"
     mode: single
-    triggers:
-      - trigger: state
+    trigger:
+      - platform: state
         entity_id: sensor.front_sun_tilt
-      - trigger: state
+      - platform: state
         entity_id: sun.sun
-    actions:
+    action:
       - variables:
           covers:
             - cover.living_room_tv_left
@@ -463,12 +462,12 @@ automation:
   - id: blinds_side_sun_tilt
     alias: "Blinds: Side Sun Tilt"
     mode: single
-    triggers:
-      - trigger: state
+    trigger:
+      - platform: state
         entity_id: sensor.side_sun_tilt
-      - trigger: state
+      - platform: state
         entity_id: sun.sun
-    actions:
+    action:
       - variables:
           covers:
             - cover.living_room_fire_left
