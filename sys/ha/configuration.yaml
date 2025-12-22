@@ -346,8 +346,8 @@ automation:
           actions: press
     actions:
       - variables:
-          button: "{{trigger.event.data.button_number}}"
-          device: "{{trigger.event.data.device_name}}"
+          button: "{{trigger.data.button_number}}"
+          device: "{{trigger.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}"
@@ -376,8 +376,8 @@ automation:
           actions: press
     actions:
       - variables:
-          button: "{{trigger.event.data.button_number}}"
-          device: "{{trigger.event.data.device_name}}"
+          button: "{{trigger.data.button_number}}"
+          device: "{{trigger.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}"
@@ -395,8 +395,8 @@ automation:
           actions: press
     actions:
       - variables:
-          button: "{{trigger.event.data.button_number}}"
-          device: "{{trigger.event.data.device_name}}"
+          button: "{{trigger.data.button_number}}"
+          device: "{{trigger.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
           - conditions: "{{button == buttons.bottom}}" # Bottom Button
@@ -415,8 +415,8 @@ automation:
           device_id: a5c1c236b6340ae8db83857c10e1bd8e
     actions:
       - variables:
-          direction: "{{'up' if trigger.event.data.property_key == '001' else 'down'}}"
-          count: "{{trigger.event.data.value_raw - 1}}"
+          direction: "{{'up' if trigger.data.property_key == '001' else 'down'}}"
+          count: "{{trigger.data.value_raw - 1}}"
 
       - choose:
           - conditions: "{{direction == 'up' and count == 2}}"
