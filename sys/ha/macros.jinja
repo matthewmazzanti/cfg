@@ -30,8 +30,8 @@
 {# Window-relative elevation to cover percent #}
 {% macro elevation_to_tilt(win_el) -%}
   {%- set MAX_TILT = 81 -%}
-  {%- set SUNRISE_ANGLE = 10 -%}
-  {%- set SUNSET_ANGLE = 5 -%}
+  {%- set SUNRISE_ANGLE = 9.0 -%}
+  {%- set SUNSET_ANGLE = 2.5 -%}
 
   {%- set sun_el = state_attr("sun.sun", "elevation") | float(-90) -%}
   {%- set rising = state_attr("sun.sun", "rising") -%}
