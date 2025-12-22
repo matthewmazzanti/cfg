@@ -204,7 +204,7 @@ script:
 
       # --- Side group ---
       - choose:
-          - condition:
+          - conditions:
               - condition: template
                 value_template: "{{ side_tilt is not none }}"
             sequence:
@@ -215,7 +215,7 @@ script:
 
       # --- Front group ---
       - choose:
-          - condition:
+          - conditions:
               - condition: template
                 value_template: "{{ front_tilt is not none }}"
             sequence:
@@ -350,7 +350,7 @@ automation:
           device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - condition: "{{button == buttons.bottom}}"
+          - conditions: "{{button == buttons.bottom}}"
             sequence:
               - action: switch.toggle
                 entity_id: switch.living_room_bookshelf_lamp
@@ -380,7 +380,7 @@ automation:
           device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - condition: "{{button == buttons.bottom}}"
+          - conditions: "{{button == buttons.bottom}}"
             sequence:
               - action: script.first_floor_low_lights_toggle
 
@@ -399,7 +399,7 @@ automation:
           device: "{{trigger.event.data.device_name}}"
           buttons: { top: 2, middle: 3, bottom: 4, up: 5, down: 6 }
       - choose:
-          - condition: "{{button == buttons.bottom}}" # Bottom Button
+          - conditions: "{{button == buttons.bottom}}" # Bottom Button
             sequence:
               - action: switch.toggle
                 data:
@@ -419,15 +419,15 @@ automation:
           count: "{{trigger.event.data.value_raw - 1}}"
 
       - choose:
-          - condition: "{{direction == 'up' and count == 2}}"
+          - conditions: "{{direction == 'up' and count == 2}}"
             sequence:
               - action: script.first_floor_low_lights_on
 
-          - condition: "{{direction == 'up' and count == 3}}"
+          - conditions: "{{direction == 'up' and count == 3}}"
             sequence:
               - action: script.first_floor_all_on
 
-          - condition: "{{direction == 'down' and count == 2}}"
+          - conditions: "{{direction == 'down' and count == 2}}"
             sequence:
               - action: script.first_floor_all_off
 
