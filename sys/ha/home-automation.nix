@@ -1,4 +1,6 @@
 { config, flake, ... }: {
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
+
   # Storage for containers
   environment.persistence."/persist".directories = [ "/var/lib/containers" ];
 
@@ -30,18 +32,19 @@
   };
 
   virtualisation.quadlet = {
-    networks.ha.networkConfig = {
-      driver = "macvlan";
-      subnets = [ "172.18.0.0/16" ];
-      gateways = [ "172.18.0.1" ];
-      ipRanges  = [ "172.18.2.11/32" ];
-    };
+    # networks.ha.networkConfig = {
+    #   driver = "macvlan";
+    #   subnets = [ "172.18.0.0/16" ];
+    #   gateways = [ "172.18.0.1" ];
+    #   ipRanges  = [ "172.18.2.11/32" ];
+    # };
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [ "ha:mac=a2:d9:5d:37:ef:10" ];
-      ip = "172.18.2.11";
-      dns = [ "172.18.0.1" ];
+      networks = ["host"];
+      # networks = [ "ha:mac=a2:d9:5d:37:ef:10" ];
+      # ip = "172.18.2.11";
+      # dns = [ "172.18.0.1" ];
     };
 
     containers = {
