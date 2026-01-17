@@ -12,6 +12,7 @@ let
     import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      config.segger-jlink.acceptLicense = true;
     }
   );
 

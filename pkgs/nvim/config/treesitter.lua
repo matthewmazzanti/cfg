@@ -1,45 +1,50 @@
 -- PLUGIN: Treesitter - better syntax highlighting for most languages
 -- HOMEPAGE: https://github.com/nvim-treesitter/nvim-treesitter
-local treesitter = require("nvim-treesitter.configs")
+local nvim_treesitter = require("nvim-treesitter")
+nvim_treesitter.setup()
 
-treesitter.setup({
-  -- Modules and its options go here
-  modules = {},
-  ensure_installed = {},
-  ignore_install = {},
-  sync_install = false,
-  auto_install = false,
-  highlight = { enable = true },
-  indent = {
-    -- TODO: Indentation doesn't seem to work in many languages, at least 
-    -- nix possibly go.
-    enable = true,
-  },
-  textobjects = {
-    enable = true,
-    select = {
-      enable = true,
-
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        -- TODO: More textobjects? These don't seem to work everywhere
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@comment.outer",
-        ["ic"] = "@comment.inner",
-        ["al"] = "@loop.outer",
-        ["il"] = "@loop.inner",
-      }
-    }
-  },
+-- Start highlighting if a parser exists; don't blow up if it doesn't.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = 'v:lua.require("nvim-treesitter").indentexpr()'
+  end,
 })
 
+-- PLUGIN: nvim-treesitter-textobjects
+-- HOMEPAGE: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+require("nvim-treesitter-textobjects").setup({
+  select = {
+    lookahead = true,
+    include_surrounding_whitespace = false,
+  }
+})
+
+local textobjects_select = require("nvim-treesitter-textobjects.select")
+local mappings = {
+  am = "@function.outer",
+  im = "@function.inner",
+  aC = "@class.outer",
+  iC = "@class.inner",
+  ac = "@comment.outer",
+  ic = "@comment.inner",
+}
+
+for keys, query in pairs(mappings) do
+  vim.keymap.set({ "x", "o" }, keys, function()
+    textobjects_select.select_textobject(query, "textobjects")
+  end)
+end
+
+-- PLUGIN: nvim-ts-autotag -- Auto close tags intelligently in different
+-- filetypes
+-- HOMEPAGE: https://github.com/windwp/nvim-ts-autotag
 require("nvim-ts-autotag").setup()
 
 -- PLUGIN: TreeSJ -- Splitting for list-like structures
 -- HOMEPAGE: https://github.com/Wansmer/treesj
 local treesj = require("treesj")
-
 treesj.setup({
   use_default_keymaps = false,
   max_join_length = 500,

@@ -21,11 +21,7 @@ in rec {
   #   - Document here and in the nix script purpose and stuff
   eachSystemShell = inputs:
     eachSystem (
-      {
-        pkgs,
-        system,
-        ...
-      } @ systemInputs:
+      { pkgs, ... } @ systemInputs:
         (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
     );
 

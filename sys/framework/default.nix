@@ -6,7 +6,9 @@
     flake.modules.base
     flake.modules.impermanence
     flake.modules.lanzaboote
+    flake.modules.hardware.framework-13-7040-amd
     ./hardware.nix
+    ./nrf.nix
   ];
 
   # Networking
@@ -35,6 +37,8 @@
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
+    mpv
+    todoist-electron
   ];
 
   # Environment variables
@@ -67,4 +71,5 @@
   services.fprintd.enable = true;
   virtualisation.podman.enable = true;
   users.users.mmazzanti.autoSubUidGidRange = true;
+  programs.nix-ld.enable = true;
 }

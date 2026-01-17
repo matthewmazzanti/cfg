@@ -23,6 +23,8 @@
     # Home assistant plugins
     slider-entity-row.url = "github:thomasloven/lovelace-slider-entity-row";
     slider-entity-row.flake = false;
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
   outputs = { self, nixpkgs, ... }@inputs: let
@@ -57,6 +59,7 @@
 
     nixosModules = {
       quadlet = inputs.quadlet-nix.nixosModules.quadlet;
+      hardware = inputs.nixos-hardware.nixosModules;
       impermanence = import ./modules/nixos/impermanence.nix;
       lanzaboote = import ./modules/nixos/lanzaboote.nix;
       base = import ./modules/nixos/base.nix;

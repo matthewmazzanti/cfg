@@ -53,15 +53,16 @@ $env.PROMPT_COMMAND_RIGHT = {||
 }
 
 
-def --wrapped wrapped_ls [...args] {
+def --wrapped wrapped_eza [...args: path] {
     ^eza --classify --group-directories-first --binary ...$args
 }
 
-def --wrapped tree [...args] {
-    wrapped_ls --tree ...$args
+def --wrapped wrapped_eza_tree [...args: path] {
+    wrapped_eza --tree ...$args
 }
 
 alias list = ls
-alias ls = wrapped_ls
+alias ls = wrapped_eza
+alias tree = wrapped_eza_tree
 
-let cfg = "~/src/nix/cfg" |path expand
+let cfg = "~/src/nix/cfg" | path expand
