@@ -11,7 +11,7 @@
       // {
         vim-easyclip = super.vimUtils.buildVimPlugin {
           pname = "vim-easyclip";
-          version = builtins.toString inputs.vim-easyclip.lastModified;
+          version = toString inputs.vim-easyclip.lastModified;
           src = inputs.vim-easyclip;
           dependencies = with super.vimPlugins; [vim-repeat];
         };
