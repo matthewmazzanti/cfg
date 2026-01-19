@@ -53,12 +53,14 @@ $env.PROMPT_COMMAND_RIGHT = {||
 }
 
 
-def --wrapped wrapped_eza [...args: path] {
-    ^eza --classify --group-directories-first --binary ...$args
+def wrapped_eza [...args: glob] {
+    let args = $args | each { glob $in } | flatten
+    echo $args
+    # ^eza --classify --group-directories-first --binary ...$args
 }
 
-def --wrapped wrapped_eza_tree [...args: path] {
-    wrapped_eza --tree ...$args
+def --wrapped wrapped_eza_tree [...args: string] {
+    # wrapped_eza --tree ...$args
 }
 
 alias list = ls
