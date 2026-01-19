@@ -97,7 +97,6 @@ in {
       flake.packages."less/dev"
       flake.packages."nvim/dev"
       flake.packages."nvim/ai"
-      flake.packages."short-pwd/default"
       flake.packages."zsh/dev"
     ];
 

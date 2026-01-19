@@ -8,7 +8,7 @@
     flake.modules.lanzaboote
     flake.modules.hardware.framework-13-7040-amd
     ./hardware.nix
-    ./nrf.nix
+    # ./nrf.nix
   ];
 
   # Networking
@@ -27,18 +27,19 @@
 
   # Packages
   environment.systemPackages = with pkgs; [
+    flake.packages.home-manager
     firefox
     ghostty
     # flake.packages.ghostty
     wl-clipboard
     nushell
-    # TODO: Switch back to stable, at some point
     _1password-gui
-    flake.packages.home-manager
     nixos-rebuild-ng
     direnv
-    mpv
-    todoist-electron
+    mpv # Tui movie player
+    todoist-electron # TODO list
+    eza
+    obsidian
   ];
 
   # Environment variables
@@ -55,21 +56,21 @@
     ];
   };
 
-  # Auto login as mmazzanti
-  # services.getty.autologinUser = "mmazzanti";
-  # services.getty.autologinOnce = true;
-
+  # Graphical settings
   services = {
     displayManager.gdm.enable = true;
     displayManager.autoLogin.enable = true;
     displayManager.autoLogin.user = "mmazzanti";
     desktopManager.gnome.enable = true;
   };
-
   fonts.packages = [ pkgs.fira-code ];
-  services.fwupd.enable = true;
-  services.fprintd.enable = true;
+
+  # Podman settings
   virtualisation.podman.enable = true;
   users.users.mmazzanti.autoSubUidGidRange = true;
+
+  # Enable finger print scanner
+  services.fprintd.enable = true;
+  # Enable non-nix binaries, like uv
   programs.nix-ld.enable = true;
 }

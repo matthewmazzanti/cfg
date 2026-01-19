@@ -61,7 +61,6 @@ in nu // {
     };
   };
   "zsh/dev" = pkgs.callPackage ./zsh {};
-  "short-pwd/default" = pkgs.callPackage ./short-pwd {};
   "direnv/dev" = pkgs.callPackage ./direnv {
     direnv = inputs.direnv-patched.packages.${system}.default;
   };

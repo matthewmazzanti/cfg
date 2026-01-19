@@ -50,9 +50,10 @@
         unwrapped="$out/bin/$name-unwrapped"
         mv "$exe" "$unwrapped"
         makeWrapper \
-          "$(readlink -f "$unwrapped")" "$exe" \
+          "$(readlink -f "$unwrapped")" "$exe-configured" \
           --set ZDOTDIR "${zdotdir}"
       '';
+      passthru.shellPath = "/bin/zsh-configured";
     };
 in
   lib.makeOverridable wrapper

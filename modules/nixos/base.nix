@@ -48,6 +48,7 @@
   users.users.mmazzanti = {
     isNormalUser = true;
     extraGroups = ["wheel"];
+    shell = flake.packages."zsh/dev";
   };
 
   # Enable zsh

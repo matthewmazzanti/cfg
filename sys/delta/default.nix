@@ -38,7 +38,6 @@ in {
     ++ [
       updateScript
       flake.packages."nvim/dev"
-      flake.packages."short-pwd/default"
       flake.packages."zsh/dev"
     ];
 
