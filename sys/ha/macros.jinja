@@ -28,25 +28,22 @@
 {%- endmacro %}
 
 {# Window-relative elevation to cover percent #}
-{% macro elevation_to_tilt(sun_el) -%}
+{% macro elevation_to_tilt(win_el) -%}
   {%- set MAX_TILT = 81 -%}
-  {%- if sun_el < 0 -%}
-    0
-  {%- elif sun_el > MAX_TILT - 10 -%}
-    50
-  {%- else -%}
-    {{ (MAX_TILT - sun_el) * 100 / (MAX_TILT * 2) }}
-  {%- endif -%}
-{%- endmacro %}
+  {%- set SUNRISE_ANGLE = 9.0 -%}
+  {%- set SUNSET_ANGLE = 2.5 -%}
 
-{# True if the sun is high enough to track blinds.
-  Uses different thresholds for morning vs evening.
-#}
-{% macro sun_active_band(sunrise_min, sunset_min) -%}
   {%- set sun_el = state_attr("sun.sun", "elevation") | float(-90) -%}
   {%- set rising = state_attr("sun.sun", "rising") -%}
-  {%- set min_el = sunrise_min if rising else sunset_min -%}
-  {{ sun_el > min_el }}
+  {%- set min_sun_el = SUNRISE_ANGLE if rising else SUNSET_ANGLE -%}
+
+  {%- if sun_el < min_sun_el -%}
+    0
+  {%- elif win_el > MAX_TILT - 10 -%}
+    50
+  {%- else -%}
+    {{ (MAX_TILT - win_el) * 100 / (MAX_TILT * 2) }}
+  {%- endif -%}
 {%- endmacro %}
 
 {#

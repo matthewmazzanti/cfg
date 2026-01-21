@@ -1,44 +1,8 @@
 { config, flake, ... }: {
-  # Bluetooth + BlueZ
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-    settings = {
-      General = {
-        # Enable BlueZ userspace experimental features.
-        # Required for reliable BLE GATT operations used by SwitchBot
-        # (improves LE scanning, connection handling, and write semantics).
-        Experimental = true;
-
-        # Enable kernel-side Bluetooth experimental paths.
-        # Improves LE connection parameter negotiation and reconnect behavior
-        # for devices that rapidly connect/write/disconnect (e.g. SwitchBot).
-        KernelExperimental = true;
-
-        # Restrict the controller to Bluetooth Low Energy only.
-        # Disables BR/EDR (classic Bluetooth), reducing firmware scheduling
-        # contention and improving LE latency on headless automation hosts.
-        ControllerMode = "le";
-
-        # Use stable per-device BLE identities instead of rotating addresses.
-        # Prevents SwitchBot devices from "disappearing" or being rediscovered
-        # after reboot, reducing scan time and connection delays.
-        Privacy = "device";
-
-        # Automatically repair broken or dropped BLE pairings using
-        # the Just-Works model.
-        # SwitchBot devices frequently lose bonding state; this avoids
-        # manual re-pairing and prevents silent reconnect failures.
-        JustWorksRepairing = "always";
-      };
-    };
-  };
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # Storage for containers
-  environment.persistence."/persist".directories = [
-    "/var/lib/containers"
-    "/var/lib/bluetooth"
-  ];
+  environment.persistence."/persist".directories = [ "/var/lib/containers" ];
 
   # Create filesystems for different containers in zfs
   fileSystems = {
@@ -54,6 +18,12 @@
       options = [ "noatime" "nodiratime" ];
     };
 
+    "/var/lib/matter" = {
+      device = "root-pool/state/services/matter";
+      fsType = "zfs";
+      options = [ "noatime" "nodiratime" ];
+    };
+
     "/var/lib/zwave" = {
       device = "root-pool/state/services/zwave";
       fsType = "zfs";
@@ -62,20 +32,19 @@
   };
 
   virtualisation.quadlet = {
-    networks.ha.networkConfig = {
-      driver = "macvlan";
-      subnets = [ "172.18.0.0/16" ];
-      gateways = [ "172.18.0.1" ];
-      ipRanges  = [ "172.18.2.11/32" ];
-    };
+    # networks.ha.networkConfig = {
+    #   driver = "macvlan";
+    #   subnets = [ "172.18.0.0/16" ];
+    #   gateways = [ "172.18.0.1" ];
+    #   ipRanges  = [ "172.18.2.11/32" ];
+    # };
 
     pods.ha.podConfig = {
       name = "ha";
-      networks = [ "ha:mac=a2:d9:5d:37:ef:10" ];
-      ip = "172.18.2.11";
-      dns = [ "172.18.0.1" ];
-      # uidMaps = [ "0:100000:65536" ];
-      # gidMaps = [ "0:100000:65536" ];
+      networks = ["host"];
+      # networks = [ "ha:mac=a2:d9:5d:37:ef:10" ];
+      # ip = "172.18.2.11";
+      # dns = [ "172.18.0.1" ];
     };
 
     containers = {
@@ -91,8 +60,6 @@
           dropCapabilities = ["ALL"];
           addCapabilities = [ "SETUID" "SETGID" "CHOWN" "NET_BIND_SERVICE" ];
           noNewPrivileges = true;
-          # readOnly = true;
-          # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [
             "${./nginx.conf}:/etc/nginx/nginx.conf:ro"
             "/var/lib/nginx/ssl:/etc/nginx/ssl:ro"
@@ -103,14 +70,14 @@
 
       hass = {
         unitConfig = {
-          After = [ "var-lib-hass.mount" "bluetooth.service" ];
-          Requires = [ "var-lib-hass.mount" "bluetooth.service" ];
+          After = [ "var-lib-hass.mount" ];
+          Requires = [ "var-lib-hass.mount" ];
         };
         containerConfig = {
           name = "hass";
           pod = "ha.pod";
           image = flake.lib.images.hass;
-          addCapabilities = [ "FOWNER" "NET_RAW" "NET_ADMIN" ];
+          addCapabilities = [ "FOWNER" "NET_RAW" ];
           noNewPrivileges = true;
           volumes = [
             "/etc/machine-id:/etc/machine-id:ro"
@@ -120,11 +87,30 @@
             "${./macros.jinja}:/config/custom_templates/macros.jinja:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
-            "/run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro"
           ];
           environments = {
             TZ = config.time.timeZone;
-            DBUS_SYSTEM_BUS_ADDRESS="unix:path=/run/dbus/system_bus_socket";
+          };
+        };
+      };
+
+      matter = {
+        unitConfig = {
+          After = [ "var-lib-matter.mount" ];
+          Requires = [ "var-lib-matter.mount" ];
+        };
+        containerConfig = {
+          name = "matter";
+          pod = "ha.pod";
+          image = flake.lib.images.matter;
+          addCapabilities = [ "FOWNER" "NET_RAW" ];
+          noNewPrivileges = true;
+          volumes = [
+            "/etc/localtime:/etc/localtime:ro"
+            "/var/lib/matter:/data"
+          ];
+          environments = {
+            TZ = config.time.timeZone;
           };
         };
       };
@@ -138,11 +124,7 @@
           name = "zwave";
           pod = "ha.pod";
           image = flake.lib.images.zwave;
-          # dropCapabilities = ["ALL"];
-          # addCapabilities = ["FOWNER" "NET_RAW"];
           noNewPrivileges = true;
-          # readOnly = true;
-          # tmpfses = [ "/var/run" "/tmp" ];
           volumes = [ "/var/lib/zwave/store:/usr/src/app/store" ];
           devices = [ "/dev/serial/by-id/usb-Nabu_Casa_ZWA-2_80B54EE5C748-if00:/dev/zwave" ];
           environments = {
