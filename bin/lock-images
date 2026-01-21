@@ -287,7 +287,11 @@ async def resolve_from_json(path: Path, write: bool = False) -> None:
         print()
         return
 
-    with NamedTemporaryFile("w", delete=False) as f:
+    with NamedTemporaryFile(
+        "w",
+        delete=False,
+        dir=path.parent,
+    ) as f:
         json.dump(updated, f, indent=2)
         tmp_path = Path(f.name)
 

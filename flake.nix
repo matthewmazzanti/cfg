@@ -54,6 +54,7 @@
         neovim-unwrapped.lua
         gcc
         cargo
+        just
       ];
     });
 

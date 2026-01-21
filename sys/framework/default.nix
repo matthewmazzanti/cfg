@@ -27,19 +27,9 @@
 
   # Packages
   environment.systemPackages = with pkgs; [
-    flake.packages.home-manager
-    firefox
-    ghostty
-    # flake.packages.ghostty
     wl-clipboard
-    nushell
-    _1password-gui
     nixos-rebuild-ng
-    direnv
-    mpv # Tui movie player
-    todoist-electron # TODO list
-    eza
-    obsidian
+    firefox
   ];
 
   # Environment variables
@@ -50,9 +40,13 @@
   # User config
   users.users.mmazzanti = {
     extraGroups = [ "networkmanager" ];
-    packages = [
+    packages = with pkgs; [
       flake.packages."nvim/nix"
-      flake.packages.nu
+      mpv # Tui movie player
+      todoist-electron # TODO list
+      obsidian
+      ghostty
+      _1password-gui
     ];
   };
 

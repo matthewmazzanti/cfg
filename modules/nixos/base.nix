@@ -17,13 +17,14 @@
 
   # Packages
   environment.systemPackages = with pkgs; [
+    flake.packages.home-manager
     # Minimally configured neovim
     flake.packages."nvim/root"
     # Http stuff
     wget curl
     # Misc utils
     ripgrep fd tree jq tmux git openssl htop lsof
-    dig netcat nmap
+    dig netcat nmap fzf direnv eza
 
     # Compression
     unzip zip
