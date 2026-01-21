@@ -54,6 +54,7 @@
           --set ZDOTDIR "${zdotdir}"
       '';
       passthru.shellPath = "/bin/zsh-configured";
+      meta.mainProgram = "zsh-configured";
     };
 in
   lib.makeOverridable wrapper
