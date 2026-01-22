@@ -1,7 +1,7 @@
 {
   lib,
   bashInteractive,
-  system,
+  stdenv,
   writeTextFile,
 }: let
   bashPath = "${bashInteractive}/bin/bash";
@@ -12,7 +12,8 @@ in
     packages,
   }:
     derivation {
-      inherit name system;
+      inherit name;
+      system = stdenv.system;
 
       # `nix develop` actually checks and uses builder. And it must be bash.
       builder = bashPath;
