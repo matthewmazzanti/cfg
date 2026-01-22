@@ -39,7 +39,7 @@
 
   # User config
   users.users.mmazzanti = {
-    extraGroups = [ "networkmanager" "wireshark" "dialout" ];
+    extraGroups = [ "networkmanager" ];
     packages = with pkgs; [
       flake.packages."nvim/nix"
       mpv # Tui movie player
@@ -47,7 +47,6 @@
       obsidian
       ghostty
       _1password-gui
-      wireshark
       spotify
     ];
   };
