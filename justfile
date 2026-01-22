@@ -9,3 +9,7 @@ upgrade-system:
 
 upgrade-home:
     home-manager switch --flake ~/src/nix/cfg
+
+upgrade-remote-system system:
+    git push {{system}}:src/nix/cfg
+    ssh -t {{system}} 'sudo nixos-rebuild switch --flake ~/src/nix/cfg -L'
