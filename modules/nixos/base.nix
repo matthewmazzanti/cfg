@@ -51,10 +51,16 @@
     extraGroups = ["wheel"];
     shell = flake.packages."zsh/dev";
   };
+  environment.shells = [ flake.packages."zsh/dev" ];
 
   # Enable zsh
   users.defaultUserShell = pkgs.zsh;
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    enableCompletion =  false;
+    enableGlobalCompInit = false;
+    enableBashCompletion = false;
+  };
 
   # SSH
   services.openssh = {

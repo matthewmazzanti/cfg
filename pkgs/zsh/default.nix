@@ -30,9 +30,26 @@
   };
 
   zshrc = ''
+    if [[ -f /etc/profile ]]; then
+      source /etc/profile
+    fi
+
     if [[ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]]; then
       source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
     fi
+
+    HELPDIR="${zsh}/share/zsh/$ZSH_VERSION/help"
+
+    # Tell zsh how to find installed completions.
+    for p in ''${(z)NIX_PROFILES}; do
+        fpath=(
+            $p/share/zsh/site-functions
+            $p/share/zsh/$ZSH_VERSION/functions
+            $p/share
+            /zsh/vendor-completions
+            $fpath
+        )
+    done
 
     if [[ -f "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -45,11 +62,7 @@
     () {
         local cachedir="$HOME/.cache/zsh"
         local dumpfile="$cachedir/zcompdump"
-
-        if [ ! -d "$cachedir" ]; then
-          mkdir -p "$cachedir"
-        fi
-
+        [ ! -d "$cachedir" ] && mkdir -p "$cachedir"
         autoload -Uz compinit && compinit -C -d "$dumpfile"
         autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
     }
@@ -93,8 +106,8 @@
     source "${./config/vim.zsh}"
     source "${./config/prompt.zsh}"
     source "${./config/history.zsh}"
-    source "${./config/alias.zsh}"
     source "${./config/fzf.zsh}"
+    source "${./config/alias.zsh}"
 
     cfg="$HOME/src/nix/cfg"
 

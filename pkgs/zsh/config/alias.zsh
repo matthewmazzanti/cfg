@@ -15,6 +15,7 @@
     # ls: prefer eza, then gls (Darwin only), then GNU ls, then BSD fallback
     if (( $+commands[eza] )); then
         alias ls='eza --color=auto --group-directories-first --classify'
+        compdef eza=ls
     # Homebrew
     elif (( is_darwin && $+commands[gls] )); then
         alias ls='gls --color=auto --group-directories-first --classify --dereference-command-line'
@@ -27,6 +28,7 @@
     # tree: only alias if an implementation exists
     if (( $+commands[eza] )); then
         alias tree='eza --tree --group-directories-first'
+        compdef eza=tree
     elif (( $+commands[tree] )); then
         alias tree='tree --dirsfirst'
     fi
