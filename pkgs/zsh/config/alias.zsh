@@ -34,10 +34,14 @@
     fi
 
     function mktar() {
-      local target=$1
-      [[ -z $target ]] && return 1
-      tar -czvf "${target:t}.tar.gz" "$target"
+        local target=$1
+        [[ -z $target ]] && return 1
+        tar -czvf "${target:t}.tar.gz" "$target"
     }
     alias untar="tar -xzvf"
     alias lstar="tar -tzvf"
+
+
+    cfg="$HOME/src/nix/cfg"; [[ -d "$cfg" ]] || unset cfg
+    notes="$HOME/Documents/Notes"; [[ -d "$notes" ]] || unset notes
 }
