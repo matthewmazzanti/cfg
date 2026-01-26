@@ -106,6 +106,16 @@ function prompt_init_vi_cursor_widgets() {
 # PROMPT below. The functions use print -r (raw) to avoid unexpected escapes.
 # ----------------------------
 
+function prompt_shlvl_prefix() {
+  local n=$(( SHLVL - 1 ))
+  (( n < 0 )) && n=0
+
+  local char="›"
+  [[ $TERM == linux ]] && char=">"
+
+  print -r -- "${(l:$n::${char}:)}"
+}
+
 # Translate the first letter of a string to a Greek-ish glyph. This is purely
 # aesthetic and intended for short hostnames.
 #
@@ -230,7 +240,7 @@ function prompt_separator() {
 
 # Apply PROMPT / RPROMPT definitions.
 function prompt_init() {
-  PROMPT='$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
+  PROMPT='$(prompt_shlvl)$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
   RPROMPT=""
 }
 

@@ -53,8 +53,8 @@
           "$(readlink -f "$unwrapped")" "$exe-configured" \
           --set ZDOTDIR "${zdotdir}"
       '';
-      passthru.shellPath = "/bin/zsh-configured";
-      meta.mainProgram = "zsh-configured";
+      passthru.shellPath = zsh.shellPath;
+      meta.mainProgram = zsh.meta.mainProgram;
     };
 in
   lib.makeOverridable wrapper

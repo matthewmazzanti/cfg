@@ -32,6 +32,10 @@
     '';
   };
 
+  zshenv = ''
+    setopt no_global_rcs
+  '';
+
   zshrc = ''
     typeset -gA NIX_INPUTS=(
         fsh_theme   ${lib.escapeShellArg fshTheme}
@@ -50,5 +54,5 @@
   '';
 in
   wrapZsh {
-    inherit zsh zshrc;
+    inherit zsh zshrc zshenv;
   }
