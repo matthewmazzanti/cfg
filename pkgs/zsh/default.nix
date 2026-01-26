@@ -4,8 +4,11 @@
   zsh,
   zsh-fast-syntax-highlighting,
   zsh-autosuggestions,
+  lib,
 }: let
   wrapZsh = callPackage ./wrapper.nix {};
+
+  autosuggestPlugin = "${zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh";
 
   fsh = zsh-fast-syntax-highlighting.overrideAttrs (old: {
     postPatch = (old.postPatch or "") + ''
@@ -30,90 +33,20 @@
   };
 
   zshrc = ''
-    if [[ -f /etc/profile ]]; then
-      source /etc/profile
-    fi
+    typeset -gA NIX_INPUTS=(
+        fsh_theme   ${lib.escapeShellArg fshTheme}
+        fsh_plugin  ${lib.escapeShellArg fshPlugin}
+        autosuggest ${lib.escapeShellArg autosuggestPlugin}
+    )
+    source_scoped() { source "$1" }
 
-    if [[ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]]; then
-      source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
-    fi
-
-    HELPDIR="${zsh}/share/zsh/$ZSH_VERSION/help"
-
-    # Tell zsh how to find installed completions.
-    for p in ''${(z)NIX_PROFILES}; do
-        fpath=(
-            $p/share/zsh/site-functions
-            $p/share/zsh/$ZSH_VERSION/functions
-            $p/share
-            /zsh/vendor-completions
-            $fpath
-        )
-    done
-
-    if [[ -f "/opt/homebrew/bin/brew" ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
-
-    if command -v direnv &> /dev/null; then
-        eval "$(direnv hook zsh)"
-    fi
-
-    () {
-        local cachedir="$HOME/.cache/zsh"
-        local dumpfile="$cachedir/zcompdump"
-        [ ! -d "$cachedir" ] && mkdir -p "$cachedir"
-        autoload -Uz compinit && compinit -C -d "$dumpfile"
-        autoload -Uz bashcompinit && bashcompinit -d "$dumpfile"
-    }
-
-    () {
-        [[ -n "$GHOSTTY_RESOURCES_DIR" ]] || return
-        local file="$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
-        [[ -f "$file" ]] || return
-        source "$file"
-    }
-
-    # Zsh completion has this dumb thing where it will SSH into remote servers
-    # to suggest file paths. With autosuggestions, this causes an SSH
-    # connection to occur for each keypress causing a number of undesirable
-    # effects:
-    # - Overloading the remote server and causing you to get timed out
-    # - Mangling the prompt, if a TUI password request gets rendered
-    # - Repeatedly popping up an SSH passphrase prompt and forcing you to lose
-    # focus on your terminal if a GUI askpass is setup
-    #
-    # All of this is dumb, and honestly a terrible idea. Disable remote-access
-    # to fix
-    zstyle ':completion:*' remote-access no
-
-    # Source before highlighting for correct updates. Keybindings defined in
-    # "vim.zsh"
-    source ${./config/copy.zsh}
-
-    # Fast Syntax Highlighting
-    FAST_WORK_DIR='${fshTheme}'
-    source '${fshPlugin}'
-    # Man highlighting takes a huge amount of time, skip
-    FAST_HIGHLIGHT[chroma-man]=
-
-    # Zsh Autosuggestions
-    source '${zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh'
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-    ZSH_AUTOSUGGEST_USE_ASYNC=true
-    ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"
-
-    source "${./config/vim.zsh}"
-    source "${./config/prompt.zsh}"
-    source "${./config/history.zsh}"
-    source "${./config/fzf.zsh}"
-    source "${./config/alias.zsh}"
-
-    cfg="$HOME/src/nix/cfg"
-
-    if [[ -f "$HOME/.zshrc" ]]; then
-        source "$HOME/.zshrc"
-    fi
+    source_scoped ${lib.escapeShellArg ./config/base-env.zsh}
+    source_scoped ${lib.escapeShellArg ./config/completion.zsh}
+    source_scoped ${lib.escapeShellArg ./config/plugins.zsh}
+    source_scoped ${lib.escapeShellArg ./config/copy.zsh}
+    source_scoped ${lib.escapeShellArg ./config/prompt.zsh}
+    source_scoped ${lib.escapeShellArg ./config/settings.zsh}
+    unset NIX_INPUTS
   '';
 in
   wrapZsh {

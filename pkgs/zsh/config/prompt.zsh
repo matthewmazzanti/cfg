@@ -28,7 +28,7 @@ setopt PROMPT_SUBST
 #   print -P "${prompt_fg[red]}hello${prompt_fg[reset]}"
 # ----------------------------
 
-typeset -A prompt_fg=(
+typeset -gA prompt_fg=(
   black          "%F{0}"
   red            "%F{1}"
   green          "%F{2}"
@@ -153,7 +153,7 @@ function prompt_greek_letter() {
 
 # Cache the hostname once at init for speed and predictability.
 # (We expect hostname -s to be stable during a shell session.)
-typeset -g prompt_hostname=""
+prompt_hostname=""
 function prompt_init_hostname() {
   prompt_hostname="$(prompt_greek_letter "$(hostname -s)")"
 }
@@ -252,8 +252,8 @@ function prompt_init() {
 # - prompt_cmd_run: set to 1 when a command has run since last prompt
 # ----------------------------
 
-local prompt_clear=1
-local prompt_cmd_run=0
+prompt_clear=1
+prompt_cmd_run=0
 
 function prompt_post_command() {
   local exit_code="$?"
