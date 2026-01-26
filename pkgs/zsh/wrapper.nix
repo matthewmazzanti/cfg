@@ -50,7 +50,7 @@
         unwrapped="$out/bin/$name-unwrapped"
         mv "$exe" "$unwrapped"
         makeWrapper \
-          "$(readlink -f "$unwrapped")" "$exe-configured" \
+          "$(readlink -f "$unwrapped")" "$exe" \
           --set ZDOTDIR "${zdotdir}"
       '';
       passthru.shellPath = zsh.shellPath;

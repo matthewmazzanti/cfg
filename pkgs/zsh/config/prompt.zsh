@@ -50,6 +50,14 @@ typeset -gA prompt_fg=(
   reset          "%f"
 )
 
+function prompt_accent_color() {
+  local color=cyan
+  if [[ -n $SSH_CONNECTION || -n $SSH_CLIENT || -n $SSH_TTY ]]; then
+    color=blue
+  fi
+  print -r -- "$color"
+}
+
 # ----------------------------
 # Cursor shape + vi mode integration
 #
@@ -106,14 +114,23 @@ function prompt_init_vi_cursor_widgets() {
 # PROMPT below. The functions use print -r (raw) to avoid unexpected escapes.
 # ----------------------------
 
-function prompt_shlvl_prefix() {
+function prompt_shlvl() {
   local n=$(( SHLVL - 1 ))
-  (( n < 0 )) && n=0
+  if (( n <= 0 )); then
+    return
+  fi
 
   local char="›"
-  [[ $TERM == linux ]] && char=">"
+  if [[ "$TERM" == linux ]]; then
+    char=">"
+  fi
 
-  print -r -- "${(l:$n::${char}:)}"
+  local i out=""
+  for (( i = 0; i < n; i++ )); do
+    out+="$char"
+  done
+
+  print -r -- "${prompt_fg[bright-black]}$out ${prompt_fg[reset]}"
 }
 
 # Translate the first letter of a string to a Greek-ish glyph. This is purely
@@ -170,7 +187,8 @@ function prompt_init_hostname() {
 
 # Leader segment: currently just the hostname in cyan.
 function prompt_leader() {
-  print -r -- "${prompt_fg[cyan]}$prompt_hostname${prompt_fg[reset]}"
+  local color="$(prompt_accent_color)"
+  print -r -- "${prompt_fg[$color]}$prompt_hostname${prompt_fg[reset]}"
 }
 
 # PWD segment:
@@ -184,17 +202,25 @@ function prompt_pwd() {
   local shorten_to=1
 
   local keep_long=$(( ${COLUMNS:-0} / 50 + 1 ))
-  (( keep_long < 1 )) && keep_long=1
-  (( keep_long > 4 )) && keep_long=4
+  if (( keep_long < 1 )); then
+    keep_long=1
+  fi
+  if (( keep_long > 4 )); then
+    keep_long=4
+  fi
 
   local dir=$PWD
-  [[ $dir == $HOME(|/*) ]] && dir="~${dir#$HOME}"
+  if [[ $dir == $HOME(|/*) ]]; then
+    dir="~${dir#$HOME}"
+  fi
 
   local -a segs
   segs=(${(s:/:)dir})
 
   local cutoff=$(( ${#segs} - keep_long ))
-  (( cutoff < 0 )) && cutoff=0
+  if (( cutoff < 0 )); then
+    cutoff=0
+  fi
 
   local i seg
   for (( i = 1; i <= cutoff; i++ )); do
@@ -216,7 +242,10 @@ function prompt_pwd() {
   # - yellow text for segment names
   local out=""
   for (( i = 1; i <= ${#segs}; i++ )); do
-    [[ $i -gt 1 ]] && out+="${prompt_fg[bright-yellow]}/"
+    if (( i > 1 )); then
+      out+="${prompt_fg[bright-yellow]}/"
+    fi
+
     out+="${prompt_fg[yellow]}${segs[i]}"
   done
 
@@ -235,7 +264,8 @@ function prompt_separator() {
     *)     char=">" ;;
   esac
 
-  print -r -- "${prompt_fg[cyan]}$char${prompt_fg[reset]}"
+  local color="$(prompt_accent_color)"
+  print -r -- "${prompt_fg[$color]}$char${prompt_fg[reset]}"
 }
 
 # Apply PROMPT / RPROMPT definitions.
