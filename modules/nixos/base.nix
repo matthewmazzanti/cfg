@@ -1,6 +1,9 @@
-{ pkgs, modulesPath, flake, ... }: {
+{ pkgs, modulesPath, flake, lib, ... }: {
   # Not entirely sure what this does, but it definitely does something
-  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+    ./zsh.nix
+  ];
 
   # Use systemd in initrd
   boot.initrd.systemd.enable = true;
@@ -18,8 +21,12 @@
   # Packages
   environment.systemPackages = with pkgs; [
     flake.packages.home-manager
-    # Minimally configured neovim
+    # Minimally configured nvim
     flake.packages."nvim/root"
+
+    # Allow Ghostty to work
+    ghostty.terminfo
+
     # Http stuff
     wget curl
     # Misc utils
@@ -37,7 +44,6 @@
     gptfdisk # sgdisk
     usbutils # lsusb
     nftables # firewall control
-    ghostty.terminfo
   ];
   environment.sessionVariables.EDITOR = "vim";
 
@@ -49,17 +55,6 @@
   users.users.mmazzanti = {
     isNormalUser = true;
     extraGroups = ["wheel"];
-    shell = flake.packages."zsh/dev";
-  };
-  environment.shells = [ flake.packages."zsh/dev" ];
-
-  # Enable zsh
-  users.defaultUserShell = pkgs.zsh;
-  programs.zsh = {
-    enable = true;
-    enableCompletion =  false;
-    enableGlobalCompInit = false;
-    enableBashCompletion = false;
   };
 
   # SSH

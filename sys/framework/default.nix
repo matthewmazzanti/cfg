@@ -41,7 +41,7 @@
   users.users.mmazzanti = {
     extraGroups = [ "networkmanager" ];
     packages = with pkgs; [
-      flake.packages."nvim/nix"
+      flake.packages."nvim/dev"
       mpv # Tui movie player
       todoist-electron # TODO list
       obsidian
