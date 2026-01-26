@@ -1,4 +1,4 @@
-{ pkgs, flake, ... }: {
+{ flake, config, ... }: {
   imports = [ flake.inputs.impermanence.nixosModules.impermanence ];
 
   # Roll root back to base state on root-pool/local/root
@@ -8,7 +8,7 @@
     wantedBy = [ "initrd.target" ];
     before = [ "sysroot.mount" ];
     after = [ "zfs-import-root-pool.service" ];
-    path = [ pkgs.zfs ];
+    path = [ config.boot.zfs.package ];
     unitConfig.DefaultDependencies = "no";
     serviceConfig.Type = "oneshot";
     script = "zfs rollback -r root-pool/local/root@blank";

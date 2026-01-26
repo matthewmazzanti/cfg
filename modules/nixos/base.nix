@@ -8,6 +8,10 @@
   # Use systemd in initrd
   boot.initrd.systemd.enable = true;
 
+  # Select versions for kernel/zfs explicitly
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_18;
+  boot.zfs.package = pkgs.zfs_2_4;
+
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = pkgs.writeText "keymap" ''
