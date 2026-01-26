@@ -125,12 +125,7 @@ function prompt_shlvl() {
     char=">"
   fi
 
-  local i out=""
-  for (( i = 0; i < n; i++ )); do
-    out+="$char"
-  done
-
-  print -r -- "${prompt_fg[bright-black]}$out ${prompt_fg[reset]}"
+  print -r -- "${prompt_fg[bright-black]}$n$char ${prompt_fg[reset]}"
 }
 
 # Translate the first letter of a string to a Greek-ish glyph. This is purely
