@@ -55,6 +55,12 @@
 # Zsh Autosuggestions
 () {
     source "${NIX_INPUTS[autosuggest]}"
+    # God I hate zsh
+    # For some reason, autosuggestions does this late init thing. I want it
+    # _under_ my copy wrapper, so unset their precmd hook (which default ALWAYS
+    # RUNS, insane) and set up ourselves
+    add-zsh-hook -d precmd _zsh_autosuggest_start
+    _zsh_autosuggest_start
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
     ZSH_AUTOSUGGEST_USE_ASYNC=true
     ZSH_AUTOSUGGEST_HISTORY_IGNORE="cd *"

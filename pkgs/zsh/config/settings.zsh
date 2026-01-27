@@ -34,28 +34,24 @@ bindkey -v '^?' backward-delete-char
 # (Allows shells/editors to detect pasted text)
 printf '\e[?2004h'
 
-
 # Copy/paste improvements
-bindkey -M vicmd   'y' clip-vi-yank
-bindkey -M vicmd   'Y' clip-vi-yank-eol
-bindkey -M vicmd   'x' clip-vi-delete
-bindkey -M vicmd   'X' clip-vi-kill-eol
-bindkey -M vicmd   'p' clip-vi-put-after
-bindkey -M vicmd   'P' clip-vi-put-before
-
-bindkey -M visual  'x' clip-vi-delete
-bindkey -M visual  'p' clip-put-replace-selection
-
+bindkey -M vicmd  'x' vi-delete
+bindkey -M visual 'x' vi-delete
+bindkey -M vicmd  'X' vi-kill-eol
+# Blackhole "d" emulation
+bindkey -M vicmd  'd' _clip_orig__vi-delete
+bindkey -M visual 'd' _clip_orig__vi-delete
+bindkey -M vicmd  'D' _clip_orig__vi-kill-eol
 
 # Sacrilege: Emacs-style Ctrl bindings in vi command/insert modes
 for map in vicmd viins; do
     # Movement
-    bindkey -M $map '^A' beginning-of-line
-    bindkey -M $map '^E' end-of-line
-    bindkey -M $map '^F' forward-char
-    bindkey -M $map '^B' backward-char
-    bindkey -M $map '^P' up-line-or-history
-    bindkey -M $map '^N' down-line-or-history
+    bindkey -M "$map" '^A' beginning-of-line
+    bindkey -M "$map" '^E' end-of-line
+    bindkey -M "$map" '^F' forward-char
+    bindkey -M "$map" '^B' backward-char
+    bindkey -M "$map" '^P' up-line-or-history
+    bindkey -M "$map" '^N' down-line-or-history
 done
 
 # Editing / killing
