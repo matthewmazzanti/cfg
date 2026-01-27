@@ -17,6 +17,10 @@
 
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 
+    # Direnv plugins
+    nix-direnv.url = "github:nix-community/nix-direnv/master";
+    nix-direnv.inputs.nixpkgs.follows = "nixpkgs";
+
     # Neovim plugins
     vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
     vim-easyclip.flake = false;
@@ -34,17 +38,17 @@
   in {
     inherit lib;
 
-    packages = lib.eachSystem ({
-      pkgs,
-      system,
-    }:
-      (import ./pkgs {
+    packages = lib.eachSystem ({ pkgs, system, }: let
+      localPkgs = import ./pkgs {
         inherit pkgs system inputs;
-      }) // {
-        home-manager = inputs.home-manager.packages.${system}.default;
-        ghostty = inputs.ghostty.packages.${system}.default;
-      }
-    );
+      };
+
+      pkgFor = input: input.packages.${system}.default;
+    in localPkgs // {
+      home-manager = pkgFor inputs.home-manager;
+      ghostty = pkgFor inputs.ghostty;
+      nix-direnv = pkgFor inputs.nix-direnv;
+    });
 
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
