@@ -49,7 +49,7 @@
     source_scoped ${lib.escapeShellArg ./config/plugins.zsh}
     source_scoped ${lib.escapeShellArg ./config/copy.zsh}
     source_scoped ${lib.escapeShellArg ./config/prompt.zsh}
-    source_scoped ${lib.escapeShellArg ./config/settings.zsh}
+    source_scoped ${lib.escapeShellArg ./config/config.zsh}
     unset NIX_INPUTS
   '';
 in
