@@ -49,12 +49,9 @@
     devShell = lib.eachSystemShell ({pkgs, ...}: {
       packages = with pkgs; [
         nix-tree
-        go
-        uv
         alejandra
         neovim-unwrapped.lua
-        gcc
-        cargo
+        uv
         just
       ];
     });

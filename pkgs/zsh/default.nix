@@ -44,12 +44,12 @@
     )
     source_scoped() { source "$1" }
 
-    source_scoped ${lib.escapeShellArg ./config/base-env.zsh}
-    source_scoped ${lib.escapeShellArg ./config/completion.zsh}
-    source_scoped ${lib.escapeShellArg ./config/plugins.zsh}
-    source_scoped ${lib.escapeShellArg ./config/copy.zsh}
-    source_scoped ${lib.escapeShellArg ./config/prompt.zsh}
-    source_scoped ${lib.escapeShellArg ./config/config.zsh}
+    source_scoped ${lib.escapeShellArg "${./config/base-env.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/completion.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/plugins.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/copy.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/prompt.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/config.zsh}"}
     unset NIX_INPUTS
   '';
 in
