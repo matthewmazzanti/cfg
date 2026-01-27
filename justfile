@@ -5,7 +5,14 @@ update:
 upgrade: upgrade-system upgrade-home
 
 upgrade-system:
-    sudo nixos-rebuild switch --flake ~/src/nix/cfg -L
+    #!/usr/bin/env bash
+    case "$(uname)" in
+        Linux)
+            sudo nixos-rebuild switch --flake ~/src/nix/cfg -L;;
+        Darwin)
+            sudo darwin-rebuild switch --flake ~/src/nix/cfg -L;;
+    esac
+
 
 upgrade-home:
     home-manager switch --flake ~/src/nix/cfg -L
