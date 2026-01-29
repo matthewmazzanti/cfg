@@ -117,6 +117,18 @@ vim.filetype.add({
   },
   pattern = {
     ["*.conf"] = "conf",
+    [".*"] = function(path, bufnr)
+      local first_line = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1];
+      if not first_line or not first_line:match("^#!") then
+        return nil
+      end
+
+      if first_line:match("uv%s+run") then
+        return "python"
+      end
+
+      return nil
+    end,
   },
 })
 
