@@ -86,8 +86,13 @@ function prompt_beam_cursor() { print -n '\033[5 q' }
 # KEYMAP is set by ZLE and is only meaningful inside widgets/hooks that ZLE
 # runs.
 function prompt_update_cursor() {
+    local keymap="$KEYMAP"
+    if [[ "$keymap" == "$leader_map" ]]; then
+        keymap="$leader_prev_keymap"
+    fi
+
     # Set cursor based on current keymap.
-    case "$KEYMAP" in
+    case "$keymap" in
         vicmd) prompt_block_cursor ;;
         *)     prompt_beam_cursor ;;
     esac
@@ -253,9 +258,13 @@ function prompt_pwd() {
 # - vicmd: ":" (command mode)
 # - else : ">" (insert/emacs/etc)
 function prompt_separator() {
-    local char=":"
+    local keymap="$KEYMAP"
+    if [[ "$keymap" == "$leader_map" ]]; then
+        keymap="$leader_prev_keymap"
+    fi
 
-    case "$KEYMAP" in
+    local char=":"
+    case "$keymap" in
         vicmd) char=":" ;;
         *)     char=">" ;;
     esac
@@ -268,6 +277,9 @@ function prompt_separator() {
 function prompt_init() {
     PROMPT='$(prompt_shlvl)$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
     RPROMPT=""
+    if [[ "$TERM" != linux ]]; then
+        PS2='↳ '
+    fi
 }
 
 # ----------------------------

@@ -1,8 +1,6 @@
 # --- Platform Detection ---
-
 local is_darwin=0
 [[ "$(uname -s)" == Darwin ]] && is_darwin=1
-
 
 # --- History Settings ---
 SAVEHIST=10000
@@ -24,7 +22,7 @@ setopt hist_reduce_blanks
 # Enable Vi mode
 bindkey -v
 
-# Faster escape from insert → command (10ms)
+# Faster escape from insert -> command (10ms)
 KEYTIMEOUT=1
 
 # Vim-style backspace
@@ -61,6 +59,25 @@ bindkey -M viins '^Y' yank
 bindkey -M viins '^[^?' backward-kill-word
 bindkey -M viins '^[\b' backward-kill-word
 bindkey -M viins '^H' backward-kill-word
+
+# FZF integration
+bindkey -M emacs '^R' fzf-history-widget
+bindkey -M vicmd '^R' fzf-history-widget
+bindkey -M viins '^R' fzf-history-widget
+leader-wrap leader-fzf-history-widget fzf-history-widget
+bindkey -M "$leader_map" 'r' leader-fzf-history-widget
+
+bindkey -M emacs '\ed' fzf-cd-widget
+bindkey -M viins '\ed' fzf-cd-widget
+bindkey -M vicmd '\ed' fzf-cd-widget
+leader-wrap leader-fzf-cd-widget fzf-cd-widget
+bindkey -M "$leader_map" 'd' leader-fzf-cd-widget
+
+bindkey -M emacs '^T' fzf-file-widget
+bindkey -M vicmd '^T' fzf-file-widget
+bindkey -M viins '^T' fzf-file-widget
+leader-wrap leader-fzf-file-widget fzf-file-widget
+bindkey -M "$leader_map" 'f' leader-fzf-file-widget
 
 # --- Aliases & Variables ---
 
@@ -121,7 +138,6 @@ cfg="$HOME/src/nix/cfg"
 
 notes="$HOME/Documents/Notes"
 [[ -d $notes ]] || unset notes
-
 
 # --- Local Overrides ---
 local zshrc_local="$XDG_CONFIG_HOME/zsh/zshrc"

@@ -36,6 +36,9 @@
     setopt no_global_rcs
   '';
 
+  # TODO: Work through better ordering for all this
+  # Layered zle widgets make this hard to do "right", and I'm not 100% clear on
+  # desired wrappings myself at this point
   zshrc = ''
     typeset -gA NIX_INPUTS=(
         fsh_theme   ${lib.escapeShellArg fshTheme}
@@ -47,9 +50,11 @@
     source_scoped ${lib.escapeShellArg "${./config/base-env.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/completion.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/plugins.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/leader.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/fzf.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/copy.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/prompt.zsh}"}
-    source_scoped ${lib.escapeShellArg "${./config/config.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/init.zsh}"}
     unset NIX_INPUTS
   '';
 in

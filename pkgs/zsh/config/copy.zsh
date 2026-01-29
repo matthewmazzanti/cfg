@@ -118,9 +118,6 @@ if _clip_select_backend; then
     _clip_wrap_widgets copy \
         vi-yank \
         vi-yank-eol \
-        vi-change \
-        vi-change-eol \
-        vi-change-whole-line \
         vi-delete \
         vi-kill-eol
 
