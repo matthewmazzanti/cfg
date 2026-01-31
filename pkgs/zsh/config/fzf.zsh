@@ -21,11 +21,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+
+: ${_FZF_LOADED:=0}
+(( _FZF_LOADED || ! ${+commands[fd]} || ! ${+commands[fzf]} )) && return
+typeset -g _FZF_LOADED=1
+
+_fzf_common=(
+    # Layout / UI
+    --height='40%'
+    --min-height='20+'
+    --highlight-line
+    --reverse
+    # Key bindings
+    --bind=ctrl-z:ignore
+)
+
+_fd_common=(
+    --hidden
+    --ignore
+    --no-follow
+    --exclude=.git/
+    --strip-cwd-prefix
+)
+
 function fzf-print-history() {
     local nl=$'\n' indent=$'\n\t'
     local -A seen
     local id cmd
-    for id cmd in ${(kv)history}; do
+    for id cmd in "${(@kv)history}"; do
         (( ${+seen[$cmd]} )) && continue
         seen[$cmd]=1
         printf '%s\t%s\0' "$id" "${cmd//$nl/$indent}"
@@ -35,17 +58,10 @@ function fzf-print-history() {
 function fzf-history-widget() {
     setopt pipefail
     local fzf_args=(
-        # Layout / UI
-        --height=40%
-        --min-height=20+
-        --highlight-line
-        --reverse
+        "${_fzf_common[@]}"
 
         # History / mode
         --scheme=history
-
-        # Key bindings
-        --bind=ctrl-z:ignore
 
         # Input / parsing
         --delimiter=$'\t'
@@ -56,16 +72,26 @@ function fzf-history-widget() {
         --no-multi
 
         # Initial query
-        --query=${LBUFFER}
+        --query="$BUFFER"
     )
 
-    local selected="$(fzf-print-history | command fzf "${fzf_args[@]}")"
+    # Save current cursor position, move cursor to end of buffer
+    local saved_cursor="$CURSOR"
+    CURSOR="${#BUFFER}"
+    zle redisplay
+
+    # Run fzf
+    local selected="$(fzf-print-history | fzf "${fzf_args[@]}")"
     local ret="$?"
-    if [[ -n $selected ]]; then
+
+    # Restore cursor position
+    CURSOR="$saved_cursor"
+
+    if [[ -n "$selected" ]]; then
         zle vi-fetch-history -n "$selected"
     fi
 
-    zle reset-prompt
+    zle redisplay
     return "$ret"
 }
 zle -N fzf-history-widget
@@ -73,41 +99,29 @@ zle -N fzf-history-widget
 
 # TODO: allow upwards traversal
 function fzf-cd-widget() {
-  # Directory source
-  local fd_cmd=(
-    fd
-    --type=d
-    --hidden
-    --ignore
-    --no-follow
-    --exclude=.git/
-    --strip-cwd-prefix
-    --print0
-  )
+  local fd_args=("${_fd_common[@]}" --type=d --print0)
+  local fzf_args=("${_fzf_common[@]}" --scheme=path --no-multi --read0)
 
-  # fzf options (self-contained)
-  local fzf_args=(
-    --height=40%
-    --min-height=20+
-    --bind=ctrl-z:ignore
-    --reverse
-    --scheme=path
-    --no-multi
-    --read0
-  )
+  # Save current cursor position, move cursor to end of buffer
+  local saved_cursor="$CURSOR"
+  CURSOR="${#BUFFER}"
+  zle redisplay
 
-  local dir="$(
-    FZF_DEFAULT_COMMAND="$fd_cmd" command fzf "${fzf_args[@]}" < /dev/tty
-  )"
+  # Run the picker
+  local selected="$(fd "${fd_args[@]}" | fzf "${fzf_args[@]}")"
   local ret="$?"
-  if (( ret != 0 || ${#dir} == 0 )); then
-    zle redisplay
+
+  # Restore cursor position
+  CURSOR="$saved_cursor"
+
+  if (( ret && ${#selected} > 0 )); then
+    cd "$selected"
+    ret="$?"
+    zle reset-prompt
     return "$ret"
   fi
 
-  cd "$dir"
-  ret="$?"
-  zle reset-prompt
+  zle redisplay
   return "$ret"
 }
 zle -N fzf-cd-widget
@@ -129,7 +143,7 @@ function zle-insert-words() {
 
   # Cursor is "on a character" (block cursor semantics) in these keymaps
   local is_block_cursor=0
-  [[ $KEYMAP == (vicmd|visual) ]] && is_block_cursor=1
+  [[ "$KEYMAP" == (vicmd|visual) ]] && is_block_cursor=1
 
   # We have something selected
   local has_selection=$(( REGION_ACTIVE && MARK != CURSOR ))
@@ -185,46 +199,30 @@ function zle-insert-words() {
     zle deactivate-region
     MARK=$CURSOR
   fi
-
-  zle redisplay
 }
 
 function fzf-file-widget() {
-  local fd_cmd=(
-    fd
-    --type=f
-    --hidden
-    --ignore
-    --no-follow
-    --exclude=.git/
-    --strip-cwd-prefix
-    --print0
-  )
+  local fd_args=("${_fd_common[@]}" --type=f --print0)
+  local fzf_args=("${_fzf_common[@]}" --multi --scheme=path --read0 --print0)
 
-  # fzf options
-  local fzf_args=(
-    --height=40%
-    --min-height=20+
-    --bind=ctrl-z:ignore
-    --reverse
-    --multi
-    --scheme=path
-    --read0
-    --print0
-  )
+  # Save current cursor position, move cursor to end of buffer
+  local saved_cursor="$CURSOR"
+  CURSOR="${#BUFFER}"
+  zle redisplay
 
-  local selected="$(
-    FZF_DEFAULT_COMMAND="$fd_cmd" command fzf "${fzf_args[@]}" < /dev/tty
-  )"
+  # Run the picker
+  local selected="$(fd "${fd_args[@]}" | fzf "${fzf_args[@]}")"
   local ret="$?"
-  if (( ret != 0 || ${#selected} == 0 )); then
-    zle redisplay
-    return "$ret"
-  fi
+
+  # Restore cursor position
+  CURSOR="$saved_cursor"
 
   # Insert at cursor / replace region (helper handles quoting + spacing)
-  zle-insert-words "${(@R)${(0)selected}:#}"
-  zle reset-prompt
+  if (( ret == 0 && ${#selected} >= 0 )); then
+      zle-insert-words "${(@R)${(0)selected}:#}"
+  fi
+
+  zle redisplay
   return "$ret"
 }
 zle -N fzf-file-widget

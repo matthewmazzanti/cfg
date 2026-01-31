@@ -152,6 +152,7 @@
     vimdoc
     xml
     yaml
+    zsh
   ];
 
   plugins = with pkgs.vimPlugins;

@@ -50,7 +50,6 @@
     source_scoped ${lib.escapeShellArg "${./config/base-env.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/completion.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/plugins.zsh}"}
-    source_scoped ${lib.escapeShellArg "${./config/leader.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/fzf.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/clip.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/prompt.zsh}"}

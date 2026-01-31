@@ -80,7 +80,7 @@ function prompt_accent_color() {
 function prompt_block_cursor() { print -n '\033[1 q' }
 
 # Print escape code to set cursor to beam for insert mode
-function prompt_beam_cursor() { print -n '\033[5 q' }
+function prompt_beam_cursor() { print -n '\033[5 q'; }
 
 # ZLE widget: called when keymap changes or when the editor initializes.
 # KEYMAP is set by ZLE and is only meaningful inside widgets/hooks that ZLE
@@ -100,11 +100,6 @@ function prompt_update_cursor() {
     # Redraw prompt so prompt elements that depend on KEYMAP (e.g. separator
     # char) update immediately.
     zle reset-prompt
-    zle -R
-}
-
-# Bind the widgets and register hooks needed for cursor management.
-function prompt_init_vi_cursor_widgets() {
 }
 
 # ----------------------------
