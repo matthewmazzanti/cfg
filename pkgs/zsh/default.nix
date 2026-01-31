@@ -52,7 +52,7 @@
     source_scoped ${lib.escapeShellArg "${./config/plugins.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/leader.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/fzf.zsh}"}
-    source_scoped ${lib.escapeShellArg "${./config/copy.zsh}"}
+    source_scoped ${lib.escapeShellArg "${./config/clip.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/prompt.zsh}"}
     source_scoped ${lib.escapeShellArg "${./config/init.zsh}"}
     unset NIX_INPUTS

@@ -105,12 +105,6 @@ function prompt_update_cursor() {
 
 # Bind the widgets and register hooks needed for cursor management.
 function prompt_init_vi_cursor_widgets() {
-    zle -N zle-keymap-select prompt_update_cursor
-    zle -N zle-line-init     prompt_update_cursor
-
-    # When entering/leaving an SSH session or running a command, prefer block.
-    add-zsh-hook zshexit  prompt_block_cursor
-    add-zsh-hook preexec  prompt_block_cursor
 }
 
 # ----------------------------
@@ -177,13 +171,6 @@ function prompt_greek_letter() {
         z) print "ζ" ;;  # zeta
         *) print -r -- "$input" ;;
     esac
-}
-
-# Cache the hostname once at init for speed and predictability.
-# (We expect hostname -s to be stable during a shell session.)
-prompt_hostname=""
-function prompt_init_hostname() {
-    prompt_hostname="$(prompt_greek_letter "$(hostname -s)")"
 }
 
 # Leader segment: currently just the hostname in cyan.
@@ -273,15 +260,6 @@ function prompt_separator() {
     print -r -- "${prompt_fg[$color]}$char${prompt_fg[reset]}"
 }
 
-# Apply PROMPT / RPROMPT definitions.
-function prompt_init() {
-    PROMPT='$(prompt_shlvl)$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
-    RPROMPT=""
-    if [[ "$TERM" != linux ]]; then
-        PS2='↳ '
-    fi
-}
-
 # ----------------------------
 # Post-prompt newline + exit status
 #
@@ -322,11 +300,6 @@ function prompt_set_cmd_run() {
     prompt_cmd_run=1
 }
 
-function prompt_init_post_command_hooks() {
-    add-zsh-hook precmd  prompt_post_command
-    add-zsh-hook preexec prompt_set_cmd_run
-}
-
 # Clear-screen helper:
 # Marks the screen as "fresh" so the next prompt appears without an extra spacer.
 function prompt_clear_screen() {
@@ -338,8 +311,23 @@ function prompt_clear_screen() {
 # Init (call once when sourced)
 # ----------------------------
 
-prompt_init_hostname
-prompt_init_vi_cursor_widgets
-prompt_init_post_command_hooks
-prompt_init
-alias clear=prompt_clear_screen
+() {
+    prompt_hostname="$(prompt_greek_letter "$(hostname -s)")"
+
+    zle -N zle-keymap-select prompt_update_cursor
+    zle -N zle-line-init     prompt_update_cursor
+    # When entering/leaving an SSH session or running a command, prefer block.
+    add-zsh-hook zshexit  prompt_block_cursor
+    add-zsh-hook preexec  prompt_block_cursor
+
+    add-zsh-hook precmd  prompt_post_command
+    add-zsh-hook preexec prompt_set_cmd_run
+
+    PROMPT='$(prompt_shlvl)$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
+    RPROMPT=""
+    if [[ "$TERM" != linux ]]; then
+        PS2='↳ '
+    fi
+
+    alias clear=prompt_clear_screen
+}

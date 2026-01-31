@@ -21,10 +21,8 @@ setopt hist_reduce_blanks
 
 # Enable Vi mode
 bindkey -v
-
 # Faster escape from insert -> command (10ms)
 KEYTIMEOUT=1
-
 # Vim-style backspace
 bindkey -v '^?' backward-delete-char
 
@@ -32,52 +30,65 @@ bindkey -v '^?' backward-delete-char
 # (Allows shells/editors to detect pasted text)
 printf '\e[?2004h'
 
-# Copy/paste improvements
-bindkey -M vicmd  'x' vi-delete
-bindkey -M visual 'x' vi-delete
-bindkey -M vicmd  'X' vi-kill-eol
-# Blackhole "d" emulation
-bindkey -M vicmd  'd' _clip_orig__vi-delete
-bindkey -M visual 'd' _clip_orig__vi-delete
-bindkey -M vicmd  'D' _clip_orig__vi-kill-eol
+# c / C / s - change -> blackhole
+bindkey -M vicmd  'c' "$(clip_widget blackhole vi-change)"
+bindkey -M visual 'c' "$(clip_widget blackhole vi-change)"
+bindkey -M vicmd  'C' "$(clip_widget blackhole vi-change-eol)"
 
-# Sacrilege: Emacs-style Ctrl bindings in vi command/insert modes
+# S - change whole line -> blackhole
+bindkey -M vicmd  's' "$(clip_widget blackhole vi-substitute)"
+bindkey -M visual 's' "$(clip_widget blackhole vi-substitute)"
+bindkey -M vicmd  'S' "$(clip_widget blackhole vi-change-whole-line)"
+
+# d / D - delete -> blackhole
+bindkey -M vicmd  'd' "$(clip_widget blackhole vi-delete)"
+bindkey -M visual 'd' "$(clip_widget blackhole vi-delete)"
+bindkey -M vicmd  'D' "$(clip_widget blackhole vi-kill-eol)"
+
+# x / X - delete -> system copy (Custom mapping)
+bindkey -M vicmd  'x' "$(clip_widget copy vi-delete)"
+bindkey -M visual 'x' "$(clip_widget copy vi-delete)"
+bindkey -M vicmd  'X' "$(clip_widget copy vi-kill-eol)"
+
+# y - yank -> system copy
+bindkey -M vicmd  'y' "$(clip_widget copy vi-yank)"
+bindkey -M visual 'y' "$(clip_widget copy vi-yank)"
+bindkey -M vicmd  'Y' "$(clip_widget copy vi-yank-eol)"
+
+# p / P - system paste
+bindkey -M vicmd  'p' "$(clip_widget paste vi-put-after)"
+bindkey -M visual 'p' "$(clip_widget paste put-replace-selection)"
+bindkey -M vicmd  'P' "$(clip_widget paste vi-put-before)"
+
+# Emacs-style movement (vi mode only)
 for map in vicmd viins; do
-    # Movement
-    bindkey -M "$map" '^A' beginning-of-line
-    bindkey -M "$map" '^E' end-of-line
-    bindkey -M "$map" '^F' forward-char
-    bindkey -M "$map" '^B' backward-char
-    bindkey -M "$map" '^P' up-line-or-history
-    bindkey -M "$map" '^N' down-line-or-history
+  bindkey -M "$map" '^A' beginning-of-line
+  bindkey -M "$map" '^E' end-of-line
+  bindkey -M "$map" '^F' forward-char
+  bindkey -M "$map" '^B' backward-char
+  bindkey -M "$map" '^P' up-line-or-history
+  bindkey -M "$map" '^N' down-line-or-history
 done
 
-# Editing / killing
-bindkey -M viins '^K' kill-line
-bindkey -M viins '^U' backward-kill-line
-bindkey -M viins '^Y' yank
-bindkey -M viins '^[^?' backward-kill-word
-bindkey -M viins '^[\b' backward-kill-word
-bindkey -M viins '^H' backward-kill-word
+# Emacs-style editing (viins only)
+bindkey -M viins '^K'   "$(clip_widget blackhole kill-line)"
+bindkey -M viins '^U'   "$(clip_widget blackhole backward-kill-line)"
+bindkey -M viins '^[^?' "$(clip_widget blackhole backward-kill-word)"
+bindkey -M viins '^[\b' "$(clip_widget blackhole backward-kill-word)"
+bindkey -M viins '^H'   "$(clip_widget blackhole backward-kill-word)"
 
 # FZF integration
 bindkey -M emacs '^R' fzf-history-widget
 bindkey -M vicmd '^R' fzf-history-widget
 bindkey -M viins '^R' fzf-history-widget
-leader-wrap leader-fzf-history-widget fzf-history-widget
-bindkey -M "$leader_map" 'r' leader-fzf-history-widget
 
-bindkey -M emacs '\ed' fzf-cd-widget
-bindkey -M viins '\ed' fzf-cd-widget
-bindkey -M vicmd '\ed' fzf-cd-widget
-leader-wrap leader-fzf-cd-widget fzf-cd-widget
-bindkey -M "$leader_map" 'd' leader-fzf-cd-widget
+bindkey -M emacs '\ec' fzf-cd-widget
+bindkey -M viins '\ec' fzf-cd-widget
+bindkey -M vicmd '\ec' fzf-cd-widget
 
 bindkey -M emacs '^T' fzf-file-widget
 bindkey -M vicmd '^T' fzf-file-widget
 bindkey -M viins '^T' fzf-file-widget
-leader-wrap leader-fzf-file-widget fzf-file-widget
-bindkey -M "$leader_map" 'f' leader-fzf-file-widget
 
 # --- Aliases & Variables ---
 

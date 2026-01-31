@@ -48,6 +48,7 @@
       ghostty
       _1password-gui
       spotify
+      element-desktop
     ];
   };
 
