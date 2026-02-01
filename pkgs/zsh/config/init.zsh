@@ -16,7 +16,6 @@ setopt hist_find_no_dups
 setopt hist_fcntl_lock
 setopt hist_reduce_blanks
 
-
 # --- Vim Config ---
 
 # Enable Vi mode
@@ -103,21 +102,37 @@ fi
 
 
 # ls
-local ls_opts=(
-    --color=auto
-    --group-directories-first
-    --classify
-)
-if (( $+commands[eza] )); then
-    alias ls="eza $ls_opts"
-    compdef eza=ls
-elif (( is_darwin && $+commands[gls] )); then
-    alias ls="gls $ls_opts --dereference-command-line"
-elif (( is_darwin )); then
-    alias ls='ls -G -F'
-else
-    alias ls="ls $ls_opts --dereference-command-line"
-fi
+() {
+    local ls_args=(
+        --color=auto
+        --group-directories-first
+        --classify
+    )
+    local gnu_ls_args=(
+        "${ls_opts[@]}"
+        --dereference-command-line
+    )
+    if (( $+commands[eza] )); then
+        alias ls="eza $ls_args"
+        compdef eza=ls
+    elif (( is_darwin )); then
+        # macOS: detect best ls
+        if command ls --version >/dev/null 2>&1; then
+            # GNU ls (coreutils shadowing system ls)
+            alias ls="ls $gnu_ls_args"
+
+        elif (( $+commands[gls] )); then
+            # Homebrew coreutils
+            alias ls="gls $gnu_ls_args"
+
+        else
+            # BSD/macOS default
+            alias ls='ls -G -F'
+        fi
+    else
+        alias ls="ls $gnu_ls_args"
+    fi
+}
 
 
 # tree
