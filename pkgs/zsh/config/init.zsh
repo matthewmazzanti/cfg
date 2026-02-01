@@ -30,12 +30,12 @@ bindkey -v '^?' backward-delete-char
 # (Allows shells/editors to detect pasted text)
 printf '\e[?2004h'
 
-# c / C / s - change -> blackhole
+# c / C - change -> blackhole
 bindkey -M vicmd  'c' "$(clip_widget blackhole vi-change)"
 bindkey -M visual 'c' "$(clip_widget blackhole vi-change)"
 bindkey -M vicmd  'C' "$(clip_widget blackhole vi-change-eol)"
 
-# S - change whole line -> blackhole
+# s / S - substitute -> blackhole
 bindkey -M vicmd  's' "$(clip_widget blackhole vi-substitute)"
 bindkey -M visual 's' "$(clip_widget blackhole vi-substitute)"
 bindkey -M vicmd  'S' "$(clip_widget blackhole vi-change-whole-line)"
@@ -45,17 +45,17 @@ bindkey -M vicmd  'd' "$(clip_widget blackhole vi-delete)"
 bindkey -M visual 'd' "$(clip_widget blackhole vi-delete)"
 bindkey -M vicmd  'D' "$(clip_widget blackhole vi-kill-eol)"
 
-# x / X - delete -> system copy (Custom mapping)
+# x / X - "cut" -> system copy (Custom mapping)
 bindkey -M vicmd  'x' "$(clip_widget copy vi-delete)"
 bindkey -M visual 'x' "$(clip_widget copy vi-delete)"
 bindkey -M vicmd  'X' "$(clip_widget copy vi-kill-eol)"
 
-# y - yank -> system copy
+# y / Y - yank -> system copy
 bindkey -M vicmd  'y' "$(clip_widget copy vi-yank)"
 bindkey -M visual 'y' "$(clip_widget copy vi-yank)"
 bindkey -M vicmd  'Y' "$(clip_widget copy vi-yank-eol)"
 
-# p / P - system paste
+# p / P - paste -> system paste
 bindkey -M vicmd  'p' "$(clip_widget paste vi-put-after)"
 bindkey -M visual 'p' "$(clip_widget paste put-replace-selection)"
 bindkey -M vicmd  'P' "$(clip_widget paste vi-put-before)"
