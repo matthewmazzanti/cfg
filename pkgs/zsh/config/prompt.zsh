@@ -77,26 +77,15 @@ function prompt_accent_color() {
 # ----------------------------
 
 # Print escape code to set cursor to block for command mode
-function prompt_block_cursor() { print -n '\033[1 q' }
-
-# Print escape code to set cursor to beam for insert mode
-function prompt_beam_cursor() { print -n '\033[5 q'; }
+function prompt_block_cursor() {
+    cursor block-blink
+}
 
 # ZLE widget: called when keymap changes or when the editor initializes.
 # KEYMAP is set by ZLE and is only meaningful inside widgets/hooks that ZLE
 # runs.
-function prompt_update_cursor() {
-    local keymap="$KEYMAP"
-    if [[ "$keymap" == "$leader_map" ]]; then
-        keymap="$leader_prev_keymap"
-    fi
-
-    # Set cursor based on current keymap.
-    case "$keymap" in
-        vicmd) prompt_block_cursor ;;
-        *)     prompt_beam_cursor ;;
-    esac
-
+function prompt_update_mode() {
+    zle-mode-cursor
     # Redraw prompt so prompt elements that depend on KEYMAP (e.g. separator
     # char) update immediately.
     zle reset-prompt
@@ -240,13 +229,8 @@ function prompt_pwd() {
 # - vicmd: ":" (command mode)
 # - else : ">" (insert/emacs/etc)
 function prompt_separator() {
-    local keymap="$KEYMAP"
-    if [[ "$keymap" == "$leader_map" ]]; then
-        keymap="$leader_prev_keymap"
-    fi
-
     local char=":"
-    case "$keymap" in
+    case "$KEYMAP" in
         vicmd) char=":" ;;
         *)     char=">" ;;
     esac
@@ -309,8 +293,9 @@ function prompt_clear_screen() {
 () {
     prompt_hostname="$(prompt_greek_letter "$(hostname -s)")"
 
-    zle -N zle-keymap-select prompt_update_cursor
-    zle -N zle-line-init     prompt_update_cursor
+    zle -N zle-keymap-select prompt_update_mode
+    zle -N zle-line-init     zle-mode-cursor
+
     # When entering/leaving an SSH session or running a command, prefer block.
     add-zsh-hook zshexit  prompt_block_cursor
     add-zsh-hook preexec  prompt_block_cursor
