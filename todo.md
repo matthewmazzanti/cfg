@@ -30,7 +30,7 @@
 
 ## Zsh
 
-- [ ] `<C-O>`/`<C-I>` mappings to push/pop directories like buffer stack
+- [x] `<C-O>`/`<C-I>` mappings to push/pop directories like buffer stack
 
 ## Direnv
 

@@ -54,12 +54,48 @@ function _jumplist_show() {
     done
 }
 
+function _jumplist_goto() {
+    local target=$1
+    (( target < 1 || target > ${#_jumplist_stack[@]} )) && return 1
+    (( target == _jumplist_pos )) && return 0
+    _jumplist_pos=$target
+    _jumplist_navigating=1
+    cd "${_jumplist_stack[$_jumplist_pos]}"
+    _jumplist_navigating=0
+}
+
+function _jumplist_entries() {
+    local i marker
+    for (( i = 1; i <= ${#_jumplist_stack[@]}; i++ )); do
+        (( i == _jumplist_pos )) && marker='>' || marker=' '
+        printf '%s\t%s %s\0' "$i" "$marker" "${_jumplist_stack[$i]/#$HOME/~}"
+    done
+}
+
+function _jumplist_pick() {
+    (( ! ${+commands[fzf]} )) && return 1
+    local fzf_args=(
+        "${_fzf_common[@]}"
+        --scheme=path
+        --no-multi
+        --read0
+        --delimiter=$'\t'
+        --with-nth=2
+        --accept-nth=1
+        --bind="load:pos($_jumplist_pos)"
+    )
+    local selected=$(_jumplist_entries | fzf "${fzf_args[@]}")
+    [[ -n "$selected" ]] && _jumplist_goto "$selected"
+}
+
 function jumplist() {
     case "${1:-show}" in
         back)    _jumplist_back ;;
         forward) _jumplist_forward ;;
         reset)   _jumplist_reset ;;
         show)    _jumplist_show ;;
+        goto)    _jumplist_goto "$2" ;;
+        pick)    _jumplist_pick ;;
     esac
 }
 
@@ -73,8 +109,33 @@ function jumplist-forward-widget() {
     zle reset-prompt
 }
 
+function jumplist-pick-widget() {
+    # Save cursor, move to end, set beam cursor
+    local saved_cursor="$CURSOR"
+    CURSOR="${#BUFFER}"
+    cursor beam-blink
+    zle redisplay
+
+    # Run picker
+    _jumplist_pick
+    local ret=$?
+
+    # Restore cursor
+    CURSOR="$saved_cursor"
+
+    if (( ret == 0 )); then
+        zle reset-prompt
+        zle-mode-cursor
+    else
+        zle redisplay
+        zle-mode-cursor
+    fi
+    return "$ret"
+}
+
 zle -N jumplist-back-widget
 zle -N jumplist-forward-widget
+zle -N jumplist-pick-widget
 
 # Register chpwd hook
 autoload -Uz add-zsh-hook

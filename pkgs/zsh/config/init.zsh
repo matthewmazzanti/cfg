@@ -95,6 +95,9 @@ bindkey -M vicmd '^O' jumplist-back-widget
 bindkey -M viins '^O' jumplist-back-widget
 bindkey -M vicmd '\e[105;5u' jumplist-forward-widget  # CSI u for Ctrl-I (Ghostty)
 bindkey -M viins '\e[105;5u' jumplist-forward-widget
+# 01110011
+bindkey -M vicmd '\ej' jumplist-pick-widget
+bindkey -M viins '\ej' jumplist-pick-widget
 alias jl=jumplist
 
 # --- Aliases & Variables ---
