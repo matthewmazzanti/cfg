@@ -118,7 +118,7 @@ function fzf-cd-widget() {
     # Restore cursor position
     CURSOR="$saved_cursor"
 
-    if (( ret && ${#selected} > 0 )); then
+    if (( ret == 0 && ${#selected} > 0 )); then
         cd "$selected"
         ret="$?"
         zle reset-prompt

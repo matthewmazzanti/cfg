@@ -90,6 +90,13 @@ bindkey -M emacs '^T' fzf-file-widget
 bindkey -M vicmd '^T' fzf-file-widget
 bindkey -M viins '^T' fzf-file-widget
 
+# Jumplist (Neovim-style directory navigation)
+bindkey -M vicmd '^O' jumplist-back-widget
+bindkey -M viins '^O' jumplist-back-widget
+bindkey -M vicmd '\e[105;5u' jumplist-forward-widget  # CSI u for Ctrl-I (Ghostty)
+bindkey -M viins '\e[105;5u' jumplist-forward-widget
+alias jl=jumplist
+
 # --- Aliases & Variables ---
 
 # Initialize LS_COLORS if unset
