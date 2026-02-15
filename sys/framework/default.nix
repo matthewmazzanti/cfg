@@ -49,6 +49,7 @@
       _1password-gui
       spotify
       element-desktop
+      claude-code
     ];
   };
 

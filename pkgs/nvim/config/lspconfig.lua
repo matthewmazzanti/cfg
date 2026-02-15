@@ -1,3 +1,5 @@
+vim.lsp.set_log_level("debug")
+
 -- PLUGIN: lsp_config
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
 local defaults = {
@@ -73,8 +75,16 @@ setup("lua_ls", {
         unusedLocalExclude = { "_*" },
       },
       workspace = {
-        library = vim.api.nvim_get_runtime_file("", true),
+        library = vim.api.nvim_get_runtime_file("lua", true),
         checkThirdParty = false,
+        useGitIgnore = true,
+        ignoreDir = {
+          ".git/",
+          ".direnv/",
+          ".venv/",
+          "node_modules/",
+          "result/",
+        },
       },
       telemetry = {
         enable = false,

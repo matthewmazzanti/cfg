@@ -6,7 +6,7 @@
   neovim-unwrapped,
   neovimUtils,
   stdenvNoCC,
-  writeText,
+  writeTextDir,
 
   # Config
   packages? [],
@@ -29,7 +29,7 @@
     pluginDeps = lib.lists.concatMap getPluginDeps normalizedPlugins;
   in pluginDeps ++ packages;
 
-  initLua = writeText "init.lua" ''
+  initLua = writeTextDir "init.lua" ''
     vim.opt.packpath:prepend("${finalPackdir}")
     vim.opt.runtimepath:prepend("${finalPackdir}")
     vim.g.loaded_python3_provider = 0
@@ -39,7 +39,7 @@
     ${init}
   '';
 
-in stdenvNoCC.mkDerivation ({
+in stdenvNoCC.mkDerivation {
   name = "neovim";
   pname = wrapperName;
   version = lib.getVersion neovim-unwrapped;
@@ -67,7 +67,7 @@ in stdenvNoCC.mkDerivation ({
       --suffix PATH ':' "${lib.makeBinPath runtimeDeps}" \
       --prefix LUA_PATH ';' "$LUA_PATH" \
       --prefix LUA_CPATH ';' "$LUA_CPATH" \
-      --add-flags '-u ${initLua}'
+      --add-flags '-u ${initLua}/init.lua'
   ''
   + optionalString stdenvNoCC.hostPlatform.isLinux ''
     rm $out/share/applications/nvim.desktop
@@ -82,4 +82,4 @@ in stdenvNoCC.mkDerivation ({
   '';
 
   dontFixup = true;
-})
+}
