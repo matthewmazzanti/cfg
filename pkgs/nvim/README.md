@@ -137,3 +137,20 @@ Per-language settings are generated via ftplugin:
 - **Terminal-aware**: Detects Ghostty vs standard terminals, adjusts visuals
 - **Safe loading**: pcall() prevents broken configs from crashing the editor
 - **Nix patterns**: Uses `optionals` for conditional inclusion of servers/plugins
+
+## TODO
+
+### Markdown Rendering
+
+Goals:
+- [ ] Nested code blocks highlighted with appropriate language parsers
+- [ ] Easy to glance headings & distinguish depth visually
+- [ ] Good list handling with correct wrapping behavior
+- [ ] Consistent markdown-aware wrapping that preserves document structure (custom `formatexpr` + treesitter)
+- [ ] Nicer table rendering for non-formatted tables
+- [ ] Table reformatting capability (auto-align columns)
+
+Explore/extend:
+- [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) - Rich markdown rendering with conceal
+- [markdown.nvim](https://github.com/tadmccorkle/markdown.nvim) - Markdown editing utilities (lists, links, TOC)
+- [nabla.nvim](https://github.com/jbyuki/nabla.nvim) - Render LaTeX as ASCII art

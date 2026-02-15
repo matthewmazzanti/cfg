@@ -1,38 +1,42 @@
-# pkgs
-- Write generic symlinkJoin/makeWrapper system
-- Understand what https://github.com/nix-systems/nix-systems is doing
-  (dependency of flake-utils)
-- Remove fake.nix things
+# TODO
+
+## Infrastructure
+
+- [ ] Lock down network access within quadlets
+- [ ] Clean up nix modules generally
+- [ ] Find a way of defining package sets for different systems that doesn't suck
+  - Root/user/home manager level - who owns what?
+  - How do I sync between them?
+  - System overrides
+
+## Packages
+
+- [ ] Formalize wrapping/config generation system
+  - Wrappers to configure programs, not dropping files onto system
+  - Nix -> config via composable libraries (nix/external scripts), not opaque modules
+  - Possibly extract as standalone project
+  - Support: neovim, zsh, ghostty, git, direnv, etc.
+- [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
+- [ ] Remove fake.nix things
 
 ## Neovim
-- Create "Share" mode, unset relative numbers
-- Fix file path to always be relative - sometimes is home-based when using file
-  picker
-- Per-project editor config, lines, tabs etc - Already supported?
-- Pre-compile Lua code?
-- Re-add CCLS for C projects, if used
-- Markdown renderer, of some sort
+
+- [ ] Create "Share" mode, unset relative numbers
+- [ ] Fix file path to always be relative - sometimes is home-based when using file picker
+- [ ] Per-project editor config, lines, tabs etc - already supported?
+- [ ] Pre-compile Lua code?
+- [ ] Re-add CCLS for C projects, if used
+- [ ] Markdown renderer
 
 ## Zsh
-- Re-target zsh history file
-- <C-O>/<C-I> mappings to push/pop directories like my buffer stack
 
-## iTerm2
-- Figure out how to get plist property loading to work
-    - Don't overwrite existing properties, if possible
-    - Filter non-relevant properties, like update times
+- [ ] `<C-O>`/`<C-I>` mappings to push/pop directories like buffer stack
 
 ## Direnv
-- Upstream wrapper changes
 
-__FOO__
+- [ ] Upstream wrapper changes
 
+## Gitea
 
-```python
-def foo():
-  bar, baz
-```
-
-# Gitea
-- Run on second interface to allow native port 22. Requires setting up static addressing
-  and multiple addresses for the server
+- [ ] Run on second interface to allow native port 22
+  - Requires setting up static addressing and multiple addresses for the server
