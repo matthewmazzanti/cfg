@@ -32,6 +32,7 @@ _fzf_common=(
     --min-height='20+'
     --highlight-line
     --reverse
+    --cycle
     # Key bindings
     --bind=ctrl-z:ignore
 )
@@ -43,6 +44,15 @@ _fd_common=(
     --exclude=.git/
     --strip-cwd-prefix
 )
+
+# Save cursor position to REPLY, move to end, set beam cursor
+function fzf-cursor-save() {
+    local saved="$CURSOR"
+    CURSOR="${#BUFFER}"
+    cursor beam-blink
+    zle redisplay
+    REPLY="$saved"
+}
 
 function fzf-print-history() {
     local nl=$'\n' indent=$'\n\t'
@@ -76,10 +86,8 @@ function fzf-history-widget() {
     )
 
     # Save current cursor position, move cursor to end of buffer
-    local saved_cursor="$CURSOR"
-    CURSOR="${#BUFFER}"
-    cursor beam-blink
-    zle redisplay
+    fzf-cursor-save
+    local saved_cursor="$REPLY"
 
     # Run fzf
     local selected="$(fzf-print-history | fzf "${fzf_args[@]}")"
@@ -106,10 +114,8 @@ function fzf-cd-widget() {
     local fzf_args=("${_fzf_common[@]}" --scheme=path --no-multi --read0)
 
     # Save current cursor position, move cursor to end of buffer
-    local saved_cursor="$CURSOR"
-    CURSOR="${#BUFFER}"
-    cursor beam-blink
-    zle redisplay
+    fzf-cursor-save
+    local saved_cursor="$REPLY"
 
     # Run the picker
     local selected="$(fd "${fd_args[@]}" | fzf "${fzf_args[@]}")"
@@ -138,10 +144,8 @@ function fzf-file-widget() {
     local fzf_args=("${_fzf_common[@]}" --multi --scheme=path --read0 --print0)
 
     # Save current cursor position, move cursor to end of buffer
-    local saved_cursor="$CURSOR"
-    CURSOR="${#BUFFER}"
-    cursor beam-blink
-    zle redisplay
+    fzf-cursor-save
+    local saved_cursor="$REPLY"
 
     # Run the picker
     local selected="$(fd "${fd_args[@]}" | fzf "${fzf_args[@]}")"

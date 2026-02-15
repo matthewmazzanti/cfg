@@ -43,13 +43,15 @@ function _jumplist_reset() {
 }
 
 function _jumplist_show() {
-    local i dir
-    for (( i = 1; i <= ${#_jumplist_stack[@]}; i++ )); do
+    local i dir marker print0=0
+    [[ "$1" == --print0 ]] && print0=1
+    for (( i = ${#_jumplist_stack[@]}; i >= 1; i-- )); do
         dir="${_jumplist_stack[$i]/#$HOME/~}"
-        if (( i == _jumplist_pos )); then
-            printf '> %s\n' "$dir"
+        (( i == _jumplist_pos )) && marker='>' || marker=' '
+        if (( print0 )); then
+            printf '%s\t%s %s\0' "$i" "$marker" "$dir"
         else
-            printf '  %s\n' "$dir"
+            printf '%s %s\n' "$marker" "$dir"
         fi
     done
 }
@@ -64,14 +66,6 @@ function _jumplist_goto() {
     _jumplist_navigating=0
 }
 
-function _jumplist_entries() {
-    local i marker
-    for (( i = 1; i <= ${#_jumplist_stack[@]}; i++ )); do
-        (( i == _jumplist_pos )) && marker='>' || marker=' '
-        printf '%s\t%s %s\0' "$i" "$marker" "${_jumplist_stack[$i]/#$HOME/~}"
-    done
-}
-
 function _jumplist_pick() {
     (( ! ${+commands[fzf]} )) && return 1
     local fzf_args=(
@@ -80,11 +74,11 @@ function _jumplist_pick() {
         --no-multi
         --read0
         --delimiter=$'\t'
-        --with-nth=2
+        --with-nth=2..
         --accept-nth=1
-        --bind="load:pos($_jumplist_pos)"
+        --bind="load:pos($((${#_jumplist_stack[@]} - _jumplist_pos + 1)))"
     )
-    local selected=$(_jumplist_entries | fzf "${fzf_args[@]}")
+    local selected=$(_jumplist_show --print0 | fzf "${fzf_args[@]}")
     [[ -n "$selected" ]] && _jumplist_goto "$selected"
 }
 
@@ -111,10 +105,8 @@ function jumplist-forward-widget() {
 
 function jumplist-pick-widget() {
     # Save cursor, move to end, set beam cursor
-    local saved_cursor="$CURSOR"
-    CURSOR="${#BUFFER}"
-    cursor beam-blink
-    zle redisplay
+    fzf-cursor-save
+    local saved_cursor="$REPLY"
 
     # Run picker
     _jumplist_pick
@@ -125,11 +117,10 @@ function jumplist-pick-widget() {
 
     if (( ret == 0 )); then
         zle reset-prompt
-        zle-mode-cursor
     else
         zle redisplay
-        zle-mode-cursor
     fi
+    zle-mode-cursor
     return "$ret"
 }
 
