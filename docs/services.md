@@ -30,7 +30,8 @@ Under consideration for future deployment.
 
 | Service | Purpose | Notes |
 |---------|---------|-------|
-| **PostgreSQL** | Centralized database | Shared backend for Gitea, Home Assistant recorder, JuiceFS metadata |
+| **PostgreSQL** | Centralized database | Shared backend for Gitea, Home Assistant recorder, JuiceFS metadata. SSL required, mTLS later |
+| **Garage** | S3-compatible object storage | JuiceFS backend. Lightweight single binary, replaces MinIO (now in maintenance mode) |
 | **Authentik** | Identity / SSO | Single sign-on for all services, 2FA, OIDC/SAML. Heavier but full-featured (alt: Authelia for lighter footprint) |
 | **Tailscale** | Mesh VPN | Remote access to services, see isolation plan for proxy architecture |
 | **StepCA** | Internal PKI | TLS certificates for all services, cert-manager integration |
@@ -64,7 +65,7 @@ Under consideration for future deployment.
 
 #### JuiceFS
 
-Distributed POSIX filesystem backed by object storage and metadata engine.
+Distributed POSIX filesystem - translation layer over existing storage, not a storage system itself.
 
 **Use cases:**
 - Unified file storage across machines
@@ -80,23 +81,25 @@ Distributed POSIX filesystem backed by object storage and metadata engine.
        │                   │                   │
        └───────────────────┼───────────────────┘
                            │
-                    ┌──────┴──────┐
-                    │  Metadata   │
-                    │   (Redis/   │
-                    │  PostgreSQL)│
-                    └──────┬──────┘
-                           │
-                    ┌──────┴──────┐
-                    │   Object    │
-                    │   Storage   │
-                    │ (MinIO/S3)  │
-                    └─────────────┘
+              ┌────────────┴────────────┐
+              │                         │
+       ┌──────┴──────┐           ┌──────┴──────┐
+       │  Metadata   │           │   Object    │
+       │ PostgreSQL  │           │   Storage   │
+       │  (+ SSL)    │           │   Garage    │
+       └─────────────┘           └─────────────┘
 ```
 
-**Components needed:**
-- Metadata engine: Redis or PostgreSQL
-- Object storage: MinIO (self-hosted) or S3-compatible
-- JuiceFS client on each machine
+**Decisions:**
+- **Metadata**: PostgreSQL (shared with Gitea, Home Assistant)
+- **Object storage**: Garage (lightweight S3-compatible, single binary, ~20MB)
+- **Auth**: Password + SSL (verify-full) initially, migrate to mTLS when StepCA ready
+- **Encryption**: TLS in transit, disk encryption at rest (server-side)
+
+**Why not Ceph/GlusterFS?**
+- Ceph: 3+ nodes minimum, complex ops, overkill for single server
+- GlusterFS: Deprecated by Red Hat, declining maintenance
+- JuiceFS: Reuses existing infrastructure, complexity in backends not filesystem
 
 **NixOS integration:**
 ```nix
