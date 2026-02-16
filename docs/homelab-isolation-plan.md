@@ -238,6 +238,50 @@ spec:
       mode: iptables
 ```
 
+#### Why Calico over Cilium?
+
+| | Calico | Cilium |
+|---|--------|--------|
+| **Backend** | iptables | eBPF |
+| **k0s support** | Native | Manual |
+| **L2 service VIPs** | MetalLB | Built-in |
+| **True pod L2 (mDNS)** | Multus | Multus (still needed) |
+| **L7 policy** | No | Yes |
+| **Observability** | Basic | Hubble |
+| **Complexity** | Lower | Higher |
+
+Cilium has better observability (Hubble) and eBPF performance, but:
+- Still needs Multus for true L2 (hass mDNS requirement)
+- More complex for single-node homelab
+- k0s has native Calico support
+
+### Multus: Multi-homed Pods
+
+Meta-plugin that attaches additional network interfaces to pods.
+
+```
+┌─────────────────────┐
+│        Pod          │
+│   ┌───────────┐     │
+│   │   eth0    │─────┼────► Cluster network (Calico)
+│   └───────────┘     │
+│   ┌───────────┐     │
+│   │   net1    │─────┼────► LAN bridge (br0) - real L2
+│   └───────────┘     │
+└─────────────────────┘
+```
+
+**How it works:**
+1. Kubelet calls Multus (configured as CNI)
+2. Multus calls Calico → creates eth0 (cluster network)
+3. Multus reads pod annotation for extra networks
+4. Multus calls macvlan/bridge plugin → creates net1 on br0
+
+**Use cases:**
+- hass: mDNS discovery requires L2 adjacency
+- lan-proxy: dedicated IP on br0
+- gitea-ssh: separate IP for SSH allowlisting
+
 ### Ingress: Two Traefik Instances
 
 Separate proxies for LAN vs tailnet - better isolation.
