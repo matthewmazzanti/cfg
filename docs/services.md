@@ -22,6 +22,37 @@ Current and planned services for the homelab infrastructure.
 | **Matter Server** | Container (Quadlet) | `sys/ha/home-automation.nix` | Internal (Home Assistant) |
 | **Z-Wave JS UI** | Container (Quadlet) | `sys/ha/home-automation.nix` | Internal (Home Assistant) |
 
+## Provisional Services
+
+Under consideration for future deployment.
+
+### Core Infrastructure
+
+| Service | Purpose | Notes |
+|---------|---------|-------|
+| **PostgreSQL** | Centralized database | Shared backend for Gitea, Home Assistant recorder, JuiceFS metadata |
+| **Authentik** | Identity / SSO | Single sign-on for all services, 2FA, OIDC/SAML. Heavier but full-featured (alt: Authelia for lighter footprint) |
+| **Tailscale** | Mesh VPN | Remote access to services, see isolation plan for proxy architecture |
+| **StepCA** | Internal PKI | TLS certificates for all services, cert-manager integration |
+
+### Monitoring & Notifications
+
+| Service | Purpose | Notes |
+|---------|---------|-------|
+| **Prometheus** | Metrics collection | Node exporter, cAdvisor for containers, Home Assistant integration |
+| **Grafana** | Metrics visualization | Dashboards for system and Home Assistant metrics |
+| **InfluxDB** | Time-series database | Long-term Home Assistant history, sensor data retention |
+| **Ntfy** | Push notifications | Service alerts, Home Assistant events, backup status. Self-hosted, mobile app |
+
+### Applications
+
+| Service | Purpose | Notes |
+|---------|---------|-------|
+| **Immich** | Photo management | Google Photos replacement, mobile backup, face recognition, GPU transcoding |
+| **Recipe Management** | Meal planning / recipes | Options: Tandoor, Mealie, Grocy |
+| **CalDAV/CardDAV** | Calendar & contacts sync | Options: Radicale (lightweight), Baikal, or full Nextcloud |
+| **Document Management** | Searchable document archive | Paperless-ngx is standard but uses Tesseract. Investigate: LLM-based extraction, Apple Intelligence OCR pipeline, or custom workflow with vision models |
+
 ## Storage
 
 ### Current
