@@ -32,9 +32,9 @@ Under consideration for future deployment.
 |---------|---------|-------|
 | **PostgreSQL** | Centralized database | Shared backend for Gitea, Home Assistant recorder, JuiceFS metadata. SSL required, mTLS later |
 | **Garage** | S3-compatible object storage | JuiceFS backend. Lightweight single binary, replaces MinIO (now in maintenance mode) |
-| **Authentik** | Identity / SSO | Single sign-on for all services, 2FA, OIDC/SAML. Heavier but full-featured (alt: Authelia for lighter footprint) |
+| **Kanidm** | Identity / SSO | See [Identity & PKI](#identity--pki). Rust, lightweight, native NixOS provisioning |
+| **StepCA** | Internal PKI | See [Identity & PKI](#identity--pki). OIDC provisioner for user certs |
 | **Tailscale** | Mesh VPN | Remote access to services, see isolation plan for proxy architecture |
-| **StepCA** | Internal PKI | TLS certificates for all services, cert-manager integration |
 
 ### Monitoring & Notifications
 
@@ -114,6 +114,101 @@ fileSystems."/mnt/juice" = {
   ];
 };
 ```
+
+## Identity & PKI
+
+Layered approach: OIDC for identity, StepCA for certificates, mTLS for transport.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Application Layer                                               │
+│ → OIDC tokens, session cookies, user/group permissions          │
+├─────────────────────────────────────────────────────────────────┤
+│ Transport Layer                                                 │
+│ → mTLS, certificate validation, cryptographic identity          │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────┐   1. SSO Login   ┌──────────┐
+│  User    │ ───────────────► │  Kanidm  │
+│          │ ◄─────────────── │          │
+└────┬─────┘   2. ID Token    └──────────┘
+     │
+     │ 3. Present token
+     ▼
+┌──────────┐
+│  StepCA  │  Validates token, issues cert with identity
+└────┬─────┘
+     │
+     │ 4. X.509 Certificate (identity in CN/SAN)
+     ▼
+   Client has PKI credential tied to OIDC identity
+```
+
+### Components
+
+| Component | Role | Notes |
+|-----------|------|-------|
+| **Kanidm** | Identity source | OIDC provider, user auth, groups, 2FA, Unix PAM/NSS |
+| **StepCA** | Certificate Authority | Issues certs, OIDC provisioner validates tokens before issuance |
+| **mTLS** | Transport auth | Services verify client certs, no per-request token exchange |
+
+### StepCA Provisioners
+
+| Type | Use case |
+|------|----------|
+| **OIDC** | User certs - browser SSO flow, identity from token |
+| **JWK** | Service/machine certs - password or automated |
+| **ACME** | Web server certs - standard Let's Encrypt flow |
+
+### Trust Flow
+
+```
+Kanidm (identity authority)
+       │
+       │ signs ID tokens (RFC 9068 JWT)
+       ▼
+   StepCA (validates tokens, issues certs)
+       │
+       │ signs X.509 certs
+       ▼
+   Services (validate certs via CA trust)
+```
+
+### Access Patterns
+
+| Scenario | Auth method |
+|----------|-------------|
+| User → Web app | OIDC (browser SSO) |
+| User → SSH/socket | Client cert (issued via OIDC flow) |
+| Machine → Machine | mTLS (certs from JWK provisioner) |
+| Service → Postgres | mTLS (cert CN = service identity) |
+| External → Web | ACME certs (public TLS) |
+
+### Decisions
+
+- **OIDC Provider**: Kanidm
+- **Certificate lifetime**: Short-lived (24h) for users, longer for services
+- **Revocation**: CRL or OCSP via StepCA
+- **Bootstrap**: JWK provisioner for initial machine enrollment
+
+### Why Kanidm?
+
+| | Kanidm | Authentik | Keycloak |
+|---|--------|-----------|----------|
+| **Language** | Rust | Python | Java |
+| **RAM** | ~50-100MB | ~500MB | ~1GB+ |
+| **Database** | Built-in | PostgreSQL + Redis | PostgreSQL |
+| **NixOS** | Native module, declarative | Container | Container |
+| **Unix auth** | PAM/NSS native | Weak | Weak |
+| **Config** | Nix/CLI | Web UI + YAML | Web UI |
+
+- Declarative OAuth2 clients in Nix config
+- No external database dependencies
+- Lightweight (Rust, built-in DB)
+- Unix-first (SSH, sudo via PAM/NSS)
+- Strict security defaults (PKCE required)
 
 ## Network
 
