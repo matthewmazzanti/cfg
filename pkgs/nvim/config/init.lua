@@ -107,6 +107,17 @@ vim.keymap.set("n", "<leader>n", function()
   vim.cmd.nohlsearch()
 end)
 
+-- Toggle relative line numbers (useful for screen sharing)
+local function toggle_relativenumber()
+  local rnu = not vim.opt.relativenumber:get()
+  vim.opt.relativenumber = rnu
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    vim.wo[win].relativenumber = rnu
+  end
+end
+vim.api.nvim_create_user_command("Share", toggle_relativenumber, {})
+vim.keymap.set("n", "<leader>r", toggle_relativenumber)
+
 -- Copy to system clipboard where available
 vim.opt.clipboard = "unnamedplus"
 
