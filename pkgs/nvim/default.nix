@@ -109,7 +109,7 @@
         vim.opt_local.colorcolumn = "89"
         vim.opt_local.textwidth = 88
       end
-      vim.opt_local.conceallevel = 2
+      -- vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
     nu = four-space;
@@ -166,6 +166,7 @@
 
         # Visual enhancements
         lualine-nvim
+        render-markdown-nvim
 
         # Picker
         fzf-lua
@@ -237,6 +238,7 @@
         ./config/sandwich.lua
         ./config/fzf.lua
         ./config/easyclip.lua
+        ./config/markdown.lua
       ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
