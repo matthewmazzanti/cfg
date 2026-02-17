@@ -89,4 +89,10 @@ in {
     specialArgs.flake = flakeArgs.${darwin};
     modules = [ ./delta ];
   };
+
+  home."mcarta@delta" = hmConfig {
+    pkgs = systemPkgs.${darwin};
+    extraSpecialArgs.flake = flakeArgs.${darwin};
+    modules = [ ./delta/home.nix ];
+  };
 }

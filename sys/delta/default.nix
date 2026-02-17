@@ -2,18 +2,7 @@
   pkgs,
   flake,
   ...
-}: let
-  updateScript = pkgs.writeShellScriptBin "update" ''
-    set -e
-    darwin-rebuild --flake "$HOME/src/nix/cfg#delta" switch
-
-    # Update zsh completion cache on next start
-    dumpfile="$HOME/.cache/zsh/zcompdump"
-    if [ -e "$dumpfile" ]; then
-      rm "$dumpfile"
-    fi
-  '';
-in {
+}: {
   # environment.systemPackages = [];
   users.users.mcarta.packages =
     (with pkgs; [
@@ -32,13 +21,14 @@ in {
       wget
       curl
       nix-tree
-      coreutils
+      # coreutils
       direnv
+      eza
     ])
     ++ [
-      updateScript
       flake.packages."nvim/dev"
       flake.packages."zsh/dev"
+      flake.packages.home-manager
     ];
 
   environment.darwinConfig = "$HOME/src/nix/cfg";
