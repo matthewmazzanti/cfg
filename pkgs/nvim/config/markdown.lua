@@ -32,6 +32,7 @@ vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { link = "GruvboxPurpleSign" })
 
 require("render-markdown").setup({
   debounce = 50,
+  anti_conceal = { enabled = false },
   sign = { enabled = false },
   heading = {
     position = "inline",
