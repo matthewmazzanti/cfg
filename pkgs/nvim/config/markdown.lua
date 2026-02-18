@@ -17,8 +17,10 @@ vim.api.nvim_set_hl(0, "@markup.heading.4.markdown", { link = "GruvboxGreenBold"
 vim.api.nvim_set_hl(0, "@markup.heading.5.markdown", { link = "GruvboxAquaBold" })
 vim.api.nvim_set_hl(0, "@markup.heading.6.markdown", { link = "GruvboxPurpleBold" })
 
--- Code block background
-vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = require("gruvbox").palette.dark0_soft })
+-- Code blocks
+local palette = require("gruvbox").palette
+vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = palette.dark0_soft })
+vim.api.nvim_set_hl(0, "RenderMarkdownCodeLanguage", { fg = palette.gray, bg = palette.dark0_soft })
 
 -- Override heading backgrounds (defaults use Diff* which looks odd)
 vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { link = "GruvboxRedSign" })
@@ -32,9 +34,11 @@ require("render-markdown").setup({
   debounce = 50,
   sign = { enabled = false },
   heading = {
-    icons = {},
+    position = "inline",
+    icons = { "| ", "| ", "| ", "| ", "| ", "| " },
   },
   code = {
     border = "thick",
+    highlight_language = "RenderMarkdownCodeLanguage",
   },
 })
