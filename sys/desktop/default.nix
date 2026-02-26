@@ -34,7 +34,9 @@
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
-    discord
+    (discord.override {
+      commandLineArgs = "--force-device-scale-factor=1";
+    })
     eza
   ];
 
