@@ -69,5 +69,16 @@
   # For video drivers and stuff
   programs.steam.enable = true;
 
+  services.power-profiles-daemon.enable = false;
   powerManagement.cpuFreqGovernor = "performance";
+
+  # GPU performance mode
+  systemd.services.gpu-performance = {
+    description = "Set GPU to performance mode";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash ${./gpu_performance.sh}";
+    };
+  };
 }
