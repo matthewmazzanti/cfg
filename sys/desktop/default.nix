@@ -35,6 +35,7 @@
     nixos-rebuild-ng
     direnv
     discord
+    eza
   ];
 
 
@@ -67,4 +68,6 @@
 
   # For video drivers and stuff
   programs.steam.enable = true;
+
+  powerManagement.cpuFreqGovernor = "performance";
 }
