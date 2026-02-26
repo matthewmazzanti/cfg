@@ -1,5 +1,7 @@
 # TODO
 
+- 1password cli cleanup
+
 ## Infrastructure
 
 - [ ] Lock down network access within quadlets
@@ -40,3 +42,5 @@
 
 - [ ] Run on second interface to allow native port 22
   - Requires setting up static addressing and multiple addresses for the server
+
+
