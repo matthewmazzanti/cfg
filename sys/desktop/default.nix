@@ -68,6 +68,7 @@
 
   # For video drivers and stuff
   programs.steam.enable = true;
+  programs.gamescope.enable = true;
 
   services.power-profiles-daemon.enable = false;
   powerManagement.cpuFreqGovernor = "performance";
