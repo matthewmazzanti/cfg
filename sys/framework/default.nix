@@ -71,4 +71,7 @@
   services.fprintd.enable = true;
   # Enable non-nix binaries, like uv
   programs.nix-ld.enable = true;
+
+  # Gaming
+  programs.steam.enable = true;
 }

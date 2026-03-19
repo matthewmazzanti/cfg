@@ -38,6 +38,7 @@
       commandLineArgs = "--force-device-scale-factor=1";
     })
     eza
+    btop
   ];
 
 
