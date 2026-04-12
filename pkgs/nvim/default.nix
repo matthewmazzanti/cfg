@@ -35,7 +35,7 @@
       optionals opts.langs.c [ccls]
       ++ optionals opts.langs.go [gopls]
       ++ optionals opts.langs.haskell [haskell-language-server]
-      ++ optionals opts.langs.web [nodePackages.typescript-language-server]
+      ++ optionals opts.langs.web [typescript-language-server]
       ++ optionals opts.langs.lua [lua-language-server]
       ++ optionals opts.langs.nix [
         # nil

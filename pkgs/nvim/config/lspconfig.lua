@@ -1,4 +1,4 @@
-vim.lsp.set_log_level("debug")
+vim.lsp.log.set_level("debug")
 
 -- PLUGIN: lsp_config
 -- HOMEPAGE: https://github.com/neovim/nvim-lspconfig
