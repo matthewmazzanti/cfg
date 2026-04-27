@@ -8,6 +8,7 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "*",
   callback = function()
     pcall(vim.treesitter.start)
+    if vim.bo.filetype == "markdown" then return end
     vim.bo.indentexpr = 'v:lua.require("nvim-treesitter").indentexpr()'
   end,
 })
@@ -23,8 +24,8 @@ require("nvim-treesitter-textobjects").setup({
 
 local textobjects_select = require("nvim-treesitter-textobjects.select")
 local mappings = {
-  am = "@function.outer",
-  im = "@function.inner",
+  af = "@function.outer",
+  ["if"] = "@function.inner",
   aC = "@class.outer",
   iC = "@class.inner",
   ac = "@comment.outer",
