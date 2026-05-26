@@ -51,6 +51,7 @@
       spotify
       element-desktop
       claude-code
+      proton-pass
     ];
   };
 

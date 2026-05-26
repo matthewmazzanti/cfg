@@ -9,8 +9,9 @@
   boot.initrd.systemd.enable = true;
 
   # Select versions for kernel/zfs explicitly
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_18;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_7_0;
   boot.zfs.package = pkgs.zfs_2_4;
+  boot.zfs.forceImportRoot = false;
 
   # Console stuff
   i18n.defaultLocale = "en_US.UTF-8";
