@@ -208,7 +208,6 @@
         nvim-treesitter-textobjects # Treesitter powered textobjects
         nvim-ts-autotag # Auto XML/HTML tag closing
         treesj # Split/Join list structures
-        # hop-nvim # Visual interactive jumps using treesitter
       ]
       ++ optionals opts.lsp [
         # Language server configurations
