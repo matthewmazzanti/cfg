@@ -31,7 +31,8 @@ local defaults = {
 
 local function setup(server, extra)
   -- Check that server binary exists, otherwise don't configure
-  if vim.fn.executable(vim.lsp.config[server].cmd[1]) ~= 1 then
+  local cmd = vim.lsp.config[server].cmd
+  if type(cmd) == "table" and vim.fn.executable(cmd[1]) ~= 1 then
     return
   end
   vim.lsp.config(server, vim.tbl_extend("force", defaults, extra or {}))
