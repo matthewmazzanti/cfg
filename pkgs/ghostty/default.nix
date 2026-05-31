@@ -77,6 +77,7 @@ let
       title = quote " ";
       split-divider-color = "#a89984";
       unfocused-split-fill = "#504945";
+      gtk-titlebar-style = "tabs";
     };
 
   config = base // platformConfig // extraConfig;
