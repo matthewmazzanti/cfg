@@ -30,7 +30,10 @@
   opts = lib.attrsets.recursiveUpdate baseOptions options;
 
   packages = with pkgs; (
-    [fd]
+    [
+      fd
+      inotify-tools
+    ]
     ++ optionals (opts.plugins && opts.lsp) (
       optionals opts.langs.c [ccls]
       ++ optionals opts.langs.go [gopls]

@@ -74,7 +74,6 @@ let
       font-variation = "wght=400";
       font-variation-bold = "wght=600";
       adjust-cell-width = "-1";
-      title = quote " ";
       split-divider-color = "#a89984";
       unfocused-split-fill = "#504945";
       gtk-titlebar-style = "tabs";
