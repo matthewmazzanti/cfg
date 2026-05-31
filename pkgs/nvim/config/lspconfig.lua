@@ -21,30 +21,6 @@ vim.lsp.config("*", {
       },
     },
   },
-  on_attach = function(_client, bufnr)
-    local function set(mode, keys, fn)
-      vim.keymap.set(mode, keys, fn, { buffer = bufnr, silent = true })
-    end
-
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local ok, fzf = pcall(require, "fzf-lua")
-    if ok then
-      set("n", "gd", fzf.lsp_definitions)
-      set("n", "gD", fzf.lsp_typedefs)
-      set("n", "gi", fzf.lsp_implementations)
-      set("n", "gr", fzf.lsp_references)
-    else
-      set("n", "gd", vim.lsp.buf.definition)
-      set("n", "gD", vim.lsp.buf.type_definition)
-      set("n", "gi", vim.lsp.buf.implementation)
-      set("n", "gr", vim.lsp.buf.references)
-    end
-
-    -- TODO: For lua, would be nicer to have K open the help document
-    set("n", "K", vim.lsp.buf.hover)
-    set("n", "<C-k>", vim.lsp.buf.signature_help)
-    set("n", "<leader>r", vim.lsp.buf.rename)
-  end,
 })
 
 vim.lsp.config("pyright", {
@@ -110,6 +86,39 @@ vim.lsp.enable({
   "pyright",
   -- "rust_analyzer",
   "lua_ls",
+})
+
+-- Buffer-local LSP keymaps. These MUST live in an LspAttach autocmd, not in an
+-- `on_attach` on the "*" config: config merge (`:help lsp-config-merge`) uses
+-- tbl_deep_extend("force"), and `on_attach` is a function, so a server-shipped
+-- `lsp/<name>.lua` that defines its own `on_attach` (e.g. nvim-lspconfig's
+-- pyright, which registers user commands) *replaces* the "*" one outright --
+-- silently dropping these maps. LspAttach fires on every attach regardless.
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local function set(mode, keys, fn)
+      vim.keymap.set(mode, keys, fn, { buffer = args.buf, silent = true })
+    end
+
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local ok, fzf = pcall(require, "fzf-lua")
+    if ok then
+      set("n", "gd", fzf.lsp_definitions)
+      set("n", "gD", fzf.lsp_typedefs)
+      set("n", "gi", fzf.lsp_implementations)
+      set("n", "gr", fzf.lsp_references)
+    else
+      set("n", "gd", vim.lsp.buf.definition)
+      set("n", "gD", vim.lsp.buf.type_definition)
+      set("n", "gi", vim.lsp.buf.implementation)
+      set("n", "gr", vim.lsp.buf.references)
+    end
+
+    -- TODO: For lua, would be nicer to have K open the help document
+    set("n", "K", vim.lsp.buf.hover)
+    set("n", "<C-k>", vim.lsp.buf.signature_help)
+    set("n", "<leader>r", vim.lsp.buf.rename)
+  end,
 })
 
 local symbol = vim.env.TERM == "linux" and "*" or "●"
