@@ -1,11 +1,14 @@
 {
   pkgs,
   lib,
+  system,
   stdenvNoCC,
   options ? {},
 }: let
   inherit (lib) optionals;
   inherit (lib.strings) concatMapStringsSep;
+
+  isLinux = lib.hasSuffix "linux" system;
 
   baseOptions = {
     plugins = false;
@@ -32,6 +35,7 @@
   packages = with pkgs; (
     [
       fd
+    ] ++ optionals isLinux [
       inotify-tools
     ]
     ++ optionals (opts.plugins && opts.lsp) (
