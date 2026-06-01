@@ -1,5 +1,7 @@
 # TODO
 
+- 1password cli cleanup
+
 ## Infrastructure
 
 - [ ] Lock down network access within quadlets
@@ -16,6 +18,7 @@
   - Nix -> config via composable libraries (nix/external scripts), not opaque modules
   - Possibly extract as standalone project
   - Support: neovim, zsh, ghostty, git, direnv, etc.
+  - Lightweight nix -> file format helpers (generalize ghostty format.nix pattern)
 - [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
 - [ ] Remove fake.nix things
 
@@ -40,3 +43,5 @@
 
 - [ ] Run on second interface to allow native port 22
   - Requires setting up static addressing and multiple addresses for the server
+
+

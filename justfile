@@ -1,5 +1,5 @@
 update:
-    nix flake lock
+    nix flake update
     lock-images --json lib/images.json --write
 
 upgrade: upgrade-system upgrade-home

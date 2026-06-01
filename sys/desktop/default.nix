@@ -34,7 +34,11 @@
     flake.packages.home-manager
     nixos-rebuild-ng
     direnv
-    discord
+    (discord.override {
+      commandLineArgs = "--force-device-scale-factor=1";
+    })
+    eza
+    btop
   ];
 
 
@@ -67,4 +71,13 @@
 
   # For video drivers and stuff
   programs.steam.enable = true;
+  programs.gamescope.enable = true;
+
+  services.power-profiles-daemon.enable = false;
+  powerManagement.cpuFreqGovernor = "performance";
+
+  # GPU performance mode
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card*", DRIVERS=="amdgpu", RUN+="${pkgs.bash}/bin/bash ${./gpu_performance.sh} /sys$devpath"
+  '';
 }

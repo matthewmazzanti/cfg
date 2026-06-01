@@ -4,6 +4,9 @@ import hashlib
 def qwer():
     return
 
+def identity(x):
+    return x
+
 # This is some long
 # and complex
 # comment

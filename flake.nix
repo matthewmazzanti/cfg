@@ -14,6 +14,7 @@
 
     impermanence.url = "github:nix-community/impermanence";
     impermanence.inputs.nixpkgs.follows = "nixpkgs";
+    impermanence.inputs.home-manager.follows = "home-manager";
 
     quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 

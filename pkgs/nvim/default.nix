@@ -30,12 +30,15 @@
   opts = lib.attrsets.recursiveUpdate baseOptions options;
 
   packages = with pkgs; (
-    [fd]
+    [
+      fd
+      inotify-tools
+    ]
     ++ optionals (opts.plugins && opts.lsp) (
       optionals opts.langs.c [ccls]
       ++ optionals opts.langs.go [gopls]
       ++ optionals opts.langs.haskell [haskell-language-server]
-      ++ optionals opts.langs.web [nodePackages.typescript-language-server]
+      ++ optionals opts.langs.web [typescript-language-server]
       ++ optionals opts.langs.lua [lua-language-server]
       ++ optionals opts.langs.nix [
         # nil
@@ -175,9 +178,9 @@
         # Misc
         vim-fugitive # Git management
         vim-signature # Show marks
-        vim-wordmotion # CamelCase and other motions
+        nvim-spider # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
-        vim-sandwich # Surround
+        nvim-surround # Surround
         # readline-vim # cli keybinds
         fidget-nvim
 
@@ -208,7 +211,6 @@
         nvim-treesitter-textobjects # Treesitter powered textobjects
         nvim-ts-autotag # Auto XML/HTML tag closing
         treesj # Split/Join list structures
-        # hop-nvim # Visual interactive jumps using treesitter
       ]
       ++ optionals opts.lsp [
         # Language server configurations
@@ -236,9 +238,10 @@
         ./config/input.lua
         ./config/fidget.lua
         ./config/lualine.lua
-        ./config/sandwich.lua
+        ./config/surround.lua
         ./config/fzf.lua
         ./config/easyclip.lua
+        ./config/spider.lua
         ./config/markdown.lua
       ]
       ++ optionals opts.treesitter [

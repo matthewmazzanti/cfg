@@ -65,4 +65,5 @@ in nu // {
     direnv = inputs.direnv-patched.packages.${system}.default;
   };
   "less/dev" = pkgs.callPackage ./less {};
+  "ghostty/config" = pkgs.callPackage ./ghostty { inherit system; };
 }

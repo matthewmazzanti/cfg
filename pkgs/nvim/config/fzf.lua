@@ -2,7 +2,7 @@ local fzf = require("fzf-lua")
 local actions = fzf.actions
 
 ---@diagnostic disable-next-line: undefined-field
-local border = vim.opt.winborder:get()
+local border = vim.opt.winborder:get()[1]
 
 fzf.setup({
   winopts = {

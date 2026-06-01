@@ -3,8 +3,9 @@
     username = "mcarta";
     homeDirectory = "/Users/mcarta";
 
-    # TODO: Wrapper
-    file.".config/ghostty/config".source = ./config/ghostty.config;
+    file.".config/ghostty/config".source = flake.packages."ghostty/config".override {
+      extraConfig = { command = "/etc/profiles/per-user/mcarta/bin/zsh"; };
+    };
     # TODO: Wrapper
     file.".config/direnv/lib/nix-direnv.sh".source = "${flake.packages.nix-direnv}/share/nix-direnv/direnvrc";
 

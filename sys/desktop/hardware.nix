@@ -1,29 +1,42 @@
 {
   config,
   lib,
+  utils,
   modulesPath,
   ...
 }: {
   imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "nvme"
-    "usb_storage"
-    "usbhid"
-    "sd_mod"
-  ];
-  boot.initrd.supportedFilesystems = [];
-  boot.initrd.kernelModules = [];
+  boot.initrd = let
+    luksUuid = "8da62c32-7525-4ce6-a493-b4fc149e5421";
+    cryptsetupUnit = "systemd-cryptsetup@${utils.escapeSystemdPath luksUuid}.service";
+  in {
+    availableKernelModules = [
+      "xhci_pci"
+      "nvme"
+      "usb_storage"
+      "usbhid"
+      "sd_mod"
+    ];
+
+    supportedFilesystems = [];
+    kernelModules = [];
+
+    luks.devices.${luksUuid} = {
+      device = "/dev/disk/by-uuid/${luksUuid}";
+      bypassWorkqueues = true;
+      allowDiscards = true;
+    };
+
+    systemd.services."zfs-import-root-pool" = {
+      after = [ cryptsetupUnit ];
+      requires = [ cryptsetupUnit ];
+    };
+  };
+
   boot.supportedFilesystems = [];
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
-
-  boot.initrd.luks.devices."8da62c32-7525-4ce6-a493-b4fc149e5421" = {
-    device = "/dev/disk/by-uuid/8da62c32-7525-4ce6-a493-b4fc149e5421";
-    bypassWorkqueues = true;
-    allowDiscards = true;
-  };
 
   swapDevices = [
     {
