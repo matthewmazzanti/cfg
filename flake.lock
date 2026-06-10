@@ -352,11 +352,11 @@
     "switchbot-ble": {
       "flake": false,
       "locked": {
-        "lastModified": 1781062875,
-        "narHash": "sha256-R1MxmHuE9xsgTntLSNvC1kXXpq0qEhsj9EDrCQKcD2g=",
+        "lastModified": 1781094964,
+        "narHash": "sha256-Syl+PPPW34wwwmfMW6z8DGxmCr0vrJ9uNbu+hlFlV2I=",
         "owner": "matthewmazzanti",
         "repo": "switchbot_ble",
-        "rev": "2ee51f4191a959cbcfbb3b282128e2a0186b42d3",
+        "rev": "d9fe92873ffd52545be6b7a109ae1e40a08a6664",
         "type": "github"
       },
       "original": {
