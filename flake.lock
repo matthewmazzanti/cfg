@@ -308,6 +308,7 @@
         "nixpkgs": "nixpkgs_2",
         "quadlet-nix": "quadlet-nix",
         "slider-entity-row": "slider-entity-row",
+        "switchbot-ble": "switchbot-ble",
         "vim-easyclip": "vim-easyclip"
       }
     },
@@ -345,6 +346,22 @@
       "original": {
         "owner": "thomasloven",
         "repo": "lovelace-slider-entity-row",
+        "type": "github"
+      }
+    },
+    "switchbot-ble": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781062875,
+        "narHash": "sha256-R1MxmHuE9xsgTntLSNvC1kXXpq0qEhsj9EDrCQKcD2g=",
+        "owner": "matthewmazzanti",
+        "repo": "switchbot_ble",
+        "rev": "2ee51f4191a959cbcfbb3b282128e2a0186b42d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "matthewmazzanti",
+        "repo": "switchbot_ble",
         "type": "github"
       }
     },

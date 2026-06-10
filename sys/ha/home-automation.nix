@@ -18,12 +18,6 @@
       options = [ "noatime" "nodiratime" ];
     };
 
-    "/var/lib/matter" = {
-      device = "root-pool/state/services/matter";
-      fsType = "zfs";
-      options = [ "noatime" "nodiratime" ];
-    };
-
     "/var/lib/zwave" = {
       device = "root-pool/state/services/zwave";
       fsType = "zfs";
@@ -84,29 +78,9 @@
             "/var/lib/hass:/config:rw"
             "${./configuration.yaml}:/config/configuration.yaml:ro"
             "${./macros.jinja}:/config/custom_templates/macros.jinja:ro"
-            "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
-          ];
-          environments = {
-            TZ = config.time.timeZone;
-          };
-        };
-      };
-
-      matter = {
-        unitConfig = {
-          After = [ "var-lib-matter.mount" ];
-          Requires = [ "var-lib-matter.mount" ];
-        };
-        containerConfig = {
-          name = "matter";
-          pod = "ha.pod";
-          image = flake.lib.images.matter;
-          addCapabilities = [ "FOWNER" "NET_RAW" ];
-          noNewPrivileges = true;
-          volumes = [
-            "/etc/localtime:/etc/localtime:ro"
-            "/var/lib/matter:/data"
+            "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
+            "${flake.inputs.switchbot-ble}/src/switchbot:/config/custom_components/switchbot:ro"
           ];
           environments = {
             TZ = config.time.timeZone;
