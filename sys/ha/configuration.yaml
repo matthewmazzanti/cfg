@@ -373,7 +373,7 @@ automation:
           - conditions: "{{button == buttons.bottom}}"
             sequence:
               - action: script.first_floor_low_lights_toggle
-          - conditions: "{{button == buttons.up}}" # Up Arrow: open all living room blinds to 50%
+          - conditions: "{{button == buttons.up}}" # Up Arrow: open all living room blinds to 50%, open kitchen curtains
             sequence:
               - action: cover.set_cover_tilt_position
                 target:
@@ -383,7 +383,12 @@ automation:
                     - cover.living_room_fire_right
                 data:
                   tilt_position: 50
-          - conditions: "{{button == buttons.down}}" # Down Arrow: close all living room blinds
+              - action: cover.open_cover
+                target:
+                  entity_id:
+                    - cover.kitchen_curtain_left
+                    - cover.kitchen_curtain_right
+          - conditions: "{{button == buttons.down}}" # Down Arrow: close all living room blinds, close kitchen curtains
             sequence:
               - action: cover.set_cover_tilt_position
                 target:
@@ -393,6 +398,11 @@ automation:
                     - cover.living_room_fire_right
                 data:
                   tilt_position: 0
+              - action: cover.close_cover
+                target:
+                  entity_id:
+                    - cover.kitchen_curtain_left
+                    - cover.kitchen_curtain_right
 
   - id: pico_master_bedroom
     alias: Master Bedroom Pico Handler
@@ -514,6 +524,11 @@ automation:
             - cover.living_room_fire_right
         data:
           tilt_position: 50
+      - service: cover.open_cover
+        target:
+          entity_id:
+            - cover.kitchen_curtain_left
+            - cover.kitchen_curtain_right
 
   - id: blinds_close_at_sunset
     alias: "Blinds: Close at sunset"
@@ -530,3 +545,27 @@ automation:
             - cover.living_room_fire_right
         data:
           tilt_position: 0
+      - service: cover.close_cover
+        target:
+          entity_id:
+            - cover.kitchen_curtain_left
+            - cover.kitchen_curtain_right
+
+  - id: blinds_close_back_sun_glare
+    alias: "Blinds: Close kitchen curtains on back-window glare"
+    mode: single
+    # back_sun_elevation is the profile angle (up from horizon) for the back
+    # window. The (0, 25) band = low sun roughly facing the glass = glare.
+    # The lower bound of 0 guards against firing when the sensor goes negative
+    # (sun below horizon / bad data).
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.back_sun_elevation
+        above: 0
+        below: 25
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id:
+            - cover.kitchen_curtain_left
+            - cover.kitchen_curtain_right
