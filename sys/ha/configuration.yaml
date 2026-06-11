@@ -555,14 +555,14 @@ automation:
     alias: "Blinds: Close kitchen curtains on back-window glare"
     mode: single
     # back_sun_elevation is the profile angle (up from horizon) for the back
-    # window. The (0, 25) band = low sun roughly facing the glass = glare.
+    # window. The (0, 35) band = low sun roughly facing the glass = glare.
     # The lower bound of 0 guards against firing when the sensor goes negative
     # (sun below horizon / bad data).
     triggers:
       - trigger: numeric_state
         entity_id: sensor.back_sun_elevation
         above: 0
-        below: 25
+        below: 35
     action:
       - service: cover.close_cover
         target:
