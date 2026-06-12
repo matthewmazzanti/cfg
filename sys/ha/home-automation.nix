@@ -1,4 +1,20 @@
-{ config, flake, ... }: {
+{ config, pkgs, flake, ... }:
+let
+  inherit (config.virtualisation.quadlet) builds;
+
+  # Pin the git commit of pyatv to inject into the Apple TV integration.
+  pyatvRef = "9177803dec6a165d4610d5d63fe09562820fccdb";
+  pyatvReq = "pyatv @ git+https://github.com/postlund/pyatv@${pyatvRef}";
+
+  # Build context for the hass override image. A dedicated store dir keeps the
+  # podman build context to just the Containerfile (no COPY needed).
+  hassBuildContext = pkgs.writeTextDir "Containerfile" ''
+    FROM ${flake.lib.images.hass}
+    RUN apk add --no-cache git \
+     && pip install --no-cache-dir --break-system-packages "${pyatvReq}" \
+     && python3 -c "import importlib.util,json,pathlib; r=pathlib.Path(importlib.util.find_spec('homeassistant').submodule_search_locations[0])/'components/apple_tv/manifest.json'; d=json.loads(r.read_text()); d['requirements']=['${pyatvReq}' if x.lower().startswith('pyatv') else x for x in d['requirements']]; r.write_text(json.dumps(d,indent=2)+chr(10))"
+  '';
+in {
   networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # Storage for containers
@@ -40,6 +56,18 @@
       dns = [ "172.18.0.1" ];
     };
 
+    # Override hass stable with a custom-built image that injects a git
+    # version of pyatv into the Apple TV integration manifest.
+    #
+    # Workaround for the Apple TV power off / power state issue introduced by
+    # tvOS 26.4: the Companion protocol stopped reliably reporting power state
+    # ("Could not fetch SystemStatus, power_state will not work"). The pinned
+    # pyatv commit carries the fix from
+    # https://github.com/postlund/pyatv/pull/2855 (TVRCSessionStart handshake +
+    # non-null system info identifier). Drop this override once a hass stable
+    # release ships a pyatv version that includes the fix.
+    builds.hass.buildConfig.file = "${hassBuildContext}/Containerfile";
+
     containers = {
       nginx = {
         unitConfig = {
@@ -69,7 +97,7 @@
         containerConfig = {
           name = "hass";
           pod = "ha.pod";
-          image = flake.lib.images.hass;
+          image = builds.hass.ref;
           addCapabilities = [ "FOWNER" "NET_RAW" ];
           noNewPrivileges = true;
           volumes = [
