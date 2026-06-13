@@ -102,11 +102,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781305496,
-        "narHash": "sha256-g8Vv4Qfc7n+lgov97REu3X6BeJtvYY0hlSUZR1GrGQQ=",
+        "lastModified": 1781365335,
+        "narHash": "sha256-zqDBhXMzfbdlO7F2bGHe7MOtB3xngd/+4ieMHDC+ZXo=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c87a39aa979acc4848016d2220c6238390d84779",
+        "rev": "5b6f5733726a1b2ccafb5dec6ac4ca7299fad66c",
         "type": "github"
       },
       "original": {
@@ -325,11 +325,11 @@
     "switchbot-ble": {
       "flake": false,
       "locked": {
-        "lastModified": 1781361156,
-        "narHash": "sha256-ly9a6+B3SqXj42JpRMGHzrhZHj/BsZoFePyCEfHjzqw=",
+        "lastModified": 1781366318,
+        "narHash": "sha256-BApNu6BTm9p62BH+Mk7HX5kwiKC7v/cmiTJgqb+mJOM=",
         "owner": "matthewmazzanti",
         "repo": "switchbot_ble",
-        "rev": "e3d2c4871a83173ece4824801da0be31feee6c70",
+        "rev": "9e9769c3a9b8991360abce77806a4ca9963e21fe",
         "type": "github"
       },
       "original": {
