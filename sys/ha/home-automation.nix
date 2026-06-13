@@ -108,7 +108,7 @@ in {
             "${./macros.jinja}:/config/custom_templates/macros.jinja:ro"
             "${./multicast_exec}:/config/custom_components/multicast_exec:ro"
             "${flake.inputs.slider-entity-row}:/config/www/slider-entity-row:ro"
-            "${flake.inputs.switchbot-ble}/src/switchbot:/config/custom_components/switchbot:ro"
+            "${flake.inputs.switchbot-ble}/custom_components/switchbot:/config/custom_components/switchbot:ro"
           ];
           environments = {
             TZ = config.time.timeZone;
