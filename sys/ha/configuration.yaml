@@ -541,8 +541,8 @@ automation:
           title: "💧 Water Leak Detected"
           message: >
             {{ device_attr(device_id(trigger.entity_id), 'name_by_user')
-               or device_attr(device_id(trigger.entity_id), 'name') }}
-            is reporting a water leak.
+               or device_attr(device_id(trigger.entity_id), 'name') }} is
+            reporting a water leak.
           data:
             tag: "appliance-alert-{{ trigger.entity_id }}"
             push:
