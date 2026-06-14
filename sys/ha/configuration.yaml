@@ -523,6 +523,31 @@ automation:
           entity_id:
             - cover.kitchen_curtain
 
+  - id: appliance_alert_notify
+    alias: "Appliance Alert: Notify iPhone"
+    mode: queued
+    triggers:
+      - trigger: state
+        entity_id:
+          - binary_sensor.dish_washer_alert
+          - binary_sensor.espresso_machine_alert
+          - binary_sensor.hvac_alert
+          - binary_sensor.washing_machine_alert
+          - binary_sensor.water_heater_alert
+        to: "on"
+    action:
+      - service: notify.mobile_app_matthews_iphone
+        data:
+          title: "💧 Water Leak Detected"
+          message: >
+            {{ device_attr(device_id(trigger.entity_id), 'name_by_user')
+               or device_attr(device_id(trigger.entity_id), 'name') }}
+            is reporting a water leak.
+          data:
+            tag: "appliance-alert-{{ trigger.entity_id }}"
+            push:
+              interruption-level: time-sensitive
+
   - id: blinds_close_back_sun_glare
     alias: "Blinds: Close kitchen curtains on back-window glare"
     mode: single
