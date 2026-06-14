@@ -529,12 +529,19 @@ automation:
     triggers:
       - trigger: state
         entity_id:
-          - binary_sensor.dish_washer_alert
-          - binary_sensor.espresso_machine_alert
-          - binary_sensor.hvac_alert
-          - binary_sensor.washing_machine_alert
-          - binary_sensor.water_heater_alert
-        to: "on"
+          - sensor.dish_washer_last_alert
+          - sensor.espresso_machine_last_alert
+          - sensor.hvac_last_alert
+          - sensor.washing_machine_last_alert
+          - sensor.water_heater_last_alert
+    conditions:
+      # Only fire on a genuine new alert, not on the unavailable -> value
+      # restore that happens on HA restart.
+      - condition: template
+        value_template: >
+          {{ trigger.from_state is not none
+             and trigger.from_state.state not in ['unknown', 'unavailable']
+             and trigger.to_state.state not in ['unknown', 'unavailable'] }}
     action:
       - service: notify.mobile_app_matthews_iphone
         data:
@@ -547,6 +554,38 @@ automation:
             tag: "appliance-alert-{{ trigger.entity_id }}"
             push:
               interruption-level: time-sensitive
+
+  - id: appliance_test_notify
+    alias: "Appliance Test: Notify iPhone"
+    mode: queued
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.dish_washer_last_test
+          - sensor.espresso_machine_last_test
+          - sensor.hvac_last_test
+          - sensor.washing_machine_last_test
+          - sensor.water_heater_last_test
+    conditions:
+      # Only fire on a genuine new test, not on the unavailable -> value
+      # restore that happens on HA restart.
+      - condition: template
+        value_template: >
+          {{ trigger.from_state is not none
+             and trigger.from_state.state not in ['unknown', 'unavailable']
+             and trigger.to_state.state not in ['unknown', 'unavailable'] }}
+    action:
+      - service: notify.mobile_app_matthews_iphone
+        data:
+          title: "🧪 Leak Sensor Test"
+          message: >
+            {{ device_attr(device_id(trigger.entity_id), 'name_by_user')
+               or device_attr(device_id(trigger.entity_id), 'name') }} ran a
+            leak sensor test.
+          data:
+            tag: "appliance-test-{{ trigger.entity_id }}"
+            push:
+              interruption-level: passive
 
   - id: blinds_close_back_sun_glare
     alias: "Blinds: Close kitchen curtains on back-window glare"
