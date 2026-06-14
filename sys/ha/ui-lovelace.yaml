@@ -1,0 +1,208 @@
+title: Home
+views:
+- title: First Floor
+  path: first_floor
+  type: masonry
+  icon: mdi:home-floor-1
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: heading
+      heading: Lamps & Switches
+    - type: tile
+      entity: switch.living_room_corner_lamp
+      name: All Lamps
+      icon: mdi:lamps
+      color: amber
+      tap_action:
+        action: perform-action
+        perform_action: switch.toggle
+        target:
+          entity_id:
+          - switch.living_room_corner_lamp
+          - switch.living_room_bookshelf_lamp
+          - switch.under_cabinet_lights
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: tile
+        entity: switch.living_room_corner_lamp
+        name: Corner Lamp
+        tap_action:
+          action: toggle
+      - type: tile
+        entity: switch.living_room_bookshelf_lamp
+        name: Bookshelf
+        tap_action:
+          action: toggle
+      - type: tile
+        entity: switch.under_cabinet_lights
+        name: Under Cabinet
+        tap_action:
+          action: toggle
+      - type: tile
+        entity: switch.espresso_machine
+        name: Espresso
+        tap_action:
+          action: toggle
+    - type: heading
+      heading: Climate
+    - type: thermostat
+      entity: climate.thermostat
+      features:
+      - type: climate-hvac-modes
+        hvac_modes:
+        - 'off'
+        - heat
+        - cool
+        - heat_cool
+  - type: vertical-stack
+    cards:
+    - type: heading
+      heading: Ceiling Lights
+    - type: tile
+      entity: light.living_room_lights
+      name: All Ceiling
+      icon: mdi:lightbulb-group
+      color: amber
+      tap_action:
+        action: perform-action
+        perform_action: light.toggle
+        target:
+          entity_id:
+          - light.living_room_lights
+          - light.kitchen_lights
+          - light.sink_lights_2
+          - light.dining_table_lights
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: tile
+        entity: light.living_room_lights
+        name: Living Room
+        features:
+        - type: light-brightness
+      - type: tile
+        entity: light.kitchen_lights
+        name: Kitchen
+        features:
+        - type: light-brightness
+      - type: tile
+        entity: light.sink_lights_2
+        name: Sink
+        features:
+        - type: light-brightness
+      - type: tile
+        entity: light.dining_table_lights
+        name: Dining
+        features:
+        - type: light-brightness
+    - type: tile
+      entity: light.island_lights
+      name: Island
+      features:
+      - type: light-brightness
+    - type: heading
+      heading: Media
+    - type: tile
+      entity: media_player.living_room
+      features:
+      - type: media-player-playback
+    - type: tile
+      entity: media_player.denon_avr_x1800h
+      name: Volume
+      features:
+      - type: media-player-volume-slider
+  - type: vertical-stack
+    cards:
+    - type: heading
+      heading: Blinds & Covers
+    - type: tile
+      entity: cover.kitchen_curtain
+      name: Close All
+      icon: mdi:blinds-horizontal-closed
+      color: blue-grey
+      tap_action:
+        action: perform-action
+        perform_action: cover.close_cover
+        target:
+          entity_id:
+          - cover.living_room_tv_left
+          - cover.living_room_fire_left
+          - cover.living_room_fire_right
+          - cover.kitchen_curtain
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: tile
+        entity: cover.living_room_tv_left
+        name: TV Left
+        features:
+        - type: cover-tilt-position
+      - type: tile
+        entity: cover.living_room_fire_left
+        name: Fire Left
+        features:
+        - type: cover-tilt-position
+      - type: tile
+        entity: cover.living_room_fire_right
+        name: Fire Right
+        features:
+        - type: cover-tilt-position
+      - type: tile
+        entity: cover.kitchen_curtain
+        name: Kitchen Curtain
+        features:
+        - type: cover-position
+    - type: heading
+      heading: Sensors
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: tile
+        entity: sensor.kitchen_curtain_left_battery
+        name: Curtain L
+      - type: tile
+        entity: sensor.kitchen_curtain_right_battery
+        name: Curtain R
+      - type: tile
+        entity: sensor.fire_left_battery
+        name: Fire L
+      - type: tile
+        entity: sensor.fire_right_battery
+        name: Fire R
+      - type: tile
+        entity: sensor.tv_left_battery
+        name: TV L
+- title: Second Floor
+  path: second_floor
+  type: masonry
+  icon: mdi:home-floor-2
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: heading
+      heading: Lamps & Switches
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: tile
+        entity: switch.mbr_lamp
+        name: Master Bedroom
+      - type: tile
+        entity: switch.office_lamp
+        name: Office
+  - type: vertical-stack
+    cards:
+    - type: heading
+      heading: Media
+    - type: tile
+      entity: media_player.master_bedroom
+      features:
+      - type: media-player-playback
+      - type: media-player-volume-slider

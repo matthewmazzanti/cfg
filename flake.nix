@@ -27,9 +27,6 @@
     vim-easyclip.flake = false;
 
     # Home assistant plugins
-    slider-entity-row.url = "github:thomasloven/lovelace-slider-entity-row";
-    slider-entity-row.flake = false;
-
     switchbot-ble.url = "github:matthewmazzanti/switchbot_ble";
     switchbot-ble.flake = false;
 

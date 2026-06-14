@@ -65,3 +65,14 @@ check-pyatv:
             | jq -r '.commits[] | "  \(.sha[0:9]) \(.commit.message | split("\n")[0])"'
         exit 1
     fi
+
+# Push a repo dashboard YAML to HA live via the websocket API (no restart). Needs
+# HASS_TOKEN or ~/.config/ha/token (URL defaults to https://hass.iot). The seed
+# baseline still wins on the next hass restart / rebuild, so commit to persist.
+push-ui file="sys/ha/ui-lovelace.yaml":
+    uv run scripts/lovelace.py push {{file}}
+
+# Pull HA's current dashboard config back into a repo YAML (captures live/UI edits
+# before a restart resets them to the committed baseline).
+pull-ui file="sys/ha/ui-lovelace.yaml":
+    uv run scripts/lovelace.py pull {{file}}
