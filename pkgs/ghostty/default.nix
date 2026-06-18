@@ -63,7 +63,7 @@ let
     then {
       font-size = "14";
       font-variation = "wght=450";
-      adjust-cell-width = "-2";
+      adjust-cell-width = "-1";
       adjust-underline-thickness = "2";
       macos-titlebar-style = "tabs";
       split-divider-color = "#504945";
