@@ -235,6 +235,7 @@
   init =
     [
       ./config/init.lua
+      ./config/autoread.lua
       ./config/gruvbox.lua
     ]
     ++ optionals opts.plugins (
