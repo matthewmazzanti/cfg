@@ -20,6 +20,7 @@ let
 
     font-family = quote "Fira Code";
     adjust-cell-height = "-2";
+    adjust-cell-width = "-1";
     adjust-cursor-thickness = "2";
 
     shell-integration = "zsh";
@@ -63,7 +64,6 @@ let
     then {
       font-size = "14";
       font-variation = "wght=450";
-      adjust-cell-width = "-1";
       adjust-underline-thickness = "2";
       macos-titlebar-style = "tabs";
       split-divider-color = "#504945";
@@ -73,7 +73,6 @@ let
       font-size = "11";
       font-variation = "wght=400";
       font-variation-bold = "wght=600";
-      adjust-cell-width = "-1";
       split-divider-color = "#a89984";
       unfocused-split-fill = "#504945";
       gtk-titlebar-style = "tabs";
