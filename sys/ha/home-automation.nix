@@ -97,7 +97,7 @@ in {
     # release ships a pyatv version that includes the fix.
     builds.hass.buildConfig.file = let
       # Pin the git commit of pyatv to inject into the Apple TV integration.
-      pyatvRef = "9177803dec6a165d4610d5d63fe09562820fccdb";
+      pyatvRef = "d88abc960e188d3cd2498d19117e75d7711d8600";
       pyatvReq = "pyatv @ git+https://github.com/postlund/pyatv@${pyatvRef}";
 
       # Build context for the hass override image. A dedicated store dir keeps the
