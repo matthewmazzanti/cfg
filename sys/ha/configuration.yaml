@@ -532,6 +532,7 @@ automation:
           - sensor.dish_washer_last_alert
           - sensor.espresso_machine_last_alert
           - sensor.hvac_last_alert
+          - sensor.sump_last_alert
           - sensor.washing_machine_last_alert
           - sensor.water_heater_last_alert
     conditions:
@@ -563,6 +564,7 @@ automation:
           - sensor.dish_washer_last_test
           - sensor.espresso_machine_last_test
           - sensor.hvac_last_test
+          - sensor.sump_last_test
           - sensor.washing_machine_last_test
           - sensor.water_heater_last_test
     conditions:
