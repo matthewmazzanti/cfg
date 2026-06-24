@@ -64,11 +64,34 @@ local function watch(bufnr)
   watchers[bufnr] = { handle = handle, timer = timer }
 
   local function reload()
-    if vim.api.nvim_buf_is_valid(bufnr) then
-      vim.api.nvim_buf_call(bufnr, function()
-        vim.cmd("checktime")
-      end)
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      return
     end
+    -- File gone from disk. Atomic-rename saves swap the inode but keep the
+    -- path readable, so this branch only fires on genuine deletes (rm, branch
+    -- switch, etc.) -- not on ordinary writes. Running checktime here would
+    -- error with E211 "File no longer available", so handle it ourselves.
+    if vim.fn.filereadable(path) == 0 then
+      -- The watch tracks an inode that's now unlinked -- it's dead either way
+      -- (the re-arm fails silently on the missing path), so stop it first
+      -- regardless of what we do with the buffer.
+      unwatch(bufnr)
+      if vim.bo[bufnr].modified then
+        -- The buffer holds the only copy of unsaved edits. Never discard it;
+        -- warn and keep it so :w can recreate the file.
+        vim.notify(
+          ("autoread: %s deleted on disk; buffer kept (modified). :w to restore."):format(path),
+          vim.log.levels.WARN
+        )
+        return
+      end
+      -- Unmodified: the buffer just mirrors a file that no longer exists.
+      vim.api.nvim_buf_delete(bufnr, { force = false })
+      return
+    end
+    vim.api.nvim_buf_call(bufnr, function()
+      vim.cmd("checktime")
+    end)
   end
 
   local function arm()
