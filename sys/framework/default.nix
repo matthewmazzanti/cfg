@@ -52,6 +52,7 @@
       element-desktop
       claude-code
       proton-pass
+      protonmail-desktop
     ];
   };
 

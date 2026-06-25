@@ -58,6 +58,7 @@
         neovim-unwrapped.lua
         uv
         just
+        hello
       ];
     });
 
