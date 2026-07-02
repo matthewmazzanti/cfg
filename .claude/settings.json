@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/direnv-reload.sh"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/direnv-session.sh"
           }
         ]
       }
@@ -22,7 +22,7 @@
     ],
     "FileChanged": [
       {
-        "matcher": ".envrc|flake.nix|flake.lock",
+        "matcher": ".envrc",
         "hooks": [
           {
             "type": "command",

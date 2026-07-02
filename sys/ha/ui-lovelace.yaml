@@ -148,15 +148,15 @@ views:
         features:
         - type: cover-tilt-position
       - type: tile
-        entity: cover.living_room_fire_right
-        name: Fire Right
-        features:
-        - type: cover-tilt-position
-      - type: tile
         entity: cover.kitchen_curtain
         name: Kitchen Curtain
         features:
         - type: cover-position
+      - type: tile
+        entity: cover.living_room_fire_right
+        name: Fire Right
+        features:
+        - type: cover-tilt-position
     - type: heading
       heading: Sensors
     - type: grid
