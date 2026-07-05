@@ -5,8 +5,9 @@ pair, FORWARD-ONLY (never a downgrade).
 Run as part of `just update` (after `nix flake update`), so the bump moves in
 lock-step with the flake.lock nixpkgs bump and lands as a reviewable git diff.
 base.nix reads the pins via `flake.lib.pins`, mirroring the lib/images.json +
-lock-images pattern -- including the CLI: `--json <file>` selects the pins file
-and `--write` overwrites it; without `--write` the resolved JSON is printed.
+lock-images pattern -- including the CLI: `--flake <ref>` is the flake exposing
+lib.zfsKernelMatrix, `--json <file>` selects the pins file, and `--write`
+overwrites it; without `--write` the resolved JSON is printed.
 
 lib/zfs-kernel-matrix.nix is a pure projection: the zfs x linux pairs whose
 module isn't broken, with versions. All the policy -- the forward-only floor and
@@ -21,9 +22,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-
-ROOT = Path(__file__).resolve().parent.parent
-PINS = ROOT / "lib" / "pins.json"
 
 Version = tuple[int, int, int]
 
@@ -90,14 +88,14 @@ def nix(*args: str) -> str:
     ).stdout.strip()
 
 
-def matrix() -> list[Compat]:
+def matrix(flake: str) -> list[Compat]:
     """Evaluate the zfs x linux compatibility projection from the flake output.
 
     Pure eval (no --impure): the flake exposes `lib.zfsKernelMatrix.<system>`, so
     we address it as an installable rather than getFlake-ing a mutable path.
     x86_64-linux is hardcoded -- every host running this is x86_64 linux (the
     output is defined for all systems regardless)."""
-    rows = json.loads(nix("eval", "--json", f"{ROOT}#lib.zfsKernelMatrix.x86_64-linux"))
+    rows = json.loads(nix("eval", "--json", f"{flake}#lib.zfsKernelMatrix.x86_64-linux"))
     return [Compat.from_json(r) for r in rows]
 
 
@@ -109,7 +107,8 @@ def log(msg: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Bump kernel/zfs pins forward-only.")
-    parser.add_argument("--json", type=Path, default=PINS, help="Pins JSON file")
+    parser.add_argument("--flake", required=True, help="Flake ref exposing lib.zfsKernelMatrix")
+    parser.add_argument("--json", type=Path, required=True, help="Pins JSON file")
     parser.add_argument("--write", action="store_true", help="Overwrite the pins JSON file")
     args = parser.parse_args()
 
@@ -120,7 +119,7 @@ def main() -> int:
     # Forward-only: only pairs at or above the current pins in both dimensions.
     # The floor is the pinned version itself -- no longer derived from the attr.
     rows = [
-        c for c in matrix()
+        c for c in matrix(args.flake)
         if c.kernel.version >= current.kernel.version
         and c.zfs.version >= current.zfs.version
     ]
