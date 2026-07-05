@@ -22,6 +22,12 @@
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
 
+  # Cap ZFS ARC at 8GiB so it doesn't compete with games for memory
+  # (OpenZFS 2.2+ defaults to all RAM minus 1GiB)
+  boot.kernelParams = [ "zfs.zfs_arc_max=8589934592" ];
+  # Keep game pages resident under memory pressure
+  boot.kernel.sysctl."vm.swappiness" = 10;
+
   # Packages
   environment.systemPackages = with pkgs; [
     firefox

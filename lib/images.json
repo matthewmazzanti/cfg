@@ -1,7 +1,7 @@
 {
-  "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:adb3341e31e03e0048e60d8c1cf952e118a381ae258bb921d3da12a3b27bf0c2",
+  "hass": "ghcr.io/home-assistant/home-assistant:stable@sha256:f73512ba4fe06bb4d57636fe3578d0820cdec46f81e8f837ab59e451662ff3cb",
   "zwave": "docker.io/zwavejs/zwave-js-ui:latest@sha256:1193b96b31488e5a6c7895f16a27b2ead38f8a0c3d1bec335bb10b6d9f9e2905",
-  "nginx": "docker.io/library/nginx:latest@sha256:424939d458e28153a78d9a4a8d60e8fae5eae35e84a2d92a43d153d1f92c171c",
+  "nginx": "docker.io/library/nginx:latest@sha256:ec4ed8b5299e5e90694af7750eb6dffd2627317d30544d056b0371f8082f7bce",
   "gitea": "docker.io/gitea/gitea:latest-rootless@sha256:cd1d2614b403fc9b085fa52ceb4424dde9c4dcf5da8e3263abb27955562070c4",
   "jellyfin": "docker.io/jellyfin/jellyfin:latest@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db",
   "kiwix": "ghcr.io/kiwix/kiwix-serve:latest@sha256:12df8dc8fb6d030af38e7733e846d4f4c9a0eb3302777e4e2e52337bf86e2fb7"
