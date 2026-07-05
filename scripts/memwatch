@@ -53,10 +53,14 @@ temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -;
 # Known Source/Source2 game binaries to track; first match wins
 game_pid() { pgrep -x cs2 || pgrep -x dota2 || pgrep -x hl2_linux || true; }
 
-printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s\n' \
+printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s %8s\n' \
     TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB \
     GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS \
-    DIRTY_MB SLAB_MB CTXT_K GAME_MAJF GAME_WAIT
+    DIRTY_MB SLAB_MB CTXT_K GAME_MAJF GAME_WAIT GAME_FPS
+
+# GAME_FPS comes from the Mesa Vulkan overlay layer logging to this file; see
+# docs/cs2-session-runbook.txt for the launch-line env vars that enable it.
+fps_file=/tmp/cs2-fps.log
 
 # Delta state (GAME_MAJF = major faults this interval; GAME_WAIT = ms the
 # game spent runnable-but-waiting-for-CPU this interval; CTXT_K = context
@@ -125,11 +129,20 @@ while true; do
         prev_pid=""
     fi
 
-    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s\n' \
+    # Last FPS sample from the Mesa overlay layer, if fresh (game running with
+    # the layer enabled); first numeric field of the last line, format-tolerant
+    game_fps=-
+    if [[ -r "$fps_file" ]] && (( $(date +%s) - $(stat -c %Y "$fps_file") < interval * 3 )); then
+        game_fps=$(tail -1 "$fps_file" | awk '{for (i = 1; i <= NF; i++) {
+            v = $i + 0; if (v > 0) { printf "%d", v; exit } }}')
+        [[ -n "$game_fps" ]] || game_fps=-
+    fi
+
+    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s %8s\n' \
         "$(date +%T)" "$avail" "$arc" "$psi" \
         "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
         "$sclk" "$fan" "$busy" "$vram" "$gtt" \
         "$game_rss" "$game_vram" "$game_fd" "$game_thr" "$webhlp_rss" \
-        "$dirty" "$slab" "$ctxt_k" "$game_majf" "$game_wait"
+        "$dirty" "$slab" "$ctxt_k" "$game_majf" "$game_wait" "$game_fps"
     sleep "$interval"
 done

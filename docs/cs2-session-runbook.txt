@@ -3,7 +3,10 @@ CS2 diagnostic session runbook
 
 Steam launch options (CS2 > Properties > General > Launch Options — paste as-is):
 
-gamescope -W 3840 -H 2160 -r 60 --force-grab-cursor -f -- gamemoderun %command% -novid +fps_max 120 -condebug -conclearlog
+gamescope -W 3840 -H 2160 -r 60 --force-grab-cursor -f -- gamemoderun env VK_LOADER_LAYERS_ENABLE=VK_LAYER_MESA_overlay VK_LAYER_MESA_OVERLAY_CONFIG=fps,no_display,output_file=/tmp/cs2-fps.log %command% -novid +fps_max 120 -condebug -conclearlog
+
+(The VK_LAYER_MESA_overlay bits log the game's real render FPS to /tmp/cs2-fps.log
+with no on-screen overlay; memwatch picks it up as the GAME_FPS column.)
 
 Experiment queue (ONE knob per session, in order):
   [ ] A: Steam overlay OFF   (CS2 > Properties > General > untick overlay)
