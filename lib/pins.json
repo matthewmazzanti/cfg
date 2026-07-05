@@ -1,0 +1,10 @@
+{
+  "kernel": {
+    "attr": "linux_7_0",
+    "version": "7.0.14"
+  },
+  "zfs": {
+    "attr": "zfs_2_4",
+    "version": "2.4.3"
+  }
+}

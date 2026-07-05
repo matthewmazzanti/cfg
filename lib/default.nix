@@ -27,4 +27,12 @@ in rec {
 
   keys = import ./keys;
   images = importJSON ./images.json;
+  # Kernel/zfs package-attr pins, bumped forward-only by `bump-kernel`.
+  pins = importJSON ./pins.json;
+  # zfs x linux compatibility matrix per system, read by bin/bump-kernel via
+  # `.#lib.zfsKernelMatrix.<system>` so it can eval purely (no --impure). Defined
+  # for every system -- the projection is guarded and evals everywhere; non-linux
+  # results are irrelevant and unread (bump-kernel only queries the linux host).
+  zfsKernelMatrix = eachSystem ({ pkgs, ... }:
+    import ./zfs-kernel-matrix.nix { inherit pkgs; });
 }

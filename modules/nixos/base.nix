@@ -8,9 +8,11 @@
   # Use systemd in initrd
   boot.initrd.systemd.enable = true;
 
-  # Select versions for kernel/zfs explicitly
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_7_0;
-  boot.zfs.package = pkgs.zfs_2_4;
+  # Kernel/zfs pinned explicitly (in lib/pins.json) so a nixpkgs bump can't
+  # silently regress them under our ZFS pools. `bump-kernel` (run by `just
+  # update`) advances the pins forward-only to the newest ZFS-compatible kernel.
+  boot.kernelPackages = pkgs.linuxKernel.packages.${flake.lib.pins.kernel.attr};
+  boot.zfs.package = pkgs.${flake.lib.pins.zfs.attr};
   boot.zfs.forceImportRoot = false;
 
   # Console stuff
