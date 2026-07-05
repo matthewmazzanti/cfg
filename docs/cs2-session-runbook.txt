@@ -1,0 +1,59 @@
+CS2 diagnostic session runbook
+==============================
+
+Steam launch options (CS2 > Properties > General > Launch Options — paste as-is):
+
+gamescope -W 3840 -H 2160 -r 60 --force-grab-cursor -f -- gamemoderun %command% -novid +fps_max 120 -condebug -conclearlog
+
+Experiment queue (ONE knob per session, in order):
+  [ ] A: Steam overlay OFF   (CS2 > Properties > General > untick overlay)
+  [ ] B: Proton              (Properties > Compatibility > force Proton; overlay back ON)
+  [ ] C: KVM bypass          (DP cable direct to monitor, mouse/kb direct to machine)
+
+Session procedure
+-----------------
+1. Pre-flight (only after config changes):
+     just upgrade-remote desktop.lan      # or rebuild on the machine
+     Reboot IF kernel params/microcode changed; re-login IF groups changed.
+     Check:  cat /sys/module/zfs/parameters/zfs_arc_max   -> 8589934592
+             sysctl vm.swappiness                          -> 10
+
+2. Set this session's experiment knob (A/B/C above). Note it.
+
+3. Start monitoring (framework):
+     mkdir -p ~/stutter-logs
+     ssh desktop.lan 'bash -s' < scripts/memwatch | tee ~/stutter-logs/$(date +%F)-memlog.txt
+   or on the desktop:
+     ~/src/nix/cfg/scripts/memwatch | tee ~/stutter-logs/$(date +%F)-memlog.txt
+
+4. Launch the game. Optional sanity checks while in menu:
+     gamemoded -s                              # "gamemode is active"
+     ps -o pid,ni,comm -C gamescope-wl         # wrapper reniced
+   (cs2 itself can never register — pressure-vessel blocks the preload; expected.)
+
+5. During play, drop MARKs the moment anything happens (any terminal):
+     echo "stutter start"    > /tmp/memwatch.mark
+     echo "map change"       > /tmp/memwatch.mark
+     echo "restarted game"   > /tmp/memwatch.mark
+     echo "stutter survived restart" > /tmp/memwatch.mark
+     echo "stutter gone"     > /tmp/memwatch.mark
+
+6. Optional mid-stutter intervention (tests ZFS branch 3.2, needs sudo on desktop):
+     echo $((4*1024*1024*1024)) | sudo tee /sys/module/zfs/parameters/zfs_arc_max
+   MARK it. Restore afterwards with 8589934592.
+
+7. After the session, collect:
+     ~/stutter-logs/<date>-memlog.txt
+     ~/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/console.log
+     ~/.local/share/Steam/logs/gameoverlayui.log     (overlay sessions)
+     ~/.local/share/Steam/logs/console-linux.txt
+
+What takes effect when (NixOS boot/activation order)
+----------------------------------------------------
+- nixos-rebuild switch:  sysctls (vm.swappiness), udev rules, packages,
+  sudo rules, session variables (new logins), systemd units
+- reboot required:       boot.kernelParams (zfs_arc_max), microcode updates,
+  kernel/module changes (kvm-amd)
+- re-login required:     group membership (gamemode), environment.sessionVariables
+
+Reference: docs/cs2-stutter-investigation.md (taxonomy, column legend, findings)
