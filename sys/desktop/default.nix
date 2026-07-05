@@ -51,14 +51,7 @@
   # Environment variables
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    # AMDVLK installs a layer that makes itself the default Vulkan driver;
-    # keep RADV as default, opt into AMDVLK per-game with AMD_VULKAN_ICD=AMDVLK
-    AMD_VULKAN_ICD = "RADV";
   };
-
-  # AMDVLK alongside RADV, to work around the CS2/Source2 slowdown on RADV
-  # https://github.com/ValveSoftware/csgo-osx-linux/issues/3808
-  hardware.amdgpu.amdvlk.enable = true;
 
   # User config
   users.users.mmazzanti = {
