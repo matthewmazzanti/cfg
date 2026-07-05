@@ -10,7 +10,9 @@
 
   # Kernel/zfs pinned explicitly (in lib/pins.json) so a nixpkgs bump can't
   # silently regress them under our ZFS pools. `bump-kernel` (run by `just
-  # update`) advances the pins forward-only to the newest ZFS-compatible kernel.
+  # update`) advances the pins forward-only to the newest ZFS-compatible LTS
+  # kernel -- LTS so ZFS (which lags mainline) never strands us at an EOL, the
+  # way non-LTS 7.0 did.
   boot.kernelPackages = pkgs.linuxKernel.packages.${flake.lib.pins.kernel.attr};
   boot.zfs.package = pkgs.${flake.lib.pins.zfs.attr};
   boot.zfs.forceImportRoot = false;

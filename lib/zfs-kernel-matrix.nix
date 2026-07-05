@@ -5,8 +5,10 @@
 # nixpkgs' own kernel/zfs support assertion.
 #
 #   import ./zfs-kernel-matrix.nix { inherit pkgs; }
-#   => [ { kernel = { attr = "linux_7_0"; version = "7.0.14"; };
+#   => [ { kernel = { attr = "linux_6_18"; version = "6.18.38"; lts = true; };
 #          zfs    = { attr = "zfs_2_4";   version = "2.4.3"; }; } ... ]
+# `lts` is nixpkgs' kernel.isLTS (long-term-support series); the policy of
+# preferring it lives in bin/bump-kernel, not here.
 #
 # Exposed as `flake.lib.zfsKernelMatrix`. Test directly (or via the flake, using
 # `(builtins.getFlake (toString ./.)).lib.zfsKernelMatrix`):
@@ -30,13 +32,15 @@ let
   rowsFor = kn:
     let
       r = builtins.tryEval (
-        let kernelVersion = kp.${kn}.kernel.version;
+        let
+          kernelVersion = kp.${kn}.kernel.version;
+          kernelLTS = kp.${kn}.kernel.isLTS or false;
         in lib.concatMap
           (z:
             let ok = builtins.tryEval (
               (kp.${kn} ? ${z}) && (kp.${kn}.${z}.meta.broken or true) == false);
             in lib.optional (ok.success && ok.value) {
-              kernel = { attr = kn; version = kernelVersion; };
+              kernel = { attr = kn; version = kernelVersion; lts = kernelLTS; };
               zfs = { attr = z; version = pkgs.${z}.version; };
             })
           zfsAttrs);

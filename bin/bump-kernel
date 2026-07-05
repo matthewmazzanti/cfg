@@ -19,7 +19,7 @@ import json
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -37,13 +37,18 @@ def version(s: str) -> Version:
 
 @dataclass(frozen=True)
 class Pkg:
-    """A resolved package: its nixpkgs attr name and version."""
+    """A resolved package: its nixpkgs attr name and version. `lts` is candidate
+    metadata (nixpkgs kernel.isLTS) present on matrix kernels; it's not part of a
+    pin's identity, so it's read from JSON when present but not written back."""
     attr: str
     version: Version
+    # metadata, not identity: excluded from equality so a stored pin (no lts)
+    # compares equal to the same matrix row (lts=True).
+    lts: bool = field(default=False, compare=False)
 
     @classmethod
     def from_json(cls, d: dict) -> "Pkg":
-        return cls(attr=d["attr"], version=version(d["version"]))
+        return cls(attr=d["attr"], version=version(d["version"]), lts=d.get("lts", False))
 
     def to_json(self) -> dict:
         return {"attr": self.attr, "version": ".".join(map(str, self.version))}
@@ -109,18 +114,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Bump kernel/zfs pins forward-only.")
     parser.add_argument("--flake", required=True, help="Flake ref exposing lib.zfsKernelMatrix")
     parser.add_argument("--json", type=Path, required=True, help="Pins JSON file")
+    parser.add_argument("--lts-kernel", action="store_true",
+                        help="Restrict kernel selection to LTS series")
     parser.add_argument("--write", action="store_true", help="Overwrite the pins JSON file")
     args = parser.parse_args()
 
     current = Compat.read(args.json)
 
-    log("==> Resolving newest forward-only zfs + compatible kernel from nixpkgs...")
+    kind = "LTS " if args.lts_kernel else ""
+    log(f"==> Resolving newest forward-only zfs + compatible {kind}kernel from nixpkgs...")
 
     # Forward-only: only pairs at or above the current pins in both dimensions.
-    # The floor is the pinned version itself -- no longer derived from the attr.
+    # With --lts-kernel, restrict to LTS series -- ZFS lags mainline, so a non-LTS
+    # kernel EOLs before ZFS supports the next one, stranding the pin (7.0 did).
     rows = [
         c for c in matrix(args.flake)
-        if c.kernel.version >= current.kernel.version
+        if (not args.lts_kernel or c.kernel.lts)
+        and c.kernel.version >= current.kernel.version
         and c.zfs.version >= current.zfs.version
     ]
     if rows:
