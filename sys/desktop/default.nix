@@ -24,7 +24,7 @@
 
   # Cap ZFS ARC at 8GiB so it doesn't compete with games for memory
   # (OpenZFS 2.2+ defaults to all RAM minus 1GiB)
-  boot.kernelParams = [ "zfs.zfs_arc_max=8589934592" ];
+  boot.kernelParams = [ "zfs.zfs_arc_max=${toString (8 * 1024 * 1024 * 1024)}" ];
   # Keep game pages resident under memory pressure
   boot.kernel.sysctl."vm.swappiness" = 10;
 
@@ -55,7 +55,7 @@
 
   # User config
   users.users.mmazzanti = {
-    extraGroups = [ "networkmanager" ];
+    extraGroups = [ "networkmanager" "gamemode" ];
     packages = [
       flake.packages."nvim/nix"
       flake.packages.nu
@@ -78,6 +78,15 @@
   # For video drivers and stuff
   programs.steam.enable = true;
   programs.gamescope.enable = true;
+
+  # Per-game renice/ioprio/screensaver-inhibit, via `gamemoderun %command%`
+  programs.gamemode = {
+    enable = true;
+    settings.general = {
+      renice = 10;
+      inhibit_screensaver = 1;
+    };
+  };
 
   services.power-profiles-daemon.enable = false;
   powerManagement.cpuFreqGovernor = "performance";
