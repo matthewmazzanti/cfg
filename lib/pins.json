@@ -1,7 +1,7 @@
 {
   "kernel": {
     "attr": "linux_6_18",
-    "version": "6.18.37"
+    "version": "6.18.38"
   },
   "zfs": {
     "attr": "zfs_2_4",
