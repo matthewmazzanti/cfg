@@ -1,19 +1,46 @@
 #!/usr/bin/env bash
-# Memory pressure monitor for game-stutter diagnosis.
-# Prints available RAM, ZFS ARC size, swap usage, and PSI memory pressure.
+# Memory + thermal monitor for game-stutter diagnosis.
+# Prints available RAM, ZFS ARC size, PSI memory pressure, CPU/GPU temps,
+# GPU core clock, fan speed, and GPU utilization.
 #
 # On the desktop:  memwatch [interval-seconds]
 # From elsewhere:  ssh desktop.lan 'bash -s' < scripts/memwatch | tee memlog.txt
 #
-# Reading it: stutter + AVAIL_MB cratering + PSI_SOME climbing over ~1.0
-# means memory pressure is real. If ARC_MB is pinned at its cap and PSI
-# stays near zero during stutter, memory is exonerated.
+# Reading it: stutter + AVAIL_MB cratering + PSI climbing over ~1.0 means
+# memory pressure. GPU_MEM approaching ~95C or SCLK_MHZ sagging while
+# BUSY stays high means thermal throttling (VRAM tjmax first suspect).
 
 set -euo pipefail
 
 interval="${1:-5}"
 
-printf '%-8s %9s %9s %9s %9s %9s\n' TIME AVAIL_MB ARC_MB SWAP_MB PSI_SOME PSI_FULL
+# Locate hwmon/drm paths once
+cpu_temp=""
+for h in /sys/class/hwmon/hwmon*; do
+    [[ "$(cat "$h/name" 2>/dev/null)" == k10temp ]] && cpu_temp="$h/temp1_input"
+done
+
+gpu=""
+for c in /sys/class/drm/card*/device; do
+    [[ -r "$c/gpu_busy_percent" ]] && gpu="$c"
+done
+gpu_junction="" gpu_mem="" gpu_fan=""
+if [[ -n "$gpu" ]]; then
+    for t in "$gpu"/hwmon/hwmon*/temp*_input; do
+        case "$(cat "${t%_input}_label" 2>/dev/null)" in
+            junction) gpu_junction="$t" ;;
+            mem)      gpu_mem="$t" ;;
+        esac
+    done
+    for f in "$gpu"/hwmon/hwmon*/fan1_input; do
+        [[ -r "$f" ]] && gpu_fan="$f"
+    done
+fi
+
+temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -; }
+
+printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s\n' \
+    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY
 
 while true; do
     avail=$(( $(awk '/^MemAvailable:/ {print $2}' /proc/meminfo) / 1024 ))
@@ -23,13 +50,18 @@ while true; do
         arc=$(( $(awk '$1 == "size" {print $3}' /proc/spl/kstat/zfs/arcstats) / 1024 / 1024 ))
     fi
 
-    swap_total=$(awk '/^SwapTotal:/ {print $2}' /proc/meminfo)
-    swap_free=$(awk '/^SwapFree:/ {print $2}' /proc/meminfo)
-    swap=$(( (swap_total - swap_free) / 1024 ))
+    psi=$(awk 'NR == 1 { sub("avg10=", "", $2); print $2 }' /proc/pressure/memory)
 
-    some=$(awk 'NR == 1 { sub("avg10=", "", $2); print $2 }' /proc/pressure/memory)
-    full=$(awk 'NR == 2 { sub("avg10=", "", $2); print $2 }' /proc/pressure/memory)
+    sclk=- fan=- busy=-
+    if [[ -n "$gpu" ]]; then
+        sclk=$(grep '\*' "$gpu/pp_dpm_sclk" | grep -o '[0-9]*Mhz' | tr -d Mhz || echo -)
+        busy=$(cat "$gpu/gpu_busy_percent")
+        [[ -n "$gpu_fan" ]] && fan=$(cat "$gpu_fan")
+    fi
 
-    printf '%-8s %9s %9s %9s %9s %9s\n' "$(date +%T)" "$avail" "$arc" "$swap" "$some" "$full"
+    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s\n' \
+        "$(date +%T)" "$avail" "$arc" "$psi" \
+        "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
+        "$sclk" "$fan" "$busy"
     sleep "$interval"
 done
