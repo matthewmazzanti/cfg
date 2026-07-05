@@ -67,6 +67,63 @@ in Sept 2025 and nixpkgs removed it — RADV is the only AMD Vulkan driver now.
 - `scripts/memwatch` — live monitor: RAM / ARC / PSI / CPU+GPU temps /
   GPU clock / fan / busy / VRAM / GTT
 
+## Root-cause taxonomy
+
+Status: ✗ eliminated · ⚑ leading suspect · ? open
+
+**1. Hardware / firmware**
+- 1.1 CPU thermal throttling — ✗ 56–71 °C during stutter, boosting 4.6–4.7 GHz
+- 1.2 GPU core thermal throttle — ✗ junction 59–76 °C vs ~110 limit
+- 1.3 VRAM (GDDR6) thermal throttle — ✗ 66–82 °C vs ~95–100 limit
+- 1.4 Power/current limits (PROCHOT, SMU caps) — ✗ clocks stay high; decay follows process, not silicon
+- 1.5 Failing hardware (NVMe, RAM, PCIe) — ✗ two different machines over the years, same signature
+
+**2. Kernel**
+- 2.1 Memory pressure / reclaim stalls — ✗ PSI mem 0.00, 11+ GB available during stutter
+- 2.2 THP/compaction stalls — ✗ zero compact_stall, madvise mode
+- 2.3 IO stalls — ✗ PSI io 47% was a stuck-counter accounting leak (ghostty cgroup); pool near-idle
+- 2.4 Scheduler contention — ? mostly cleared; GAME_WAIT column closes it
+- 2.5 IRQ storms / lock contention — ? unlikely; CTXT_K column watches it
+- 2.6 Kernel-side leak (ZFS, DRM slab) — ? unlikely; SLAB_MB column watches it
+
+**3. Storage / ZFS**
+- 3.1 ARC starving the game — ✗ capped to 8 GiB, stutter reproduced with pressure zero
+- 3.2 ARC eviction contention at cap — ✗ mild counters, no throttling; live shrink-test
+  (`echo $((4*1024*1024*1024)) | sudo tee /sys/module/zfs/parameters/zfs_arc_max`) never
+  run — revive only if GAME_MAJF lights up
+- 3.3 txg sync / write stalls — ✗ near-zero writes during play; DIRTY_MB watches
+
+**4. Graphics stack (host side)**
+- 4.1 RADV per-process decay (allocator/descriptor churn) — ⚑ matches #3808 exactly:
+  per-match decay, restart resets, AMDVLK was immune; reproduces on Mesa 26.1.4
+- 4.2 amdgpu kernel driver faults/resets — ✗ journal clean both boots
+- 4.3 VRAM oversubscription / BO eviction thrash — ✗ VRAM flat at ~9/16.4 GB during decay
+- 4.4 Presentation path (gamescope nesting, KWin, 60 Hz pacing) — ✗ as root cause:
+  reproduced on bspwm/X11; 150 fps on 60 Hz (2.5:1) amplifies perceived jerkiness only
+
+**5. Steam layer**
+- 5.1 In-game overlay (gameoverlayrenderer.so + steamwebhelper state) — ⚑ only theory
+  explaining stutter surviving a game restart; WEBHLP_RSS + overlay-off session decide
+- 5.2 Background downloads/updates — ✗ timeline: client self-update pre-session only
+- 5.3 Fossilize shader jobs — ✗ session boundaries only
+- 5.4 NixOS FHS env / pressure-vessel — ✗ reproduces on Arch stock runtime; no
+  accumulating mechanism; Proton test re-confirms for free
+- 5.5 GameMode side effects — ✗ can't reach cs2 in-container; activity only at
+  boundaries; reaper crash was exit-time cosmetic
+
+**6. Game (CS2/Source 2 internal)**
+- 6.1 Native Vulkan renderer state accumulation — ⚑ Valve closed #3808 "not planned";
+  indistinguishable from 4.1 without the Proton test
+- 6.2 System-RAM leak per match — ? reported upstream (#3925); GAME_RSS decides
+- 6.3 fd/thread leak — ? cheap to watch; GAME_FD / GAME_THR columns
+- 6.4 Fonts/Panorama UI thrash — ✗ launch-time parse noise; cache healthy; decay not
+  UI-correlated
+
+Layers 1–3 are cleared by measurement; all survivors live inside the process. The
+three ⚑ flags are entangled: overlay-off isolates 5.1; Proton separates 6.1 from 4.1
+(DXVK exercises RADV differently); if both fail, the 6.2/6.3 trend columns are the
+tiebreaker.
+
 ## memwatch column legend
 
 `scripts/memwatch` (run on desktop, or `ssh desktop.lan 'bash -s' <
