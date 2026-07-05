@@ -93,6 +93,6 @@
 
   # GPU performance mode
   services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card*", DRIVERS=="amdgpu", RUN+="${pkgs.bash}/bin/bash ${./gpu_performance.sh} /sys$devpath"
+    ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card[0-9]", DRIVERS=="amdgpu", RUN+="${pkgs.bash}/bin/bash ${./gpu_performance.sh} /sys$devpath"
   '';
 }

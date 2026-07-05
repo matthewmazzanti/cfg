@@ -119,10 +119,26 @@ Status: ✗ eliminated · ⚑ leading suspect · ? open
 - 6.4 Fonts/Panorama UI thrash — ✗ launch-time parse noise; cache healthy; decay not
   UI-correlated
 
-Layers 1–3 are cleared by measurement; all survivors live inside the process. The
-three ⚑ flags are entangled: overlay-off isolates 5.1; Proton separates 6.1 from 4.1
-(DXVK exercises RADV differently); if both fail, the 6.2/6.3 trend columns are the
-tiebreaker.
+**7. Display / input path (added 2026-07-05: a DP 1.2 KVM sits between machine and
+monitor — possibly shared with the old bspwm machine, which would weaken the 4.4
+cross-machine elimination for display *hardware*)**
+- 7.1 DP link through KVM — ? journals clean (no link-training/HPD events), but a
+  marginal sink can backpressure the present chain (game → gamescope → KWin → DP)
+  without kernel noise, lowering measured FPS. Game restart = gamescope modeset =
+  KVM re-locks, so "restart fixes it" doesn't acquit the KVM; "sometimes persists"
+  fits an occasional failed re-lock. Decisive test: bypass the KVM (direct cable)
+  for one degraded-length session.
+- 7.2 USB input path through KVM hub — ? input jitter is perceptually identical to
+  frame stutter while aiming. No mid-session USB resets in journal (one at boot).
+  Same bypass test covers it (move mouse/kb direct).
+- 7.3 Monitor itself — ? shared across sessions; only implicated if 7.1 testing
+  points at the sink side.
+
+Layers 1–3 are cleared by measurement; the survivors are inside the process (4.1,
+5.1, 6.x) plus the newly added display-path branch (7.x). The three ⚑ flags are
+entangled: overlay-off isolates 5.1; Proton separates 6.1 from 4.1 (DXVK exercises
+RADV differently); the KVM bypass clears or convicts 7.x independently of both; if
+everything fails, the 6.2/6.3 trend columns are the tiebreaker.
 
 ## memwatch column legend
 
