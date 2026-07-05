@@ -1,148 +1,246 @@
-#!/usr/bin/env bash
-# Memory + thermal monitor for game-stutter diagnosis.
-# Prints available RAM, ZFS ARC size, PSI memory pressure, CPU/GPU temps,
-# GPU core clock, fan speed, and GPU utilization.
-#
-# On the desktop:  memwatch [interval-seconds]
-# From elsewhere:  ssh desktop.lan 'bash -s' < scripts/memwatch | tee memlog.txt
-#
-# Reading it: stutter + AVAIL_MB cratering + PSI climbing over ~1.0 means
-# memory pressure. GPU_MEM approaching ~95C or SCLK_MHZ sagging while
-# BUSY stays high means thermal throttling (VRAM tjmax first suspect).
-# VRAM_MB near the card's total with GTT_MB climbing means VRAM
-# oversubscription: amdgpu is migrating buffers over PCIe every frame,
-# which stutters indefinitely until VRAM consumers exit.
-# Per-process columns (- when no game running): monotonic growth in
-# GAME_RSS / GAME_VRAM / GAME_FD across a session is a game-side leak
-# (see csgo-osx-linux #3808/#3925); WEBHLP_RSS growth that survives game
-# restarts implicates the Steam overlay / steamwebhelper.
-#
-# Marking events: `touch /tmp/memwatch.mark` (optionally write a word into
-# it) from any terminal to drop a MARK row into the log at that timestamp —
-# use it the moment stutter starts/stops, on map change, game restart, etc.
+#!/usr/bin/env python3
+"""Memory + thermal + per-process monitor for game-stutter diagnosis.
 
-set -euo pipefail
+Stdlib only. Every probe is independently fault-tolerant: anything that
+can't be read (no game running, process exited mid-sample, missing sysfs
+node) prints '-' for that column and sampling continues.
 
-interval="${1:-5}"
+On the desktop:  memwatch [interval-seconds]
+From elsewhere:  ssh desktop.lan 'python3 -' < scripts/memwatch | tee memlog.txt
 
-# Locate hwmon/drm paths once
-cpu_temp=""
-for h in /sys/class/hwmon/hwmon*; do
-    [[ "$(cat "$h/name" 2>/dev/null)" == k10temp ]] && cpu_temp="$h/temp1_input"
-done
+Marking events: `echo "stutter start" > /tmp/memwatch.mark` from any
+terminal drops a MARK row into the log at that timestamp.
 
-gpu=""
-for c in /sys/class/drm/card*/device; do
-    [[ -r "$c/gpu_busy_percent" ]] && gpu="$c"
-done
-gpu_junction="" gpu_mem="" gpu_fan=""
-if [[ -n "$gpu" ]]; then
-    for t in "$gpu"/hwmon/hwmon*/temp*_input; do
-        case "$(cat "${t%_input}_label" 2>/dev/null)" in
-            junction) gpu_junction="$t" ;;
-            mem)      gpu_mem="$t" ;;
-        esac
-    done
-    for f in "$gpu"/hwmon/hwmon*/fan1_input; do
-        [[ -r "$f" ]] && gpu_fan="$f"
-    done
-fi
+GAME_FPS comes from the Mesa Vulkan overlay layer logging to
+/tmp/cs2-fps.log; see docs/cs2-session-runbook.txt for the launch-line
+env vars that enable it.
 
-temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -; }
+Column legend and interpretation: docs/cs2-stutter-investigation.md
+"""
 
-# Known Source/Source2 game binaries to track; first match wins
-game_pid() { pgrep -x cs2 || pgrep -x dota2 || pgrep -x hl2_linux || true; }
+import glob
+import os
+import sys
+import time
 
-printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s %8s\n' \
-    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB \
-    GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS \
-    DIRTY_MB SLAB_MB CTXT_K GAME_MAJF GAME_WAIT GAME_FPS
+INTERVAL = float(sys.argv[1]) if len(sys.argv) > 1 else 5.0
+MARK_FILE = "/tmp/memwatch.mark"
+FPS_FILE = "/tmp/cs2-fps.log"
+GAME_NAMES = ("cs2", "dota2", "hl2_linux")
 
-# GAME_FPS comes from the Mesa Vulkan overlay layer logging to this file; see
-# docs/cs2-session-runbook.txt for the launch-line env vars that enable it.
-fps_file=/tmp/cs2-fps.log
+COLS = [
+    # (header, width)
+    ("TIME", 8), ("AVAIL_MB", 9), ("ARC_MB", 8), ("PSI", 6),
+    ("CPU_C", 6), ("GPU_J", 6), ("GPU_MEM", 8), ("SCLK_MHZ", 9),
+    ("FAN", 6), ("BUSY", 6), ("VRAM_MB", 8), ("GTT_MB", 7),
+    ("GAME_RSS", 9), ("GAME_VRAM", 10), ("GAME_FD", 8), ("GAME_THR", 8),
+    ("WEBHLP_RSS", 11), ("DIRTY_MB", 8), ("SLAB_MB", 8), ("CTXT_K", 7),
+    ("GAME_MAJF", 9), ("GAME_WAIT", 9), ("GAME_FPS", 8),
+]
 
-# Delta state (GAME_MAJF = major faults this interval; GAME_WAIT = ms the
-# game spent runnable-but-waiting-for-CPU this interval; CTXT_K = context
-# switches per second, thousands)
-prev_pid="" prev_majf=0 prev_wait=0 prev_ctxt=$(awk '/^ctxt/ {print $2}' /proc/stat)
 
-while true; do
-    if [[ -e /tmp/memwatch.mark ]]; then
-        printf '%-8s ==== MARK %s ====\n' "$(date +%T)" "$(cat /tmp/memwatch.mark 2>/dev/null)"
-        rm -f /tmp/memwatch.mark
-    fi
+def read(path):
+    with open(path) as f:
+        return f.read()
 
-    avail=$(( $(awk '/^MemAvailable:/ {print $2}' /proc/meminfo) / 1024 ))
 
-    arc=-
-    if [[ -r /proc/spl/kstat/zfs/arcstats ]]; then
-        arc=$(( $(awk '$1 == "size" {print $3}' /proc/spl/kstat/zfs/arcstats) / 1024 / 1024 ))
-    fi
+def probe(fn, *args):
+    """Run a probe, returning None (rendered as '-') on any failure."""
+    try:
+        return fn(*args)
+    except Exception:
+        return None
 
-    psi=$(awk 'NR == 1 { sub("avg10=", "", $2); print $2 }' /proc/pressure/memory)
 
-    sclk=- fan=- busy=- vram=- gtt=-
-    if [[ -n "$gpu" ]]; then
-        sclk=$(grep '\*' "$gpu/pp_dpm_sclk" | grep -o '[0-9]*Mhz' | tr -d Mhz || echo -)
-        busy=$(cat "$gpu/gpu_busy_percent")
-        [[ -n "$gpu_fan" ]] && fan=$(cat "$gpu_fan")
-        vram=$(( $(cat "$gpu/mem_info_vram_used") / 1048576 ))
-        gtt=$(( $(cat "$gpu/mem_info_gtt_used") / 1048576 ))
-    fi
+def meminfo_mb(field):
+    for line in read("/proc/meminfo").splitlines():
+        if line.startswith(field + ":"):
+            return int(line.split()[1]) // 1024
+    raise KeyError(field)
 
-    game_rss=- game_vram=- game_fd=- game_thr=-
-    pid=$(game_pid | head -1)
-    if [[ -n "$pid" && -d /proc/$pid ]]; then
-        game_rss=$(( $(awk '/^VmRSS:/ {print $2}' /proc/$pid/status) / 1024 ))
-        game_thr=$(awk '/^Threads:/ {print $2}' /proc/$pid/status)
-        game_fd=$(ls /proc/$pid/fd 2>/dev/null | wc -l)
-        # Sum VRAM across the process's DRM clients (KiB in fdinfo)
-        game_vram=$(awk '/^drm-memory-vram:/ {s += $2} END {print int(s / 1024)}' \
-            /proc/$pid/fdinfo/* 2>/dev/null)
-    fi
 
-    webhlp_rss=-
-    wh_pids=$(pgrep -f steamwebhelper || true)
-    if [[ -n "$wh_pids" ]]; then
-        webhlp_rss=$(echo "$wh_pids" | xargs -I{} awk '/^VmRSS:/ {print $2}' /proc/{}/status 2>/dev/null \
-            | awk '{s += $1} END {print int(s / 1024)}')
-    fi
+def arc_mb():
+    for line in read("/proc/spl/kstat/zfs/arcstats").splitlines():
+        parts = line.split()
+        if parts and parts[0] == "size":
+            return int(parts[2]) // (1024 * 1024)
+    raise KeyError("size")
 
-    dirty=$(( $(awk '/^Dirty:/ {print $2}' /proc/meminfo) / 1024 ))
-    slab=$(( $(awk '/^SUnreclaim:/ {print $2}' /proc/meminfo) / 1024 ))
 
-    ctxt=$(awk '/^ctxt/ {print $2}' /proc/stat)
-    ctxt_k=$(( (ctxt - prev_ctxt) / interval / 1000 ))
-    prev_ctxt=$ctxt
+def psi_mem():
+    return read("/proc/pressure/memory").splitlines()[0].split()[1].split("=")[1]
 
-    game_majf=- game_wait=-
-    if [[ -n "$pid" && -r /proc/$pid/stat ]]; then
-        majf=$(awk '{print $12}' /proc/$pid/stat)
-        wait_ns=$(awk '{print $2}' /proc/$pid/schedstat)
-        if [[ "$pid" == "$prev_pid" ]]; then
-            game_majf=$(( majf - prev_majf ))
-            game_wait=$(( (wait_ns - prev_wait) / 1000000 ))
-        fi
-        prev_pid=$pid prev_majf=$majf prev_wait=$wait_ns
-    else
-        prev_pid=""
-    fi
 
-    # Last FPS sample from the Mesa overlay layer, if fresh (game running with
-    # the layer enabled); first numeric field of the last line, format-tolerant
-    game_fps=-
-    if [[ -r "$fps_file" ]] && (( $(date +%s) - $(stat -c %Y "$fps_file") < interval * 3 )); then
-        game_fps=$(tail -1 "$fps_file" | awk '{for (i = 1; i <= NF; i++) {
-            v = $i + 0; if (v > 0) { printf "%d", v; exit } }}')
-        [[ -n "$game_fps" ]] || game_fps=-
-    fi
+def find_cpu_temp():
+    for h in glob.glob("/sys/class/hwmon/hwmon*"):
+        if probe(read, h + "/name") == "k10temp\n":
+            return h + "/temp1_input"
+    return None
 
-    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s %8s\n' \
-        "$(date +%T)" "$avail" "$arc" "$psi" \
-        "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
-        "$sclk" "$fan" "$busy" "$vram" "$gtt" \
-        "$game_rss" "$game_vram" "$game_fd" "$game_thr" "$webhlp_rss" \
-        "$dirty" "$slab" "$ctxt_k" "$game_majf" "$game_wait" "$game_fps"
-    sleep "$interval"
-done
+
+def find_gpu():
+    for c in glob.glob("/sys/class/drm/card*/device"):
+        if os.path.exists(c + "/gpu_busy_percent"):
+            return c
+    return None
+
+
+def find_gpu_temps(gpu):
+    junction = mem = fan = None
+    for t in glob.glob(gpu + "/hwmon/hwmon*/temp*_input"):
+        label = probe(read, t[: -len("_input")] + "_label") or ""
+        if label.strip() == "junction":
+            junction = t
+        elif label.strip() == "mem":
+            mem = t
+    for f in glob.glob(gpu + "/hwmon/hwmon*/fan1_input"):
+        fan = f
+    return junction, mem, fan
+
+
+def temp_c(path):
+    return int(read(path)) // 1000
+
+
+def sclk_mhz(gpu):
+    for line in read(gpu + "/pp_dpm_sclk").splitlines():
+        if "*" in line:
+            return int(line.split(":")[1].strip().rstrip("* ").rstrip("Mhz"))
+    raise ValueError("no active sclk state")
+
+
+def game_pid():
+    for pid in sorted(int(p) for p in os.listdir("/proc") if p.isdigit()):
+        if probe(read, f"/proc/{pid}/comm") in (n + "\n" for n in GAME_NAMES):
+            return pid
+    return None
+
+
+def proc_status_kb(pid, field):
+    for line in read(f"/proc/{pid}/status").splitlines():
+        if line.startswith(field + ":"):
+            return int(line.split()[1])
+    raise KeyError(field)
+
+
+def game_vram_mb(pid):
+    total_kb = 0
+    for fdinfo in glob.glob(f"/proc/{pid}/fdinfo/*"):
+        content = probe(read, fdinfo)
+        if not content:
+            continue
+        for line in content.splitlines():
+            if line.startswith("drm-memory-vram:"):
+                total_kb += int(line.split()[1])
+    return total_kb // 1024
+
+
+def webhelper_rss_mb():
+    total_kb = 0
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        cmdline = probe(read, f"/proc/{pid}/cmdline") or ""
+        if "steamwebhelper" in cmdline:
+            total_kb += probe(proc_status_kb, int(pid), "VmRSS") or 0
+    return total_kb // 1024
+
+
+def ctxt():
+    for line in read("/proc/stat").splitlines():
+        if line.startswith("ctxt"):
+            return int(line.split()[1])
+    raise KeyError("ctxt")
+
+
+def game_fps():
+    if time.time() - os.stat(FPS_FILE).st_mtime > INTERVAL * 3:
+        return None
+    last = read(FPS_FILE).splitlines()[-1]
+    for tok in last.replace(",", " ").split():
+        try:
+            v = float(tok)
+        except ValueError:
+            continue
+        if v > 0:
+            return int(v)
+    return None
+
+
+def fmt(row):
+    return " ".join(
+        f"{('-' if v is None else v)!s:>{w}}" if h != "TIME" else f"{v!s:<8}"
+        for (h, w), v in zip(COLS, row)
+    )
+
+
+def main():
+    cpu_temp = find_cpu_temp()
+    gpu = find_gpu()
+    gpu_junction, gpu_mem, gpu_fan = find_gpu_temps(gpu) if gpu else (None,) * 3
+
+    print(fmt([h for h, _ in COLS]), flush=True)
+
+    prev_pid = prev_majf = prev_wait = None
+    prev_ctxt = probe(ctxt)
+
+    while True:
+        if os.path.exists(MARK_FILE):
+            note = (probe(read, MARK_FILE) or "").strip()
+            print(f"{time.strftime('%H:%M:%S')} ==== MARK {note} ====", flush=True)
+            probe(os.remove, MARK_FILE)
+
+        pid = probe(game_pid)
+
+        cur_ctxt = probe(ctxt)
+        ctxt_k = None
+        if cur_ctxt is not None and prev_ctxt is not None:
+            ctxt_k = int((cur_ctxt - prev_ctxt) / INTERVAL / 1000)
+        prev_ctxt = cur_ctxt
+
+        majf = wait_ns = None
+        if pid:
+            majf = probe(lambda: int(read(f"/proc/{pid}/stat").rsplit(")", 1)[1].split()[9]))
+            wait_ns = probe(lambda: int(read(f"/proc/{pid}/schedstat").split()[1]))
+        game_majf = game_wait = None
+        if pid and pid == prev_pid:
+            if majf is not None and prev_majf is not None:
+                game_majf = majf - prev_majf
+            if wait_ns is not None and prev_wait is not None:
+                game_wait = (wait_ns - prev_wait) // 1_000_000
+        prev_pid, prev_majf, prev_wait = pid, majf, wait_ns
+
+        row = [
+            time.strftime("%H:%M:%S"),
+            probe(meminfo_mb, "MemAvailable"),
+            probe(arc_mb),
+            probe(psi_mem),
+            probe(temp_c, cpu_temp) if cpu_temp else None,
+            probe(temp_c, gpu_junction) if gpu_junction else None,
+            probe(temp_c, gpu_mem) if gpu_mem else None,
+            probe(sclk_mhz, gpu) if gpu else None,
+            probe(lambda: int(read(gpu_fan))) if gpu_fan else None,
+            probe(lambda: int(read(gpu + "/gpu_busy_percent"))) if gpu else None,
+            probe(lambda: int(read(gpu + "/mem_info_vram_used")) // 1048576) if gpu else None,
+            probe(lambda: int(read(gpu + "/mem_info_gtt_used")) // 1048576) if gpu else None,
+            probe(lambda: proc_status_kb(pid, "VmRSS") // 1024) if pid else None,
+            probe(game_vram_mb, pid) if pid else None,
+            probe(lambda: len(os.listdir(f"/proc/{pid}/fd"))) if pid else None,
+            probe(proc_status_kb, pid, "Threads") if pid else None,
+            probe(webhelper_rss_mb),
+            probe(meminfo_mb, "Dirty"),
+            probe(meminfo_mb, "SUnreclaim"),
+            ctxt_k,
+            game_majf,
+            game_wait,
+            probe(game_fps),
+        ]
+        print(fmt(row), flush=True)
+        time.sleep(INTERVAL)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

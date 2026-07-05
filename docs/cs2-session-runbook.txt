@@ -25,7 +25,7 @@ Session procedure
 
 3. Start monitoring (framework):
      mkdir -p ~/stutter-logs
-     ssh desktop.lan 'bash -s' < scripts/memwatch | tee ~/stutter-logs/$(date +%F)-memlog.txt
+     ssh desktop.lan 'python3 -' < scripts/memwatch | tee ~/stutter-logs/$(date +%F)-memlog.txt
    or on the desktop:
      ~/src/nix/cfg/scripts/memwatch | tee ~/stutter-logs/$(date +%F)-memlog.txt
 
