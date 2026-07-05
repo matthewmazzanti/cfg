@@ -67,15 +67,66 @@ in Sept 2025 and nixpkgs removed it — RADV is the only AMD Vulkan driver now.
 - `scripts/memwatch` — live monitor: RAM / ARC / PSI / CPU+GPU temps /
   GPU clock / fan / busy / VRAM / GTT
 
+## memwatch column legend
+
+`scripts/memwatch` (run on desktop, or `ssh desktop.lan 'bash -s' <
+scripts/memwatch | tee memlog.txt`). Drop a marker row while playing with
+`echo "stutter start" > /tmp/memwatch.mark`.
+
+```
+TIME        sample wall-clock (5s interval default); MARK rows via /tmp/memwatch.mark
+AVAIL_MB    MemAvailable — RAM the kernel could give out without swapping
+ARC_MB      ZFS ARC size (capped at 8192 on desktop; pinned there is normal under load)
+PSI         memory pressure some avg10 (%); >1.0 sustained = real memory stalls
+CPU_C       CPU temp, k10temp Tctl (5900X throttles ~90C)
+GPU_J       GPU junction temp (throttle ~110C)
+GPU_MEM     VRAM/GDDR6 temp (throttle ~95-100C — least headroom in the box)
+SCLK_MHZ    current GPU core clock (7800 XT game clock ~2100+; sagging w/ high BUSY = throttling)
+FAN         GPU fan rpm
+BUSY        GPU utilization % (erratic swings during play = GPU starved, not loaded)
+VRAM_MB     card-wide VRAM used (16368 total; near-total + GTT climbing = oversubscription)
+GTT_MB      GPU buffers spilled into system RAM over PCIe
+GAME_RSS    game process resident RAM, MB (monotonic climb across maps = game-side leak)
+GAME_VRAM   game process VRAM from fdinfo, MB (same, GPU-side)
+GAME_FD     game open file descriptors (steady climb = fd leak)
+GAME_THR    game thread count
+WEBHLP_RSS  all steamwebhelper processes' RAM, MB (growth surviving game restarts = overlay suspect)
+DIRTY_MB    dirty pages awaiting writeback (bursts = write stalls)
+SLAB_MB     unreclaimable kernel memory (session-long climb = kernel-side leak: ZFS/DRM)
+CTXT_K      context switches, thousands/sec (baseline ~35; sustained multiples = IRQ storm/thrash)
+GAME_MAJF   game major page faults this interval (>0 during play = re-reading mapped data from disk)
+GAME_WAIT   ms game main thread spent runnable-but-waiting-for-CPU this interval
+            (spikes during stutter = scheduler contention; flat = game blocking internally)
+
+'-' = not applicable (no game running / first sample for delta columns)
+Baselines 2026-07-04, session start: GAME_RSS ~5300, GAME_VRAM ~5700, GAME_FD ~630,
+GAME_THR 78, WEBHLP_RSS ~1400, VRAM_MB ~9000 in-game, CTXT_K ~35, GAME_WAIT ~0-1
+```
+
 ## Next steps
 
-1. **Proton A/B test** (no config needed): force the Windows build via Steam →
-   Properties → Compatibility. Swaps the native Vulkan renderer for
-   D3D11→DXVK, a completely different allocation pattern on RADV. Smooth long
-   session ⇒ native-renderer/RADV interaction convicted and a playable
-   workaround exists.
-2. Interim mitigation: restart the game every few matches, before the decay.
-3. Report the elimination data upstream (issue #3808 or a fresh Mesa issue) —
+One knob per session; memwatch + MARKs + `-condebug -conclearlog` (console log
+at `steamapps/common/Counter-Strike Global Offensive/game/csgo/console.log`)
+running for all of them.
+
+1. **Steam overlay off** (CS2 → Properties → General). The overlay's
+   `gameoverlayrenderer.so` preload hooks every present call, and its state
+   lives partly in steamwebhelper, which survives game restarts — the only
+   theory that cleanly explains "stutter sometimes persists a game restart".
+   Journal evidence (2026-07-04 boot -1): decay windows are silent; GameMode,
+   Steam self-update, Fossilize, and fontconfig all cluster at session
+   boundaries and are exonerated. Note gamemodeauto cannot reach cs2 inside
+   pressure-vessel (dlopen fails in container) — renice lands on the wrapper
+   only, don't chase it.
+2. **Proton A/B test**: force the Windows build via Steam → Properties →
+   Compatibility. Swaps the native Vulkan renderer for D3D11→DXVK, a
+   completely different allocation pattern on RADV; also runs in the same
+   FHS/pressure-vessel stack, so a clean result clears the container layers
+   too. AMDVLK is not an option — deprecated by AMD and removed from nixpkgs.
+3. Interim mitigation: restart the game every few matches, before the decay;
+   if stutter survives a game restart, restart Steam too (webhelper) and MARK
+   both.
+4. Report the elimination data upstream (issue #3808 or a fresh Mesa issue) —
    a fully-instrumented repro on current Mesa is a stronger data point than
    anything currently in the thread.
-4. Cosmetic: restart ghostty on `desktop` to clear the stuck PSI counter.
+5. Cosmetic: restart ghostty on `desktop` to clear the stuck PSI counter.
