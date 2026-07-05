@@ -16,6 +16,10 @@
 # GAME_RSS / GAME_VRAM / GAME_FD across a session is a game-side leak
 # (see csgo-osx-linux #3808/#3925); WEBHLP_RSS growth that survives game
 # restarts implicates the Steam overlay / steamwebhelper.
+#
+# Marking events: `touch /tmp/memwatch.mark` (optionally write a word into
+# it) from any terminal to drop a MARK row into the log at that timestamp —
+# use it the moment stutter starts/stops, on map change, game restart, etc.
 
 set -euo pipefail
 
@@ -54,6 +58,11 @@ printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s\n
     GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS
 
 while true; do
+    if [[ -e /tmp/memwatch.mark ]]; then
+        printf '%-8s ==== MARK %s ====\n' "$(date +%T)" "$(cat /tmp/memwatch.mark 2>/dev/null)"
+        rm -f /tmp/memwatch.mark
+    fi
+
     avail=$(( $(awk '/^MemAvailable:/ {print $2}' /proc/meminfo) / 1024 ))
 
     arc=-
