@@ -9,6 +9,9 @@
 # Reading it: stutter + AVAIL_MB cratering + PSI climbing over ~1.0 means
 # memory pressure. GPU_MEM approaching ~95C or SCLK_MHZ sagging while
 # BUSY stays high means thermal throttling (VRAM tjmax first suspect).
+# VRAM_MB near the card's total with GTT_MB climbing means VRAM
+# oversubscription: amdgpu is migrating buffers over PCIe every frame,
+# which stutters indefinitely until VRAM consumers exit.
 
 set -euo pipefail
 
@@ -39,8 +42,8 @@ fi
 
 temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -; }
 
-printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s\n' \
-    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY
+printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s\n' \
+    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB
 
 while true; do
     avail=$(( $(awk '/^MemAvailable:/ {print $2}' /proc/meminfo) / 1024 ))
@@ -52,16 +55,18 @@ while true; do
 
     psi=$(awk 'NR == 1 { sub("avg10=", "", $2); print $2 }' /proc/pressure/memory)
 
-    sclk=- fan=- busy=-
+    sclk=- fan=- busy=- vram=- gtt=-
     if [[ -n "$gpu" ]]; then
         sclk=$(grep '\*' "$gpu/pp_dpm_sclk" | grep -o '[0-9]*Mhz' | tr -d Mhz || echo -)
         busy=$(cat "$gpu/gpu_busy_percent")
         [[ -n "$gpu_fan" ]] && fan=$(cat "$gpu_fan")
+        vram=$(( $(cat "$gpu/mem_info_vram_used") / 1048576 ))
+        gtt=$(( $(cat "$gpu/mem_info_gtt_used") / 1048576 ))
     fi
 
-    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s\n' \
+    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s\n' \
         "$(date +%T)" "$avail" "$arc" "$psi" \
         "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
-        "$sclk" "$fan" "$busy"
+        "$sclk" "$fan" "$busy" "$vram" "$gtt"
     sleep "$interval"
 done
