@@ -53,9 +53,15 @@ temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -;
 # Known Source/Source2 game binaries to track; first match wins
 game_pid() { pgrep -x cs2 || pgrep -x dota2 || pgrep -x hl2_linux || true; }
 
-printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s\n' \
+printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s\n' \
     TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB \
-    GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS
+    GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS \
+    DIRTY_MB SLAB_MB CTXT_K GAME_MAJF GAME_WAIT
+
+# Delta state (GAME_MAJF = major faults this interval; GAME_WAIT = ms the
+# game spent runnable-but-waiting-for-CPU this interval; CTXT_K = context
+# switches per second, thousands)
+prev_pid="" prev_majf=0 prev_wait=0 prev_ctxt=$(awk '/^ctxt/ {print $2}' /proc/stat)
 
 while true; do
     if [[ -e /tmp/memwatch.mark ]]; then
@@ -99,10 +105,31 @@ while true; do
             | awk '{s += $1} END {print int(s / 1024)}')
     fi
 
-    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s\n' \
+    dirty=$(( $(awk '/^Dirty:/ {print $2}' /proc/meminfo) / 1024 ))
+    slab=$(( $(awk '/^SUnreclaim:/ {print $2}' /proc/meminfo) / 1024 ))
+
+    ctxt=$(awk '/^ctxt/ {print $2}' /proc/stat)
+    ctxt_k=$(( (ctxt - prev_ctxt) / interval / 1000 ))
+    prev_ctxt=$ctxt
+
+    game_majf=- game_wait=-
+    if [[ -n "$pid" && -r /proc/$pid/stat ]]; then
+        majf=$(awk '{print $12}' /proc/$pid/stat)
+        wait_ns=$(awk '{print $2}' /proc/$pid/schedstat)
+        if [[ "$pid" == "$prev_pid" ]]; then
+            game_majf=$(( majf - prev_majf ))
+            game_wait=$(( (wait_ns - prev_wait) / 1000000 ))
+        fi
+        prev_pid=$pid prev_majf=$majf prev_wait=$wait_ns
+    else
+        prev_pid=""
+    fi
+
+    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s %8s %8s %7s %9s %9s\n' \
         "$(date +%T)" "$avail" "$arc" "$psi" \
         "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
         "$sclk" "$fan" "$busy" "$vram" "$gtt" \
-        "$game_rss" "$game_vram" "$game_fd" "$game_thr" "$webhlp_rss"
+        "$game_rss" "$game_vram" "$game_fd" "$game_thr" "$webhlp_rss" \
+        "$dirty" "$slab" "$ctxt_k" "$game_majf" "$game_wait"
     sleep "$interval"
 done
