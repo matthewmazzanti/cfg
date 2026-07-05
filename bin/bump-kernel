@@ -5,19 +5,22 @@ pair, FORWARD-ONLY (never a downgrade).
 Run as part of `just update` (after `nix flake update`), so the bump moves in
 lock-step with the flake.lock nixpkgs bump and lands as a reviewable git diff.
 base.nix reads the pins via `flake.lib.pins`, mirroring the lib/images.json +
-lock-images pattern.
+lock-images pattern -- including the CLI: `--json <file>` selects the pins file
+and `--write` overwrites it; without `--write` the resolved JSON is printed.
 
 lib/zfs-kernel-matrix.nix is a pure projection: the zfs x linux pairs whose
 module isn't broken, with versions. All the policy -- the forward-only floor and
 picking the newest pair -- lives here in Python. Stdlib only.
 """
 
+import argparse
 import json
 import re
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 ROOT = Path(__file__).resolve().parent.parent
 PINS = ROOT / "lib" / "pins.json"
@@ -67,9 +70,16 @@ class Compat:
     def read(cls, path: Path) -> "Compat":
         return cls.from_json(json.loads(path.read_text()))
 
-    def write(self, path: Path) -> None:
+    def dumps(self) -> str:
         body = {"kernel": self.kernel.to_json(), "zfs": self.zfs.to_json()}
-        path.write_text(json.dumps(body, indent=2) + "\n")
+        return json.dumps(body, indent=2)
+
+    def write(self, path: Path) -> None:
+        # Atomic replace, mirroring lock-images.
+        with NamedTemporaryFile("w", delete=False, dir=path.parent) as f:
+            f.write(self.dumps() + "\n")
+            tmp = Path(f.name)
+        tmp.replace(path)
 
 
 def nix(*args: str) -> str:
@@ -91,10 +101,21 @@ def matrix() -> list[Compat]:
     return [Compat.from_json(r) for r in rows]
 
 
-def main() -> int:
-    current = Compat.read(PINS)
+def log(msg: str) -> None:
+    """Progress/diagnostics go to stderr so stdout stays clean for the JSON that
+    a dry run (no --write) prints -- same stdout-is-data contract as lock-images."""
+    print(msg, file=sys.stderr)
 
-    print("==> Resolving newest forward-only zfs + compatible kernel from nixpkgs...")
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Bump kernel/zfs pins forward-only.")
+    parser.add_argument("--json", type=Path, default=PINS, help="Pins JSON file")
+    parser.add_argument("--write", action="store_true", help="Overwrite the pins JSON file")
+    args = parser.parse_args()
+
+    current = Compat.read(args.json)
+
+    log("==> Resolving newest forward-only zfs + compatible kernel from nixpkgs...")
 
     # Forward-only: only pairs at or above the current pins in both dimensions.
     # The floor is the pinned version itself -- no longer derived from the attr.
@@ -110,16 +131,20 @@ def main() -> int:
         # Nothing at/above the floor is compatible: keep pins (never downgrade).
         chosen = current
 
-    chosen.write(PINS)
-
     if chosen == current:
-        print(f"==> Already current ({chosen.kernel} / {chosen.zfs}); no change.")
+        log(f"==> Already current ({chosen.kernel} / {chosen.zfs}); no change.")
     else:
         if current.kernel != chosen.kernel:
-            print(f"==> kernel: {current.kernel} -> {chosen.kernel}")
+            log(f"==> kernel: {current.kernel} -> {chosen.kernel}")
         if current.zfs != chosen.zfs:
-            print(f"==> zfs:    {current.zfs} -> {chosen.zfs}")
-        print(f"==> Wrote {PINS} (review with: git diff -- lib/pins.json)")
+            log(f"==> zfs:    {current.zfs} -> {chosen.zfs}")
+
+    if args.write:
+        chosen.write(args.json)
+        log(f"==> Wrote {args.json} (review with: git diff -- {args.json})")
+    else:
+        # Dry run: print the resolved pins to stdout, leave the file untouched.
+        print(chosen.dumps())
     return 0
 
 

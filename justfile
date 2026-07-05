@@ -1,7 +1,7 @@
 update:
     nix flake update
     lock-images --json lib/images.json --write
-    bump-kernel
+    bump-kernel --json lib/pins.json --write
 
 upgrade: upgrade-system upgrade-home
 
