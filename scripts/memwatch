@@ -12,6 +12,10 @@
 # VRAM_MB near the card's total with GTT_MB climbing means VRAM
 # oversubscription: amdgpu is migrating buffers over PCIe every frame,
 # which stutters indefinitely until VRAM consumers exit.
+# Per-process columns (- when no game running): monotonic growth in
+# GAME_RSS / GAME_VRAM / GAME_FD across a session is a game-side leak
+# (see csgo-osx-linux #3808/#3925); WEBHLP_RSS growth that survives game
+# restarts implicates the Steam overlay / steamwebhelper.
 
 set -euo pipefail
 
@@ -42,8 +46,12 @@ fi
 
 temp_c() { [[ -n "$1" && -r "$1" ]] && echo $(( $(cat "$1") / 1000 )) || echo -; }
 
-printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s\n' \
-    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB
+# Known Source/Source2 game binaries to track; first match wins
+game_pid() { pgrep -x cs2 || pgrep -x dota2 || pgrep -x hl2_linux || true; }
+
+printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s\n' \
+    TIME AVAIL_MB ARC_MB PSI CPU_C GPU_J GPU_MEM SCLK_MHZ FAN BUSY VRAM_MB GTT_MB \
+    GAME_RSS GAME_VRAM GAME_FD GAME_THR WEBHLP_RSS
 
 while true; do
     avail=$(( $(awk '/^MemAvailable:/ {print $2}' /proc/meminfo) / 1024 ))
@@ -64,9 +72,28 @@ while true; do
         gtt=$(( $(cat "$gpu/mem_info_gtt_used") / 1048576 ))
     fi
 
-    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s\n' \
+    game_rss=- game_vram=- game_fd=- game_thr=-
+    pid=$(game_pid | head -1)
+    if [[ -n "$pid" && -d /proc/$pid ]]; then
+        game_rss=$(( $(awk '/^VmRSS:/ {print $2}' /proc/$pid/status) / 1024 ))
+        game_thr=$(awk '/^Threads:/ {print $2}' /proc/$pid/status)
+        game_fd=$(ls /proc/$pid/fd 2>/dev/null | wc -l)
+        # Sum VRAM across the process's DRM clients (KiB in fdinfo)
+        game_vram=$(awk '/^drm-memory-vram:/ {s += $2} END {print int(s / 1024)}' \
+            /proc/$pid/fdinfo/* 2>/dev/null)
+    fi
+
+    webhlp_rss=-
+    wh_pids=$(pgrep -f steamwebhelper || true)
+    if [[ -n "$wh_pids" ]]; then
+        webhlp_rss=$(echo "$wh_pids" | xargs -I{} awk '/^VmRSS:/ {print $2}' /proc/{}/status 2>/dev/null \
+            | awk '{s += $1} END {print int(s / 1024)}')
+    fi
+
+    printf '%-8s %9s %8s %6s %6s %6s %8s %9s %6s %6s %8s %7s %9s %10s %8s %8s %11s\n' \
         "$(date +%T)" "$avail" "$arc" "$psi" \
         "$(temp_c "$cpu_temp")" "$(temp_c "$gpu_junction")" "$(temp_c "$gpu_mem")" \
-        "$sclk" "$fan" "$busy" "$vram" "$gtt"
+        "$sclk" "$fan" "$busy" "$vram" "$gtt" \
+        "$game_rss" "$game_vram" "$game_fd" "$game_thr" "$webhlp_rss"
     sleep "$interval"
 done
