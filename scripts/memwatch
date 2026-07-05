@@ -11,8 +11,8 @@ From elsewhere:  ssh desktop.lan 'python3 -' < scripts/memwatch | tee memlog.txt
 Marking events: `echo "stutter start" > /tmp/memwatch.mark` from any
 terminal drops a MARK row into the log at that timestamp.
 
-GAME_FPS comes from the Mesa Vulkan overlay layer logging to
-/tmp/cs2-fps.log; see docs/cs2-session-runbook.txt for the launch-line
+GAME_FPS comes from MangoHud headless logging (newest CSV under
+/tmp/mangohud); see docs/cs2-session-runbook.txt for the launch-line
 env vars that enable it.
 
 Column legend and interpretation: docs/cs2-stutter-investigation.md
@@ -25,7 +25,7 @@ import time
 
 INTERVAL = float(sys.argv[1]) if len(sys.argv) > 1 else 5.0
 MARK_FILE = "/tmp/memwatch.mark"
-FPS_FILE = "/tmp/cs2-fps.log"
+FPS_DIR = "/tmp/mangohud"
 GAME_NAMES = ("cs2", "dota2", "hl2_linux")
 
 COLS = [
@@ -154,10 +154,16 @@ def ctxt():
 
 
 def game_fps():
-    if time.time() - os.stat(FPS_FILE).st_mtime > INTERVAL * 3:
+    """Last FPS sample from the newest fresh MangoHud CSV (first column)."""
+    newest = max(glob.glob(FPS_DIR + "/*.csv"), key=os.path.getmtime)
+    if time.time() - os.stat(newest).st_mtime > INTERVAL * 3:
         return None
-    last = read(FPS_FILE).splitlines()[-1]
-    for tok in last.replace(",", " ").split():
+    with open(newest, "rb") as f:
+        f.seek(0, os.SEEK_END)
+        f.seek(max(0, f.tell() - 4096))
+        lines = f.read().decode(errors="replace").splitlines()
+    for last in reversed(lines[1:] if len(lines) > 1 else lines):
+        tok = last.split(",")[0]
         try:
             v = float(tok)
         except ValueError:
@@ -242,5 +248,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
-        pass
+    except (KeyboardInterrupt, BrokenPipeError):
+        # ^C or downstream pipe (head/tee) closing — normal exits
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())

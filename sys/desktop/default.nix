@@ -45,6 +45,9 @@
     })
     eza
     btop
+    # Headless FPS/frametime logger for stutter diagnosis (MANGOHUD=1 +
+    # no_display in launch options); see docs/cs2-session-runbook.txt
+    mangohud
   ];
 
 

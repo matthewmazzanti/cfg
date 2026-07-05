@@ -3,13 +3,21 @@ CS2 diagnostic session runbook
 
 Steam launch options (CS2 > Properties > General > Launch Options — paste as-is):
 
-gamescope -W 3840 -H 2160 -r 60 --force-grab-cursor -f -- gamemoderun %command% -novid +fps_max 120 -condebug -conclearlog
+gamescope -W 3840 -H 2160 -r 60 --force-grab-cursor -f -- gamemoderun env MANGOHUD=1 MANGOHUD_CONFIG=no_display,output_folder=/tmp/mangohud,autostart_log=1,log_duration=14400,log_interval=100 %command% -novid +fps_max 120 -condebug -conclearlog
 
-(Do NOT add VK_LOADER_LAYERS_ENABLE=VK_LAYER_MESA_overlay: forcing the host Mesa
-overlay layer into cs2 inside pressure-vessel segfaults the game at Vulkan init —
-3/3 attempts on 2026-07-05. The GAME_FPS memwatch column stays and reads '-' unless
-something writes /tmp/cs2-fps.log; MangoHud in headless mode (no_display + logging)
-is the known-good way to fill it if in-log FPS is wanted.)
+MangoHud settings decoded (headless logger, nothing drawn on screen):
+  no_display              no overlay
+  output_folder=/tmp/mangohud   CSV per session lands here (create-on-demand)
+  autostart_log=1         logging starts with the game, no keybind needed
+  log_duration=14400      one log covers up to 4h
+  log_interval=100        sample every 100 ms instead of every frame (small files)
+memwatch reads the newest CSV in /tmp/mangohud for the GAME_FPS column.
+Shift_L+F2 toggles logging manually if autostart is ever removed.
+
+(Do NOT use VK_LOADER_LAYERS_ENABLE=VK_LAYER_MESA_overlay instead: forcing the
+host Mesa overlay layer into cs2 inside pressure-vessel segfaults the game at
+Vulkan init — 3/3 attempts on 2026-07-05. MangoHud is the one layer Valve
+supports inside the Steam runtime.)
 
 Experiment queue (ONE knob per session, in order):
   [ ] A: Steam overlay OFF   (CS2 > Properties > General > untick overlay)
@@ -50,6 +58,7 @@ Session procedure
 
 7. After the session, collect:
      ~/stutter-logs/<date>-memlog.txt
+     /tmp/mangohud/*.csv                             (per-frame FPS/frametime)
      ~/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/console.log
      ~/.local/share/Steam/logs/gameoverlayui.log     (overlay sessions)
      ~/.local/share/Steam/logs/console-linux.txt
