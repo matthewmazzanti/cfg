@@ -29,7 +29,7 @@
       allowDiscards = uuid == ssdUuid;
     });
 
-    systemd.services = flake.lib.cryptOrdering {
+    systemd.services = flake.lib.zfsImportAfterLuks {
       inherit luksDevices;
       zfsPools = [ "root-pool" ];
     };

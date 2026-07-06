@@ -19,9 +19,6 @@
       device = "/dev/disk/by-uuid/${uuid}";
       bypassWorkqueues = true;
     });
-
-    # ext4 root -- no zfsPools, so only the console-setup-before-unlock ordering.
-    systemd.services = flake.lib.cryptOrdering { inherit luksDevices; };
   };
 
   boot.kernelModules = ["kvm-intel"];

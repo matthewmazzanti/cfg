@@ -36,8 +36,8 @@ in rec {
         (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
     );
 
-  # Factory linking a host's LUKS unlock into the initrd boot ordering.
-  cryptOrdering = import ./cryptOrdering.nix {
+  # Factory ordering each ZFS boot pool's import after its LUKS unlocks.
+  zfsImportAfterLuks = import ./zfsImportAfterLuks.nix {
     inherit (nixpkgs) lib;
     inherit escapeSystemdPath;
   };
