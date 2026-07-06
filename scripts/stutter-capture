@@ -1,0 +1,337 @@
+#!/usr/bin/env python3
+"""Fire behavior-level probes at the game PID during a stall, into a timestamped dir.
+
+Stdlib only, same spirit as scripts/memwatch. Whatever tool isn't installed is
+skipped (not fatal). Needs root (perf/ftrace/bcc). sudo scrubs PATH, so if the
+tools come from `nix shell`, preserve it:
+
+    nix shell nixpkgs#bcc nixpkgs#bpftrace nixpkgs#gpuvis nixpkgs#trace-cmd nixpkgs#linuxPackages.perf
+    sudo -E env PATH="$PATH" scripts/stutter-capture 20 degraded light
+
+Usage: stutter-capture [seconds] [label] [probes]
+
+probes selects what runs — a TIER keyword or comma-list. Default 'light', chosen
+to minimise observer effect (a heavy capture perturbs a latency-sensitive stall
+and can mask or induce it):
+  light     offcpu + perf stat              (default; decisive first read, cheap)
+  flame     light + perf record (flat)      (PERF_CG=fp|dwarf adds call graphs)
+  timeline  light + trace-cmd -> gpuvis     (TRACE_HEAVY=1 adds sched_switch+irq)
+  ccd       perf stat + perf c2c
+  full      everything at once — HEAVY, perturbs the stall; use sparingly
+  or explicit: e.g.  offcpu,c2c
+
+Snapshots + per-thread ps sampling always run (negligible). Run TWICE per session
+(label 'clean' early, 'degraded' mid-stall); the diff between dirs is the signal.
+Escalate: start 'light', and only add a heavy probe (flame w/dwarf, timeline
+w/TRACE_HEAVY, c2c) ONE AT A TIME once light points at a branch. Watch the MangoHud
+frametime graph while capturing — if it jumps when the capture starts, you're
+perturbing the thing you're measuring.
+
+Knobs: PERF_FREQ (default 499 Hz), PERF_CG ('' flat | fp | dwarf), TRACE_HEAVY=1.
+See docs/cs2-session-runbook.txt for the result -> interpretation table.
+"""
+
+import glob
+import os
+import pwd
+import shutil
+import subprocess
+import sys
+import time
+from collections import Counter
+
+DUR = int(sys.argv[1]) if len(sys.argv) > 1 else 20
+LABEL = sys.argv[2] if len(sys.argv) > 2 else "degraded"
+GAME = os.environ.get("GAME", "cs2")
+EVENTS = ("cycles,instructions,stalled-cycles-backend,stalled-cycles-frontend,"
+          "cache-references,cache-misses,dTLB-load-misses,context-switches,"
+          "cpu-migrations,tlb:tlb_flush,irq_vectors:call_function_single_entry")
+
+ALL_PROBES = {"offcpu", "stat", "flame", "trace", "c2c"}
+TIERS = {
+    "light":    {"offcpu", "stat"},
+    "flame":    {"offcpu", "stat", "flame"},
+    "timeline": {"offcpu", "stat", "trace"},
+    "ccd":      {"stat", "c2c"},
+    "full":     set(ALL_PROBES),
+}
+
+open_files = []
+procs = []  # (name, Popen)
+
+
+def die(msg):
+    print(msg)
+    sys.exit(1)
+
+
+def parse_probes(spec):
+    if spec in TIERS:
+        return set(TIERS[spec])
+    probes = {p.strip() for p in spec.split(",") if p.strip()}
+    bad = probes - ALL_PROBES
+    if bad:
+        die(f"unknown probes {sorted(bad)}; valid: {sorted(ALL_PROBES)} "
+            f"or tiers {sorted(TIERS)}")
+    return probes
+
+
+def read(path):
+    with open(path) as f:
+        return f.read()
+
+
+def write(path, data):
+    try:
+        with open(path, "w") as f:
+            f.write(data)
+    except OSError:
+        pass
+
+
+def snap(path, fn):
+    try:
+        write(path, fn())
+    except Exception:
+        pass
+
+
+def mark(msg):
+    write("/tmp/memwatch.mark", msg + "\n")
+
+
+def find_pid(name):
+    for p in glob.glob("/proc/[0-9]*"):
+        try:
+            if read(p + "/comm").strip() == name:
+                return int(os.path.basename(p))
+        except OSError:
+            continue
+    return None
+
+
+def ofile(path):
+    fh = open(path, "w")
+    open_files.append(fh)
+    return fh
+
+
+def launch(name, cmd, log, err=None):
+    """Start a background recorder; skip (don't abort) if the tool is missing."""
+    if not shutil.which(cmd[0]):
+        print(f"  (skip) {name}: {cmd[0]} not found")
+        return
+    try:
+        p = subprocess.Popen(cmd, stdout=ofile(log),
+                             stderr=ofile(err) if err else subprocess.STDOUT)
+        procs.append((name, p))
+    except Exception as e:
+        print(f"  (skip) {name}: {e}")
+
+
+def run_to(path, cmd):
+    if not shutil.which(cmd[0]):
+        return
+    try:
+        with open(path, "w") as f:
+            subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, timeout=30)
+    except Exception:
+        pass
+
+
+def find_gpu():
+    for c in glob.glob("/sys/class/drm/card*/device"):
+        if os.path.exists(c + "/gpu_busy_percent"):
+            return c
+    return None
+
+
+def affinity(pid):
+    c = Counter()
+    for t in glob.glob(f"/proc/{pid}/task/*/status"):
+        try:
+            for line in read(t).splitlines():
+                if line.startswith("Cpus_allowed_list:"):
+                    c[line.split(":", 1)[1].strip()] += 1
+        except OSError:
+            continue
+    return "\n".join(f"{n:6d}  {mask}" for mask, n in sorted(c.items(), key=lambda x: -x[1]))
+
+
+def gpu_snapshot(gpu):
+    def g(p):
+        try:
+            return read(gpu + "/" + p).strip()
+        except OSError:
+            return "?"
+    active = [l for l in g("pp_dpm_sclk").splitlines() if "*" in l]
+    return (f"force_level: {g('power_dpm_force_performance_level')}\n"
+            f"busy%:       {g('gpu_busy_percent')}\n"
+            f"vram_used:   {g('mem_info_vram_used')}\n"
+            f"pp_dpm_sclk*: {' '.join(active)}\n")
+
+
+def main():
+    probes = parse_probes(sys.argv[3] if len(sys.argv) > 3 else "light")
+    perf_freq = os.environ.get("PERF_FREQ", "499")
+    perf_cg = os.environ.get("PERF_CG", "")          # '' flat | fp | dwarf
+    trace_heavy = bool(os.environ.get("TRACE_HEAVY"))
+
+    if os.geteuid() != 0:
+        die(f'run as root, e.g.:  sudo -E env PATH="$PATH" {sys.argv[0]} {DUR} {LABEL} '
+            f'{",".join(sorted(probes))}')
+
+    pid = find_pid(GAME)
+    if not pid:
+        die(f"{GAME} not running")
+
+    user = os.environ.get("SUDO_USER", "root")
+    try:
+        home = pwd.getpwnam(user).pw_dir
+    except KeyError:
+        home = "/root"
+    stamp = time.strftime("%F_%H-%M-%S")
+    out = os.environ.get("OUTDIR") or f"{home}/stutter-logs/capture-{stamp}-{LABEL}"
+    os.makedirs(out, exist_ok=True)
+    perf_data = f"{out}/perf.data"
+
+    print(f"pid={pid}  game={GAME}  dur={DUR}s  label={LABEL}")
+    print(f"probes: {','.join(sorted(probes))}   out={out}")
+    heavy = []
+    if "flame" in probes and perf_cg == "dwarf":
+        heavy.append("flame(dwarf stack-copy)")
+    if "trace" in probes and trace_heavy:
+        heavy.append("trace(sched_switch+irq)")
+    if "c2c" in probes:
+        heavy.append("c2c(IBS)")
+    if len({"flame", "trace", "c2c"} & probes) >= 2:
+        heavy.append("concurrent samplers (PMU multiplex skews perf stat)")
+    if heavy:
+        print("  ! observer-effect warning — heavy probes active: " + "; ".join(heavy))
+        print("  ! watch the MangoHud frametime graph; prefer one heavy probe at a time")
+
+    mark(f"capture {LABEL} start")
+
+    # ---- one-shot snapshots (always; negligible) ----
+    snap(f"{out}/proc-status.txt", lambda: read(f"/proc/{pid}/status"))
+    snap(f"{out}/smaps_rollup.txt", lambda: read(f"/proc/{pid}/smaps_rollup"))
+    snap(f"{out}/thread-affinity.txt", lambda: affinity(pid))
+    run_to(f"{out}/threads-begin.txt",
+           ["ps", "-T", "-p", str(pid), "-o", "tid,psr,stat,pcpu,wchan:32,comm"])
+    gpu = find_gpu()
+    if gpu:
+        snap(f"{out}/gpu.txt", lambda: gpu_snapshot(gpu))
+
+    # ---- selected recorders (background) ----
+    if "offcpu" in probes:
+        offcpu = shutil.which("offcputime-bpfcc") or shutil.which("offcputime")
+        if offcpu:
+            launch("offcputime", [offcpu, "-df", "-p", str(pid), str(DUR)],
+                   f"{out}/offcpu.folded", err=f"{out}/offcpu.err")
+        else:
+            print("  (skip) offcputime: bcc not found")
+
+    if "stat" in probes:
+        launch("perf stat", ["perf", "stat", "-p", str(pid), "-e", EVENTS,
+                             "--", "sleep", str(DUR)], f"{out}/perf-stat.txt")
+
+    if "flame" in probes:
+        cmd = ["perf", "record", "-F", perf_freq, "-o", perf_data, "-p", str(pid)]
+        if perf_cg:
+            cmd += ["-g", "--call-graph", perf_cg]
+        cmd += ["--", "sleep", str(DUR)]
+        launch("perf record", cmd, f"{out}/perf-record.log")
+
+    if "trace" in probes:
+        ev = ["-e", "amdgpu", "-e", "drm", "-e", "gpu_scheduler", "-e", "dma_fence"]
+        if trace_heavy:
+            ev += ["-e", "sched_switch", "-e", "irq_vectors"]
+        launch("trace-cmd", ["trace-cmd", "record", "-o", f"{out}/trace.dat",
+                            *ev, "--", "sleep", str(DUR)], f"{out}/tracecmd.log")
+
+    if "c2c" in probes:
+        launch("perf c2c", ["perf", "c2c", "record", "-o", f"{out}/c2c.data",
+                           "-p", str(pid), "--", "sleep", str(DUR)], f"{out}/c2c-record.log")
+
+    # ---- per-thread state during the window (always; cheap) ----
+    print(f"recording {DUR}s across {len(procs)} recorder(s) + ps sampler… let it finish")
+    try:
+        with open(f"{out}/thread-samples.txt", "w") as sf:
+            t = 0
+            while t < DUR:
+                sf.write(time.strftime("%T") + "\n")
+                try:
+                    r = subprocess.run(
+                        ["ps", "-T", "-p", str(pid), "-o",
+                         "tid,psr,stat,wchan:24,pcpu,comm", "--no-headers"],
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=5)
+                    sf.write(r.stdout.decode(errors="replace"))
+                except Exception:
+                    pass
+                sf.write("\n")
+                sf.flush()
+                time.sleep(2)
+                t += 2
+        for name, p in procs:
+            try:
+                p.wait(timeout=DUR + 20)
+            except Exception:
+                p.terminate()
+    except KeyboardInterrupt:
+        print("\ninterrupted — killing probes")
+        for name, p in procs:
+            try:
+                p.terminate()
+            except Exception:
+                pass
+    finally:
+        for fh in open_files:
+            try:
+                fh.close()
+            except Exception:
+                pass
+
+    # ---- after + digests ----
+    run_to(f"{out}/threads-end.txt",
+           ["ps", "-T", "-p", str(pid), "-o", "tid,psr,stat,pcpu,wchan:32,comm"])
+    run_to(f"{out}/kmsg.txt", ["journalctl", "-k", "-n", "200"])
+    mark(f"capture {LABEL} end")
+
+    if os.path.exists(perf_data) and os.path.getsize(perf_data) and shutil.which("perf"):
+        try:
+            r = subprocess.run(["perf", "report", "-i", perf_data, "--stdio", "--no-children"],
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=120)
+            lines = [l for l in r.stdout.decode(errors="replace").splitlines()
+                     if l and not l.startswith("#")]
+            write(f"{out}/perf-top.txt", "\n".join(lines[:40]))
+        except Exception:
+            pass
+
+    folded = f"{out}/offcpu.folded"
+    if os.path.exists(folded) and os.path.getsize(folded):
+        rows = []
+        for line in read(folded).splitlines():
+            _head, _, tail = line.rpartition(" ")
+            if tail.isdigit():
+                rows.append((int(tail), line))
+        rows.sort(reverse=True)
+        write(f"{out}/offcpu-top.txt", "\n".join(l for _, l in rows[:30]))
+
+    try:
+        uid, gid = pwd.getpwnam(user).pw_uid, pwd.getpwnam(user).pw_gid
+        for root, _dirs, files in os.walk(out):
+            os.chown(root, uid, gid)
+            for f in files:
+                os.chown(os.path.join(root, f), uid, gid)
+    except Exception:
+        pass
+
+    print(f"\ncaptured -> {out}")
+    print("  read offcpu-top.txt first (off-CPU vs on-CPU); see runbook for the table.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (KeyboardInterrupt, BrokenPipeError):
+        pass

@@ -5,3 +5,6 @@ a.out
 startup
 scripts/fio/results/
 .DS_Store
+__pycache__/
+/stutter-logs/
+__pycache__/

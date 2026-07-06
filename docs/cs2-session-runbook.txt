@@ -31,10 +31,16 @@ host Mesa overlay layer into cs2 inside pressure-vessel segfaults the game at
 Vulkan init — 3/3 attempts on 2026-07-05. MangoHud is the one layer Valve
 supports inside the Steam runtime.)
 
-Experiment queue (ONE knob per session, in order):
-  [ ] A: Steam overlay OFF   (CS2 > Properties > General > untick overlay)
-  [ ] B: Proton              (Properties > Compatibility > force Proton; overlay back ON)
-  [ ] C: KVM bypass          (DP cable direct to monitor, mouse/kb direct to machine)
+Experiment queue (ONE knob per session, in order). Overlay-off and KVM-bypass
+were eliminated 2026-07-05 (see investigation doc 5.1 / branch 7). Two live:
+  [ ] A: single-CCD pin      (prepend `taskset -c 0-5,12-17` to launch options —
+                              CCD0 only on the 5900X; isolates cross-CCD sync
+                              latency. Affinity is inherited through pressure-vessel.)
+  [ ] B: Proton A/B          (Properties > Compatibility > force a Proton version;
+                              swaps native Vulkan for D3D11>DXVK>RADV)
+Rationale for A-first: the 5900X is the hardest cross-machine constant — same CPU
+drove both the RX 580 (Polaris) and the current RDNA3 card, across both stutter
+eras. GPU arch changed, CPU didn't. See investigation doc taxonomy 2.4.
 
 Session procedure
 -----------------
@@ -71,9 +77,75 @@ Session procedure
 7. After the session, collect:
      ~/stutter-logs/<date>-memlog.txt
      ~/stutter-logs/mangohud/*.csv                   (per-frame FPS/frametime)
+     offcpu-clean.txt / offcpu-degraded.txt          (if traced — see below)
+     trace.dat (gpuvis), *.rgp / *.rmv               (if captured)
      ~/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive/game/csgo/console.log
      ~/.local/share/Steam/logs/gameoverlayui.log     (overlay sessions)
      ~/.local/share/Steam/logs/console-linux.txt
+
+Tracing the engine stall (behavior-level, not resource-level)
+-------------------------------------------------------------
+memwatch/MangoHud measure resource LEVELS (all healthy — that's why everything
+got eliminated). These tools measure BEHAVIOR: what a thread is blocked on, the
+per-frame CPU/GPU/fence timeline, and allocation over time. They can surface
+mechanisms not in the taxonomy (lock convoy, allocator slow-path, submission
+regression, TLB/IPI storm, DRM fence latency) and are the ONLY tools that can name
+what accumulates to the 25-min onset. Run every capture as a pre-onset vs
+post-onset DIFFERENTIAL in one session (clean window early, degraded window after
+~25 min) — the bug is per-process and resets on restart, so the diff is the signal.
+
+Tools run host-side on the cs2 PID; pressure-vessel is not an obstacle (kernel-side).
+Game symbols are stripped, but Mesa/RADV symbols resolve — which is the layer we
+suspect.
+
+ONE-SHOT (run ON the desktop, where cs2 is): scripts/stutter-capture fires the
+selected probes at the PID into a timestamped ~/stutter-logs/capture-* dir,
+skipping any missing tool. nix pulls the toolbox; --command bash -c '...' makes
+$PATH expand INSIDE the nix env (single quotes required); `env PATH=` survives
+sudo's PATH scrub. Probe tiers: light (default, cheap: offcpu+stat) | flame |
+timeline | ccd | full (everything — HEAVY, perturbs the stall). Run it TWICE —
+'clean' early, 'degraded' mid-stall — and diff the dirs:
+
+  nix shell nixpkgs#bcc nixpkgs#bpftrace nixpkgs#gpuvis nixpkgs#trace-cmd nixpkgs#linuxPackages.perf \
+    --command bash -c 'cd ~/src/nix/cfg && sudo -E env PATH="$PATH" scripts/stutter-capture 20 degraded full'
+
+  # first pass / low observer-effect: swap `full` -> `light`
+  # knobs: PERF_CG=dwarf (call stacks), TRACE_HEAVY=1 (sched+irq), PERF_FREQ=999
+  # DRY-RUN once in the menu first (10 light, 10 timeline) to shake out tools.
+
+The manual probes below are for follow-up once the one-shot points at a branch.
+pid=$(pgrep -x cs2) for those.
+
+1. DECISIVE FIRST TRACE — on-CPU vs off-CPU during a stall (which branch are we on):
+     sudo offcputime-bpfcc -p $pid 30 > offcpu-degraded.txt   # + a -clean.txt early
+     # quick peek: sudo cat /proc/$pid/task/*/wchan   (kernel func each thread sleeps in)
+
+2. PER-FRAME TIMELINE — gpuvis (Valve's CPU<->GPU<->fence viewer):
+     sudo trace-cmd record -e amdgpu -e drm -e gpu_scheduler -e dma_fence \
+          -e sched_switch -e irq_vectors sleep 20            # degraded window
+     gpuvis trace.dat        # look for the ~40ms hole and which side of the fence
+
+3. DRIVER INTERNALS via Mesa (env vars in the launch line; run MESA_VK_TRACE=help):
+     MESA_VK_TRACE=rgp MESA_VK_TRACE_TRIGGER=/tmp/rgp   -> touch /tmp/rgp mid-stall
+          (per-frame pipeline/barrier/submission -> open .rgp in Radeon GPU Profiler)
+     MESA_VK_TRACE=rmv                                  -> whole-session allocations
+          (.rmv in Radeon Memory Visualizer — DIRECT test of "state accumulation":
+           watch descriptor/pipeline/alloc counts + working set inflect at onset)
+
+4. CORROBORATION:
+     sudo perf record -g -p $pid -- sleep 20     # flame graph; radv_*/ac_* growth = driver
+     sudo perf stat -p $pid -e cycles,instructions,stalled-cycles-backend -- sleep 10
+          # IPC collapse + backend stalls rising at onset = memory-latency-bound (-> c2c/CCD)
+     sudo perf c2c record -p $pid -- sleep 20     # cross-CCD HITM lines (see 2.4)
+
+Result -> interpretation:
+  off-CPU futex_wait ................ lock contention (engine or RADV mutex)   [new]
+  off-CPU dma_fence_wait, GPU idle .. submission serialization / present stall
+  on-CPU, radv_*/ac_* in flame ..... RADV CPU-side work per frame
+  on-CPU, backend stalls up, IPC dn . memory-latency-bound -> perf c2c / CCD (2.4)
+  high tlb_flush / IPI rate ......... TLB-shootdown storm (CCD-amplified)      [new]
+  RMV allocs / working set climb .... engine/driver state ACCUMULATION (core theory)
+  gpuvis: growing semaphore/barrier . submission-pattern regression           [new]
 
 What takes effect when (NixOS boot/activation order)
 ----------------------------------------------------
