@@ -1,5 +1,16 @@
 nixpkgs: let
   inherit (nixpkgs.lib) genAttrs importJSON;
+  # escapeSystemdPath lives in nixos/lib/utils.nix, which wants { lib, config,
+  # pkgs }. The escape helper only touches lib, and Nix is lazy, so throwaway
+  # config/pkgs let us use the canonical function without a NixOS eval.
+  inherit
+    (import "${nixpkgs}/nixos/lib/utils.nix" {
+      inherit (nixpkgs) lib;
+      config = {};
+      pkgs = {};
+    })
+    escapeSystemdPath
+    ;
 in rec {
   # List of nixpkgs systems identifiers for flakes
   systems = ["aarch64-linux" "aarch64-darwin" "x86_64-linux"];
@@ -24,6 +35,12 @@ in rec {
       { pkgs, ... } @ systemInputs:
         (pkgs.callPackage (import ./mkNakedShell.nix) {}) (inputs systemInputs)
     );
+
+  # Factory linking a host's LUKS unlock into the initrd boot ordering.
+  cryptOrdering = import ./cryptOrdering.nix {
+    inherit (nixpkgs) lib;
+    inherit escapeSystemdPath;
+  };
 
   keys = import ./keys;
   images = importJSON ./images.json;

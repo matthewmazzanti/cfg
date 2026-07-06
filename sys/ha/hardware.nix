@@ -1,24 +1,34 @@
-{ config, lib, pkgs, ... }: {
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "nvme"
-    "usb_storage"
-    "usbhid"
-    "sd_mod"
-  ];
-  boot.initrd.supportedFilesystems = ["ext4"];
-  boot.initrd.kernelModules = [];
+{ config, lib, pkgs, flake, ... }: {
+  boot.initrd = let
+    luksDevices = [ "aa7f83ca-dfd0-47e1-981a-66740de64eb7" ];
+  in {
+    availableKernelModules = [
+      "xhci_pci"
+      "nvme"
+      "usb_storage"
+      "usbhid"
+      "sd_mod"
+    ];
+    supportedFilesystems = ["ext4"];
+    kernelModules = [];
+
+    luks.devices = lib.genAttrs luksDevices (uuid: {
+      device = "/dev/disk/by-uuid/${uuid}";
+      keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
+      keyFileTimeout = 10;
+      bypassWorkqueues = true;
+      allowDiscards = true;
+    });
+
+    systemd.services = flake.lib.cryptOrdering {
+      inherit luksDevices;
+      zfsPools = [ "root-pool" ];
+    };
+  };
+
   boot.supportedFilesystems = ["ext4"];
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
-
-  boot.initrd.luks.devices."aa7f83ca-dfd0-47e1-981a-66740de64eb7" = {
-    device = "/dev/disk/by-uuid/aa7f83ca-dfd0-47e1-981a-66740de64eb7";
-    keyFile = "/key-file:UUID=50c62c57-be39-4958-98fd-baab3d3b6d15";
-    keyFileTimeout = 10;
-    bypassWorkqueues = true;
-    allowDiscards = true;
-  };
 
   swapDevices = [
     {

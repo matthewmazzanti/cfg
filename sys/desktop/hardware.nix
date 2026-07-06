@@ -1,15 +1,14 @@
 {
   config,
   lib,
-  utils,
+  flake,
   modulesPath,
   ...
 }: {
   imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
   boot.initrd = let
-    luksUuid = "8da62c32-7525-4ce6-a493-b4fc149e5421";
-    cryptsetupUnit = "systemd-cryptsetup@${utils.escapeSystemdPath luksUuid}.service";
+    luksDevices = [ "8da62c32-7525-4ce6-a493-b4fc149e5421" ];
   in {
     availableKernelModules = [
       "xhci_pci"
@@ -22,15 +21,15 @@
     supportedFilesystems = [];
     kernelModules = [];
 
-    luks.devices.${luksUuid} = {
-      device = "/dev/disk/by-uuid/${luksUuid}";
+    luks.devices = lib.genAttrs luksDevices (uuid: {
+      device = "/dev/disk/by-uuid/${uuid}";
       bypassWorkqueues = true;
       allowDiscards = true;
-    };
+    });
 
-    systemd.services."zfs-import-root-pool" = {
-      after = [ cryptsetupUnit ];
-      requires = [ cryptsetupUnit ];
+    systemd.services = flake.lib.cryptOrdering {
+      inherit luksDevices;
+      zfsPools = [ "root-pool" ];
     };
   };
 
