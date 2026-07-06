@@ -12,8 +12,10 @@ Marking events: `echo "stutter start" > /tmp/memwatch.mark` from any
 terminal drops a MARK row into the log at that timestamp.
 
 GAME_FPS comes from MangoHud headless logging (newest CSV under
-/tmp/mangohud); see docs/cs2-session-runbook.txt for the launch-line
-env vars that enable it.
+~/stutter-logs/mangohud); see docs/cs2-session-runbook.txt for the launch-line
+env vars that enable it. The folder must be under $HOME, not /tmp: cs2 runs
+inside pressure-vessel with a private /tmp, but $HOME is bind-shared at its
+real path so both cs2 and this host-side script see the same files.
 
 Column legend and interpretation: docs/cs2-stutter-investigation.md
 """
@@ -25,7 +27,7 @@ import time
 
 INTERVAL = float(sys.argv[1]) if len(sys.argv) > 1 else 5.0
 MARK_FILE = "/tmp/memwatch.mark"
-FPS_DIR = "/tmp/mangohud"
+FPS_DIR = os.path.expanduser("~/stutter-logs/mangohud")
 GAME_NAMES = ("cs2", "dota2", "hl2_linux")
 
 COLS = [
