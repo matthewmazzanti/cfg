@@ -92,6 +92,16 @@ Headless MangoHud frametime logging (100 ms samples) alongside memwatch, one
   periodically blocking internally; the downclock is downstream of that.
 - **Reproduces without gamescope and without gamemoderun.** Removes 4.4 (nested
   compositor) and 5.5 as necessary conditions.
+- **Bare-config note (2026-07-06): no MangoHud / no gamescope / no gamemode.**
+  Removing gamescope *raises* baseline frametime (~4 → ~6 ms as read on the
+  built-in counter; ~220 fps, just off the 240 cap) — counter-intuitive for
+  dropping a layer, but consistent with gamescope owning the swapchain and pacing
+  cs2 in immediate/mailbox, decoupling it from KWin's compositor; direct-to-KWin
+  costs ~a couple ms/present and no longer pins the cap. Baseline throughput only
+  — does NOT change the decay (reproduces here too), and this bare path is the
+  cleanest repro (fewest layers). Caveat: no MangoHud → memwatch GAME_FPS goes
+  dark (read cs2 built-in cl_showfps/net_graph instead); scripts/stutter-capture
+  is unaffected (it uses perf/ftrace, not the CSV).
 - **Arc Raiders (UE5, Proton→vkd3d→RADV) runs smooth for hours on the identical
   GPU / RADV / kernel / KWin / DP / KVM / ZFS stack.** A heavy game hammering the
   same display + present path is fine. With the historical bspwm/X11 repro (no
