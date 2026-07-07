@@ -116,7 +116,7 @@ local function toggle_relativenumber()
   end
 end
 vim.api.nvim_create_user_command("Share", toggle_relativenumber, {})
-vim.keymap.set("n", "<leader>r", toggle_relativenumber)
+vim.keymap.set("n", "<leader>l", toggle_relativenumber)
 
 -- Copy to system clipboard where available
 vim.opt.clipboard = "unnamedplus"

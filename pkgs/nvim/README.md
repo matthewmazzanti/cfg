@@ -51,6 +51,12 @@ Creates the final wrapped executable:
 
 **Leader key**: `;`
 
+### General (init.lua)
+| Key | Action |
+|-----|--------|
+| `<leader>n` | Clear search highlight |
+| `<leader>l` | Toggle relative line numbers (also `:Share`) |
+
 ### Navigation (fzf.lua)
 | Key | Action |
 |-----|--------|
