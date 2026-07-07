@@ -3,8 +3,6 @@
   system,
   inputs,
 }: let
-  inherit (pkgs.lib) recursiveUpdate;
-
   nvimOverlay = pkgs.extend (self: super: {
     vimPlugins =
       super.vimPlugins
@@ -22,7 +20,6 @@
     plugins = true;
     lsp = true;
     treesitter = true;
-    ai = false;
     langs = {
       c = false;
       data = true;
@@ -46,9 +43,6 @@ in nu // {
   "nvim/dev" = nvimOverlay.callPackage ./nvim {
     options = neovimOptions;
   };
-  "nvim/ai" = (nvimOverlay.callPackage ./nvim {
-    options = recursiveUpdate neovimOptions { ai = true; };
-  });
   "nvim/nix" = nvimOverlay.callPackage ./nvim {
     options = {
       plugins = true;

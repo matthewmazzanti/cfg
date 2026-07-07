@@ -82,7 +82,7 @@ in {
       coreutils time gnused time openssh helix clang
 
       # cloud
-      awscli2 gh gh-copilot nodejs
+      awscli2 gh nodejs
       # qemu
       tmux screen
       # nix
@@ -96,7 +96,6 @@ in {
       # Customized tools
       flake.packages."less/dev"
       flake.packages."nvim/dev"
-      flake.packages."nvim/ai"
       flake.packages."zsh/dev"
     ];
 

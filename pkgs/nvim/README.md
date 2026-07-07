@@ -20,8 +20,7 @@ pkgs/nvim/
 │   ├── fidget.lua       # LSP progress notifications
 │   ├── sandwich.lua     # Surround text objects
 │   ├── easyclip.lua     # Improved yank/delete
-│   ├── readline.lua     # Readline keybindings for cmdline
-│   └── codecompanion.lua# AI assistant (OpenAI)
+│   └── readline.lua     # Readline keybindings for cmdline
 ├── plugin/
 │   └── readline.lua     # Readline utilities library
 └── test/                # Test files for various filetypes
@@ -46,7 +45,7 @@ Creates the final wrapped executable:
 2. Sets up LUA_PATH/LUA_CPATH for plugin dependencies
 3. Generates combined init.lua loading all config modules
 4. Adds LSP servers and tools to PATH
-5. Creates aliases (`vim` -> `nvim`, `ai-vim` -> `ai-nvim`)
+5. Creates the `vim` -> `nvim` alias
 
 ## Keybindings
 
@@ -87,14 +86,6 @@ Creates the final wrapped executable:
 |-----|--------|
 | `<leader>s` | Toggle split/join |
 | `<leader>S` | Toggle recursive |
-
-### AI (codecompanion.lua)
-| Key | Action |
-|-----|--------|
-| `<C-a>` | CodeCompanion actions |
-| `<leader>a` | Toggle chat |
-| `<leader>i` | Inline prompt |
-| `ga` (visual) | Add selection to chat |
 
 ### Editing (easyclip.lua)
 | Key | Action |

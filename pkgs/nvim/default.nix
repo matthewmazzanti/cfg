@@ -14,7 +14,6 @@
     plugins = false;
     treesitter = false;
     lsp = false;
-    ai = false;
     langs = {
       c = false;
       data = false;
@@ -222,14 +221,6 @@
         # Completion
         blink-cmp
       ]
-      ++ optionals opts.ai [
-        copilot-lua
-        codecompanion-nvim
-        mini-diff
-      ]
-      ++ optionals (opts.lsp && opts.ai) [
-        blink-copilot
-      ]
     );
 
   init =
@@ -248,6 +239,7 @@
         ./config/easyclip.lua
         ./config/spider.lua
         ./config/markdown.lua
+        ./config/readline.lua
       ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
@@ -256,17 +248,11 @@
         ./config/lspconfig.lua
         ./config/blink.lua
       ]
-      ++ optionals opts.ai [
-        ./config/codecompanion.lua
-      ]
-      ++ [
-        ./config/readline.lua
-      ]
     );
 in
   pkgs.callPackage ./wrapper.nix {
-    wrapperName = if !opts.ai then "nvim" else "ai-nvim";
-    aliases = if !opts.ai then ["vim"] else ["ai-vim"];
+    wrapperName = "nvim";
+    aliases = ["vim"];
     packages = packages;
     plugins = plugins;
     init = ''

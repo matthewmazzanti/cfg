@@ -29,17 +29,6 @@ local function get_win_config(opts)
       ) + 15,
       title_pos = "left",
     }
-
-  elseif opts.prompt == "Prompt " then
-    -- Codecompanion inline
-    local width = api.nvim_win_get_width(opts.parent_win)
-    position = {
-      relative = "cursor",
-      row = 1,
-      col = -10,
-      width = math.floor(width * 3/4),
-      title_pos = "center",
-    }
   else
     local height = api.nvim_win_get_height(opts.parent_win)
     local width = api.nvim_win_get_width(opts.parent_win)
