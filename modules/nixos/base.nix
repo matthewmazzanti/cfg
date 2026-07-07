@@ -23,6 +23,27 @@
     include "${pkgs.kbd}/share/keymaps/i386/qwerty/us.map.gz"
     keycode 58 = Escape
   '';
+  # Gruvbox dark palette for the Linux virtual terminal (colors 0-15). NixOS
+  # passes these as vt.default_{red,grn,blu} kernel params, so the kernel applies
+  # them when it brings up the VT -- before initrd -- no earlySetup needed.
+  console.colors = [
+    "282828" # black
+    "cc241d" # red
+    "98971a" # green
+    "d79921" # yellow
+    "458588" # blue
+    "b16286" # magenta
+    "689d6a" # cyan
+    "a89984" # white
+    "928374" # bright black
+    "fb4934" # bright red
+    "b8bb26" # bright green
+    "fabd2f" # bright yellow
+    "83a598" # bright blue
+    "d3869b" # bright magenta
+    "8ec07c" # bright cyan
+    "ebdbb2" # bright white
+  ];
 
   # Time zone.
   time.timeZone = "America/New_York";
