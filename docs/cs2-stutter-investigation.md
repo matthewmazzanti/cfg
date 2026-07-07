@@ -102,6 +102,13 @@ Headless MangoHud frametime logging (100 ms samples) alongside memwatch, one
     restart), so one clean 40-min run sits within noise; and this dropped THREE
     layers at once (mango+gamescope+gamemode), not a single knob. Not MangoHud-
     caused regardless — the bug predates it (bspwm/X11 years ago, pre-aaa3c18).
+  - **Also a FRESH INSTALL** — a second uncontrolled variable in the same session.
+    A fresh install clears accumulated on-disk state (shader/pipeline caches, game
+    config; if OS-level, driver/FS too), so the clean 40 min could owe to fresh
+    state rather than the bare layers. New testable angle: does onset correlate
+    with install/cache AGE — i.e. return as caches repopulate over sessions? (The
+    per-session decay resets on game restart, so on-disk state isn't the runtime
+    *accumulator* — but it may set the starting conditions that gate onset.)
   - Tension with the earlier "reproduces without gamescope" note above. Resolve by
     repeating bare sessions for a reproduce RATE; if bare stays reliably clean,
     re-add ONE layer at a time (gamescope → gamemode → mango) — a durable clean
