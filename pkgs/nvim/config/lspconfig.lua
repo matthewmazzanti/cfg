@@ -79,12 +79,10 @@ vim.lsp.config("lua_ls", {
 })
 
 vim.lsp.enable({
-  -- "ccls",
   "gopls",
   "ts_ls",
   "nixd",
   "pyright",
-  -- "rust_analyzer",
   "lua_ls",
 })
 

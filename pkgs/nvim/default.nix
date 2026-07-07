@@ -43,10 +43,7 @@
       ++ optionals opts.langs.haskell [haskell-language-server]
       ++ optionals opts.langs.web [typescript-language-server]
       ++ optionals opts.langs.lua [lua-language-server]
-      ++ optionals opts.langs.nix [
-        # nil
-        nixd
-      ]
+      ++ optionals opts.langs.nix [nixd]
       ++ optionals opts.langs.python [pyright]
       ++ optionals opts.langs.rust [rust-analyzer]
       ++ optionals opts.langs.shell [bash-language-server]
@@ -138,7 +135,6 @@
     go
     haskell
     html
-    html
     htmldjango
     ini
     javascript
@@ -159,7 +155,6 @@
     vimdoc
     xml
     yaml
-    # zsh
   ];
 
   plugins = with pkgs.vimPlugins;
@@ -184,7 +179,6 @@
         nvim-spider # CamelCase and other motions
         vim-easyclip # Improved yank/delete buffer better
         nvim-surround # Surround
-        # readline-vim # cli keybinds
         fidget-nvim
 
         (stdenvNoCC.mkDerivation (ftplugin // {

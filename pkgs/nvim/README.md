@@ -18,7 +18,7 @@ pkgs/nvim/
 │   ├── treesitter.lua   # Syntax highlighting & textobjects
 │   ├── input.lua        # Custom floating input dialog
 │   ├── fidget.lua       # LSP progress notifications
-│   ├── sandwich.lua     # Surround text objects
+│   ├── surround.lua     # Surround text objects
 │   ├── easyclip.lua     # Improved yank/delete
 │   └── readline.lua     # Readline keybindings for cmdline
 ├── plugin/
