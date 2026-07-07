@@ -92,16 +92,24 @@ Headless MangoHud frametime logging (100 ms samples) alongside memwatch, one
   periodically blocking internally; the downclock is downstream of that.
 - **Reproduces without gamescope and without gamemoderun.** Removes 4.4 (nested
   compositor) and 5.5 as necessary conditions.
-- **Bare-config note (2026-07-06): no MangoHud / no gamescope / no gamemode.**
-  Removing gamescope *raises* baseline frametime (~4 → ~6 ms as read on the
-  built-in counter; ~220 fps, just off the 240 cap) — counter-intuitive for
-  dropping a layer, but consistent with gamescope owning the swapchain and pacing
-  cs2 in immediate/mailbox, decoupling it from KWin's compositor; direct-to-KWin
-  costs ~a couple ms/present and no longer pins the cap. Baseline throughput only
-  — does NOT change the decay (reproduces here too), and this bare path is the
-  cleanest repro (fewest layers). Caveat: no MangoHud → memwatch GAME_FPS goes
-  dark (read cs2 built-in cl_showfps/net_graph instead); scripts/stutter-capture
-  is unaffected (it uses perf/ftrace, not the CSV).
+- **Bare-config session (2026-07-06): no MangoHud / no gamescope / no gamemode.**
+  - Throughput: an early ~4→~6 ms / ~220 fps dip was transient warm-up — it
+    **settled back to the 240 cap**. So gamescope removal costs no steady-state
+    throughput (retracts the first read that direct-to-KWin permanently loses the
+    cap); it was just the first-minutes ramp.
+  - **~40 min of play, decay did NOT onset.** Suggestive, NOT exonerating (per the
+    user): n=1; the bug is variable (onset 20–40 min, occasionally survives a
+    restart), so one clean 40-min run sits within noise; and this dropped THREE
+    layers at once (mango+gamescope+gamemode), not a single knob. Not MangoHud-
+    caused regardless — the bug predates it (bspwm/X11 years ago, pre-aaa3c18).
+  - Tension with the earlier "reproduces without gamescope" note above. Resolve by
+    repeating bare sessions for a reproduce RATE; if bare stays reliably clean,
+    re-add ONE layer at a time (gamescope → gamemode → mango) — a durable clean
+    bare result would REOPEN the wrapper/present-path branch (4.4) that the
+    cross-stack history had closed. This is now a live experiment, not settled.
+  - Instrumentation caveat: no MangoHud → memwatch GAME_FPS goes dark (read cs2
+    built-in cl_showfps/net_graph); scripts/stutter-capture is unaffected
+    (perf/ftrace, not the CSV).
 - **Arc Raiders (UE5, Proton→vkd3d→RADV) runs smooth for hours on the identical
   GPU / RADV / kernel / KWin / DP / KVM / ZFS stack.** A heavy game hammering the
   same display + present path is fine. With the historical bspwm/X11 repro (no
