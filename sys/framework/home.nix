@@ -1,4 +1,6 @@
 { flake, ... }: {
+  imports = [ ./gnome.nix ];
+
   home = {
     username = "mmazzanti";
     homeDirectory = "/home/mmazzanti";
