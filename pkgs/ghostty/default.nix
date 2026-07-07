@@ -76,6 +76,11 @@ let
       split-divider-color = "#a89984";
       unfocused-split-fill = "#504945";
       gtk-titlebar-style = "tabs";
+      # Force client-side decorations. Under "auto", KDE/KWin adds a
+      # server-side titlebar on top of ghostty's own libadwaita headerbar
+      # (the tab bar) -> two titlebars. "client" is native on GNOME (Mutter
+      # is CSD-only, so auto already picks it) and fixes KDE.
+      window-decoration = "client";
     };
 
   config = base // platformConfig // extraConfig;
