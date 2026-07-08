@@ -143,7 +143,6 @@ in {
       "google-drive"
       "ghostty"
       "inkscape"
-      "iterm2"
       "keycastr"
       "logitune"
       "macfuse"
