@@ -14,7 +14,7 @@ pkgs/nvim/
 │   ├── lspconfig.lua    # Language server setup
 │   ├── blink.lua        # Completion (blink-cmp)
 │   ├── fzf.lua          # Fuzzy finder
-│   ├── lualine.lua      # Status line
+│   ├── statusline.lua   # Tab & Status line
 │   ├── treesitter.lua   # Syntax highlighting & textobjects
 │   ├── input.lua        # Custom floating input dialog
 │   ├── fidget.lua       # LSP progress notifications

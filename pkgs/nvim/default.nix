@@ -113,7 +113,6 @@
         vim.opt_local.textwidth = 88
         vim.opt_local.wrap = true
       end
-      -- vim.opt_local.conceallevel = 2
     '';
     nix = two-space;
     nu = four-space;
@@ -167,7 +166,6 @@
         vim-nix # Basic nix stuff
 
         # Visual enhancements
-        lualine-nvim
         render-markdown-nvim
 
         # Picker
@@ -222,12 +220,14 @@
       ./config/init.lua
       ./config/autoread.lua
       ./config/gruvbox.lua
+      # Plugin-free (fugitive/fzf-lua degrade gracefully), so it loads in every
+      # variant including the plugin-less root nvim. After gruvbox for the palette.
+      ./config/statusline.lua
     ]
     ++ optionals opts.plugins (
       [
         ./config/input.lua
         ./config/fidget.lua
-        ./config/lualine.lua
         ./config/surround.lua
         ./config/fzf.lua
         ./config/easyclip.lua
