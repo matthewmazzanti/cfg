@@ -163,6 +163,39 @@ vim.api.nvim_create_autocmd({"VimEnter"}, {
   end
 })
 
+-- Wipe the initial empty [No Name] buffer once the first real file opens, so it
+-- doesn't linger. `:e` already reuses it (it becomes the file); this handles
+-- `:tabe`/`:tabnew`, where it's left behind in the original tab -- close that
+-- tab's window and wipe the buffer.
+local initial_buf = vim.api.nvim_get_current_buf()
+vim.api.nvim_create_autocmd({"BufReadPost", "BufNewFile"}, {
+  once = true,
+  callback = function(args)
+    -- The file loaded into the initial buffer (e.g. `:e`) -- nothing to clean.
+    if args.buf == initial_buf then
+      return
+    end
+    vim.schedule(function()
+      local buf = initial_buf
+      local empty = vim.api.nvim_buf_is_valid(buf)
+        and vim.bo[buf].buftype == ""
+        and vim.api.nvim_buf_get_name(buf) == ""
+        and not vim.bo[buf].modified
+        and vim.api.nvim_buf_line_count(buf) == 1
+        and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+      if not empty then
+        return
+      end
+      -- Close any window still showing it (the original tab after `:tabe`),
+      -- which closes that now-empty tab, then wipe the buffer.
+      for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+        pcall(vim.api.nvim_win_close, win, false)
+      end
+      pcall(vim.api.nvim_buf_delete, buf, {})
+    end)
+  end,
+})
+
 -- Use rounded borders around windows
 if vim.env.TERM == "linux" then
   vim.opt.winborder = "single"
