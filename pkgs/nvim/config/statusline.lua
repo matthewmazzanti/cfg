@@ -325,6 +325,8 @@ vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_highlights })
 vim.o.laststatus = 3 -- global statusline (was lualine's globalstatus)
 vim.o.showmode = false -- mode shown in the statusline instead
 vim.o.statusline = "%!v:lua.StatuslineRender()"
+-- The statusline shows the search count, so drop the native cmdline "[1/5]".
+vim.opt.shortmess:append("S")
 
 vim.o.showtabline = 1 -- tabline appears only with 2+ tab pages
 vim.o.tabline = "%!v:lua.TablineRender()"

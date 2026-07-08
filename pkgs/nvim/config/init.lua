@@ -102,9 +102,14 @@ vim.opt.shortmess:append({
 -- Set leader key for other commands
 vim.g.mapleader = ";"
 
--- Reset search highlighing
+-- Reset search highlighting.
+-- TODO: the redrawstatus is only needed because our statusline renders the
+-- search count -- a generic mapping coupled to one feature. Cleaner would be to
+-- fire a `User SearchCleared` event here and let the statusline subscribe and
+-- redraw itself. Part of the broader config-architecture question.
 vim.keymap.set("n", "<leader>n", function()
   vim.cmd.nohlsearch()
+  vim.cmd("redrawstatus")
 end)
 
 -- Toggle relative line numbers (useful for screen sharing)
