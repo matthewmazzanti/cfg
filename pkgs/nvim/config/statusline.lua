@@ -280,6 +280,22 @@ local function short_path(fname)
   return #relative < #anchored and relative or anchored
 end
 
+-- Buffer that best represents a tab page: its active window, unless that's a
+-- floating window (e.g. an fzf picker), in which case the first non-floating
+-- window -- so a transient float doesn't hijack the tab's label.
+local function tab_buf(tab)
+  local win = vim.api.nvim_tabpage_get_win(tab)
+  if vim.api.nvim_win_get_config(win).relative ~= "" then
+    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      if vim.api.nvim_win_get_config(w).relative == "" then
+        win = w
+        break
+      end
+    end
+  end
+  return vim.api.nvim_win_get_buf(win)
+end
+
 --- Tabline: one label per tab page, showing that tab's active buffer name and
 --- its status flags. `%NT` makes each label switch to tab N on click (native, no
 --- dispatcher needed); a trailing `%T` closes the last region so the fill area
@@ -289,7 +305,7 @@ local function render_tabline()
   local parts = {}
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local group = (tab == cur) and "StTabSel" or "StTab"
-    local buf = vim.api.nvim_win_get_buf(vim.api.nvim_tabpage_get_win(tab))
+    local buf = tab_buf(tab)
     local fname = vim.api.nvim_buf_get_name(buf)
     local name = fname ~= "" and short_path(fname) or "[No Name]"
     parts[#parts + 1] = "%" .. i .. "T" .. hl(group, " " .. name .. flags(buf) .. " ")
