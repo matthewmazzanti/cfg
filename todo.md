@@ -24,12 +24,13 @@
 
 ## Neovim
 
-- [ ] Create "Share" mode, unset relative numbers
-- [ ] Fix file path to always be relative - sometimes is home-based when using file picker
-- [ ] Per-project editor config, lines, tabs etc - already supported?
-- [ ] Pre-compile Lua code?
-- [ ] Re-add CCLS for C projects, if used
-- [ ] Markdown renderer
+- [x] Create "Share" mode, unset relative numbers
+- [x] Markdown renderer
+- [x] Replace lualine with native statusline + tabline
+- [x] Fix file path to always be relative - sometimes is home-based when using file picker
+- [x] Pre-compile Lua code? - not worth it; complexity/error messages outweigh the minimal startup savings
+- [x] Per-project editor config, lines, tabs etc - supported natively via editorconfig (built in since 0.9)
+- [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
 
 ## Zsh
 
@@ -37,7 +38,7 @@
 
 ## Direnv
 
-- [ ] Upstream wrapper changes
+- [ ] Upstream wrapper changes - https://github.com/direnv/direnv/pull/1564
 
 ## Gitea
 
