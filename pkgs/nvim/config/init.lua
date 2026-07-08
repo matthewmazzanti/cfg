@@ -9,6 +9,11 @@ vim.opt.relativenumber = true
 -- Allow for mouse
 vim.opt.mouse = "a"
 
+-- Drop the default right-click "How-to disable mouse" entry (and its now-orphaned
+-- separator) from the PopUp menu.
+vim.cmd.aunmenu([[PopUp.How-to\ disable\ mouse]])
+vim.cmd.aunmenu([[PopUp.-2-]])
+
 -- Increase speed of mouse scrolling
 if vim.env.TERM ~= "xterm-ghostty" then
   vim.keymap.set(
