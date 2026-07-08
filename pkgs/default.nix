@@ -35,10 +35,7 @@
     };
   };
 
-  nu = import ./nu/default.nix {
-    inherit pkgs system inputs;
-  };
-in nu // {
+in {
   "nvim/root" = nvimOverlay.callPackage ./nvim {};
   "nvim/dev" = nvimOverlay.callPackage ./nvim {
     options = neovimOptions;

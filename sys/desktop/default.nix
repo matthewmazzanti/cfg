@@ -34,7 +34,6 @@
     ghostty
     # flake.packages.ghostty
     wl-clipboard
-    nushell
     # TODO: Switch back to stable, at some point
     _1password-gui
     flake.packages.home-manager
@@ -61,7 +60,6 @@
     extraGroups = [ "networkmanager" "gamemode" ];
     packages = [
       flake.packages."nvim/nix"
-      flake.packages.nu
     ];
   };
 
