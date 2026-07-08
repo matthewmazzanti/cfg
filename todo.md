@@ -21,6 +21,7 @@
   - Lightweight nix -> file format helpers (generalize ghostty format.nix pattern)
 - [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
 - [ ] Remove fake.nix things
+- [ ] Re-add less/tmux configs - wrappers still live in pkgs/{less,tmux} but are orphaned (tmux never wired into pkgs/default.nix; less/dev only reaches the beta host). Hook them into the hosts I actually use.
 
 ## Neovim
 
