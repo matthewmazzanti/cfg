@@ -296,6 +296,29 @@ local function tab_buf(tab)
   return vim.api.nvim_win_get_buf(win)
 end
 
+-- Display name for a tab's buffer. Special buffers get readable labels keyed off
+-- buftype (more robust than matching paths/schemes -- no $VIMRUNTIME or store-path
+-- dependency, catches plugin buffers too); normal files use short_path.
+local function buf_name(buf)
+  local bt = vim.bo[buf].buftype
+  local name = vim.api.nvim_buf_get_name(buf)
+
+  if bt == "help" then
+    return "help: " .. vim.fn.fnamemodify(name, ":t")
+  elseif bt == "terminal" then
+    -- term://{cwd}//{pid}:{cmd} -- show the command's basename
+    local cmd = name:match("//%d+:(%S+)")
+    return "term: " .. (cmd and vim.fn.fnamemodify(cmd, ":t") or "?")
+  elseif bt == "quickfix" then
+    return "[Quickfix]"
+  elseif bt ~= "" then
+    -- other special buffers (nofile/acwrite/prompt): name tail, else [buftype]
+    return name ~= "" and vim.fn.fnamemodify(name, ":t") or ("[" .. bt .. "]")
+  end
+
+  return name ~= "" and short_path(name) or "[No Name]"
+end
+
 --- Tabline: one label per tab page, showing that tab's active buffer name and
 --- its status flags. `%NT` makes each label switch to tab N on click (native, no
 --- dispatcher needed); a trailing `%T` closes the last region so the fill area
@@ -306,8 +329,7 @@ local function render_tabline()
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local group = (tab == cur) and "StTabSel" or "StTab"
     local buf = tab_buf(tab)
-    local fname = vim.api.nvim_buf_get_name(buf)
-    local name = fname ~= "" and short_path(fname) or "[No Name]"
+    local name = buf_name(buf)
     parts[#parts + 1] = "%" .. i .. "T" .. hl(group, " " .. name .. flags(buf) .. " ")
   end
   parts[#parts + 1] = "%T" .. hl("StTabFill", "")
