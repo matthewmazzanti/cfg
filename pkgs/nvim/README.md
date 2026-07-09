@@ -19,7 +19,7 @@ pkgs/nvim/
 │   ├── input.lua        # Custom floating input dialog
 │   ├── fidget.lua       # LSP progress notifications
 │   ├── surround.lua     # Surround text objects
-│   ├── easyclip.lua     # Improved yank/delete
+│   ├── clip.lua         # Cut/yank/paste register model (loads everywhere)
 │   └── readline.lua     # Readline keybindings for cmdline
 ├── plugin/
 │   └── readline.lua     # Readline utilities library
@@ -93,12 +93,18 @@ Creates the final wrapped executable:
 | `<leader>s` | Toggle split/join |
 | `<leader>S` | Toggle recursive |
 
-### Editing (easyclip.lua)
+### Clipboard (clip.lua)
+`d` = destroy, `x` = cut, `y` = yank — each a motion operator (double for
+linewise, uppercase for to-EOL). `d` goes to the black hole, so it never
+disturbs what `x`/`y` stored. Locally the default register is the system
+clipboard (`unnamedplus`); over SSH it stays in-editor so nothing reaches OSC 52.
+
 | Key | Action |
 |-----|--------|
-| `x` | Delete char (no clipboard) |
-| `xx` | Delete line |
-| `X` | Delete to end of line |
+| `d` / `dd` / `D` | Delete → black hole (leaves the clipboard alone) |
+| `x` / `xx` / `X` | Cut → default register |
+| `y` / `yy` / `Y` | Yank → default register |
+| `p` / `P` | Paste from default register (repeatable) |
 
 ### Readline (command mode)
 | Key | Action |

@@ -159,10 +159,14 @@
     [
       gruvbox-nvim
     ]
+    # Nix syntax/indent for the plugin-less variant. When plugins are on,
+    # the nix treesitter grammar supersedes it.
+    ++ optionals (!opts.plugins) [
+      vim-nix
+    ]
     ++ optionals opts.plugins (
       [
         vim-python-pep8-indent # Better python indent handling
-        vim-nix # Basic nix stuff
 
         # Visual enhancements
         render-markdown-nvim
@@ -174,7 +178,6 @@
         vim-fugitive # Git management
         vim-signature # Show marks
         nvim-spider # CamelCase and other motions
-        vim-easyclip # Improved yank/delete buffer better
         nvim-surround # Surround
         fidget-nvim
 
@@ -222,6 +225,8 @@
       # Plugin-free (fugitive/fzf-lua degrade gracefully), so it loads in every
       # variant including the plugin-less root nvim. After gruvbox for the palette.
       ./config/statusline.lua
+      # Native register mappings, no plugin needed, so it loads everywhere.
+      ./config/clip.lua
     ]
     ++ optionals opts.plugins (
       [
@@ -229,7 +234,6 @@
         ./config/fidget.lua
         ./config/surround.lua
         ./config/fzf.lua
-        ./config/easyclip.lua
         ./config/spider.lua
         ./config/markdown.lua
         ./config/readline.lua
