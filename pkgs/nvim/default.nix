@@ -242,7 +242,7 @@
         ./config/treesitter.lua
       ]
       ++ optionals opts.lsp [
-        ./config/lspconfig.lua
+        ./config/lsp.lua
         ./config/blink.lua
       ]
     );

@@ -84,6 +84,11 @@ vim.lsp.enable({
   "nixd",
   "pyright",
   "lua_ls",
+  -- Not bundled in the nvim closure (see langs.{c,rust} = false); provided per
+  -- project via devShell/direnv. vim.lsp silently skips a server whose cmd isn't
+  -- on PATH, so enabling them here is a no-op outside a relevant project.
+  "clangd",
+  "rust_analyzer",
 })
 
 -- Buffer-local LSP keymaps. These MUST live in an LspAttach autocmd, not in an
