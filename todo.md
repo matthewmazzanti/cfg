@@ -33,6 +33,7 @@
 - [x] Per-project editor config, lines, tabs etc - supported natively via editorconfig (built in since 0.9)
 - [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
 - [ ] Flesh out utils.render-marks handler API - currently only `toggle` (bound to `m`). Planned: `list`/`delete`/`set` over a `{ buf, line, names }` selector (local/global implicit in case), plus `set_next` and `jump`/`next`/`prev`. Prototype landed in git history around commit 597a6c3 if wanted back.
+- [ ] Upstream a Neovim "mark moved" event (e.g. `MarkUpdate`) - `MarkSet` only fires on add/remove/re-set, not when a mark's line *drifts* from edits (insert/delete lines, `:sort`). render-marks papers over that with `nvim_buf_attach`/`on_lines` edit-tracking gated to structural changes. A native event when a mark's position changes would let render-marks (and similar) drop that machinery and just re-derive on notification.
 
 ## Zsh
 
