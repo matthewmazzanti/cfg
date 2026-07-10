@@ -102,6 +102,7 @@ vim.opt.signcolumn = "yes"
 vim.opt.shortmess:append({
   c = true, -- Ignore insert completion messages
   I = true, -- Skip startup message
+  s = true, -- No "search hit BOTTOM, continuing at TOP" wrap messages
 })
 
 -- Set leader key for other commands
