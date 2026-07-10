@@ -235,6 +235,12 @@
       ./config/statusline.lua
       # Native register mappings, no plugin needed, so it loads everywhere.
       ./config/clip.lua
+      # Readline cmdline maps over utils.readline (now in every variant), no
+      # plugin needed, so it loads everywhere.
+      ./config/readline.lua
+      # Sign-column marks over utils.marks -- native (no plugin), so it loads
+      # everywhere. The fzf mark picker lives separately in fzf.lua.
+      ./config/marks.lua
     ]
     ++ optionals opts.plugins (
       [
@@ -242,10 +248,8 @@
         ./config/fidget.lua
         ./config/surround.lua
         ./config/fzf.lua
-        ./config/marks.lua
         ./config/spider.lua
         ./config/markdown.lua
-        ./config/readline.lua
       ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
