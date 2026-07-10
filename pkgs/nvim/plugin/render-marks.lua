@@ -13,8 +13,12 @@
 local M = {}
 
 local ns = vim.api.nvim_create_namespace("marks_gutter")
-local hl_group = "MarkGutter"
-local priority = 10
+
+-- Publicly settable styling -- set these on the module (before or after setup) to
+-- restyle, e.g. require("utils.render-marks").number_hl_group = "CursorLineNr".
+M.hl_group = "MarkGutter" -- sign glyph highlight group
+M.number_hl_group = nil -- line-number highlight for marked lines (opt-in; nil = off)
+M.priority = 10 -- sign priority
 
 local function place(buf, name, lnum, line_count)
   if lnum < 1 or lnum > line_count then
@@ -22,8 +26,9 @@ local function place(buf, name, lnum, line_count)
   end
   vim.api.nvim_buf_set_extmark(buf, ns, lnum - 1, 0, {
     sign_text = name,
-    sign_hl_group = hl_group,
-    priority = priority,
+    sign_hl_group = M.hl_group,
+    number_hl_group = M.number_hl_group, -- nil unless opted in
+    priority = M.priority,
   })
 end
 
@@ -97,13 +102,17 @@ local function attach(attach_buf)
   end
 end
 
--- opts:
---   hl_group  sign glyph highlight group (default "MarkGutter")
---   priority  sign priority (default 10)
+-- Install the render triggers. opts (all optional) seed the styling fields;
+-- equivalently, set M.hl_group / M.number_hl_group / M.priority directly, before
+-- or after setup -- the next repaint picks up whatever they currently hold.
+--   hl_group         sign glyph highlight group (default "MarkGutter")
+--   number_hl_group  line-number highlight for marked lines (default nil / off)
+--   priority         sign priority (default 10)
 function M.setup(opts)
   opts = opts or {}
-  hl_group = opts.hl_group or hl_group
-  priority = opts.priority or priority
+  M.hl_group = opts.hl_group or M.hl_group
+  M.number_hl_group = opts.number_hl_group or M.number_hl_group
+  M.priority = opts.priority or M.priority
 
   -- Default sign highlight; `default = true` lets a colorscheme override the link.
   vim.api.nvim_set_hl(0, "MarkGutter", { link = "Identifier", default = true })
@@ -173,8 +182,9 @@ end
 -- The fuller selection/manipulation API -- list/delete/set by a { buf, line,
 -- names } selector, set_next, jump/next/prev -- is deferred; see todo.md.
 function M.toggle()
-  local name = vim.fn.getcharstr()
-  if not name:match("^%a$") then
+  -- pcall so <C-c> during the read (Vim:Interrupt) cancels cleanly.
+  local ok, name = pcall(vim.fn.getcharstr)
+  if not ok or not name:match("^%a$") then
     return
   end
   local buf = vim.api.nvim_get_current_buf()
@@ -191,7 +201,7 @@ function M.toggle()
   else -- set (or move) it to the cursor
     vim.api.nvim_buf_set_mark(buf, name, cur[1], cur[2], {})
   end
-  reconcile(buf)
+  -- No explicit repaint: the set/del fires MarkSet, which schedules a reconcile.
   return name
 end
 

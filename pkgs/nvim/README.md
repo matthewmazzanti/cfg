@@ -116,8 +116,14 @@ stay correct even through `:sort` (which pins marks to line numbers). Set marks
 with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
 `:delmarks`. `<leader>m` opens the fzf mark picker (see Navigation).
 
-The sign glyph uses the `MarkGutter` highlight (installed by `setup`, linked to
-`Identifier` by default — re-link it to restyle).
+Styling is via settable module fields (also seedable through `setup(opts)`), read
+on every repaint so they can change at runtime:
+
+| Field | Default | Effect |
+|-------|---------|--------|
+| `hl_group` | `"MarkGutter"` (→ `Identifier`) | Sign glyph highlight |
+| `number_hl_group` | `nil` | Line-number highlight for marked lines (opt-in, e.g. `"CursorLineNr"`) |
+| `priority` | `10` | Sign priority |
 
 The engine lives in `plugin/render-marks.lua` and installs no key mappings —
 bind handlers yourself in `config/marks.lua`. It currently exposes (all under
@@ -125,7 +131,7 @@ bind handlers yourself in `config/marks.lua`. It currently exposes (all under
 
 | Call | Effect |
 |------|--------|
-| `setup({ hl_group, priority })` | Install triggers + default highlight; `config/marks.lua` calls this |
+| `setup(opts?)` | Install triggers + default highlight; seeds the styling fields from `opts` |
 | `render(bufnr)` | Force a repaint (nil = all loaded, 0 = current) |
 | `toggle()` | Read a mark from the next keypress and toggle it: set/move to the cursor, or remove it if already on the line. Bind to `m` for a toggling `m{a-zA-Z}`. |
 
