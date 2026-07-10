@@ -10,6 +10,11 @@
 -- so the mode segment and location update on their own. It therefore must stay
 -- cheap -- every field here is O(1). Highlights are (re)derived from the active
 -- gruvbox groups on ColorScheme.
+--
+-- Sections below: Highlights, Rendering primitives, Statusline segments, Click
+-- actions, Statusline, Tabline, Setup.
+
+-- Highlights -----------------------------------------------------------------
 
 --- Foreground color of a highlight group, or a fallback. Used for diagnostic
 --- colors so they track the theme's Diagnostic* groups, as lualine did.
@@ -79,32 +84,7 @@ local function setup_highlights()
   set(0, "StTabFill", { bg = p.black })
 end
 
--- Display name per mode code (from nvim_get_mode().mode, which can be
--- multi-char). Falls back to first-char lookup, then uppercase.
-local mode_names = {
-  n = "NORMAL", no = "O-PENDING", niI = "NORMAL", niR = "NORMAL", niV = "NORMAL", nt = "NORMAL",
-  v = "VISUAL", V = "V-LINE", ["\22"] = "V-BLOCK",
-  s = "SELECT", S = "S-LINE", ["\19"] = "S-BLOCK",
-  i = "INSERT", ic = "INSERT", ix = "INSERT",
-  R = "REPLACE", Rc = "REPLACE", Rx = "REPLACE", Rv = "V-REPLACE",
-  c = "COMMAND", cv = "EX", ce = "EX",
-  r = "PROMPT", rm = "MORE", ["r?"] = "CONFIRM",
-  ["!"] = "SHELL", t = "TERMINAL",
-}
-
--- Highlight group per mode display name (see mode_names). Keyed by the name, not
--- the mode code, so the group is derived from what's actually shown -- keeping the
--- mode block and the location block that reuses it in agreement.
-local mode_groups = {
-  NORMAL = "StModeNormal", ["O-PENDING"] = "StModeNormal",
-  INSERT = "StModeInsert",
-  VISUAL = "StModeVisual", ["V-LINE"] = "StModeVisual", ["V-BLOCK"] = "StModeVisual",
-  SELECT = "StModeVisual", ["S-LINE"] = "StModeVisual", ["S-BLOCK"] = "StModeVisual",
-  REPLACE = "StModeReplace", ["V-REPLACE"] = "StModeReplace",
-  COMMAND = "StModeCommand", EX = "StModeCommand", PROMPT = "StModeCommand",
-  MORE = "StModeCommand", CONFIRM = "StModeCommand", SHELL = "StModeCommand",
-  TERMINAL = "StModeTerminal",
-}
+-- Rendering primitives -------------------------------------------------------
 
 --- Wrap a statusline snippet in a highlight block. Sticky: the group carries
 --- through until the next hl()/`%#..#`, which is what lets a section's color
@@ -144,9 +124,55 @@ local function join(...)
   return table.concat(out)
 end
 
--- Section helpers return the section's text (or nil), not a highlight block --
--- StatuslineRender wraps each in its top-level group. The returned text may itself
--- contain nested hl() switches for internal re-highlighting.
+-- Statusline segments --------------------------------------------------------
+--
+-- Each producer yields one segment's value -- text, or nil for an absent optional
+-- section (branch/diagnostics/search); mode is split into a display name and its
+-- highlight group. StatuslineRender wraps each in its top-level group. Ordered
+-- here as they appear on the line: mode, branch, diagnostics, file, search,
+-- location. Returned text may itself embed hl() switches for internal
+-- re-highlighting (see diagnostics()).
+
+-- Display name per mode code (from nvim_get_mode().mode, which can be
+-- multi-char). Falls back to first-char lookup, then uppercase.
+local mode_names = {
+  n = "NORMAL", no = "O-PENDING", niI = "NORMAL", niR = "NORMAL", niV = "NORMAL", nt = "NORMAL",
+  v = "VISUAL", V = "V-LINE", ["\22"] = "V-BLOCK",
+  s = "SELECT", S = "S-LINE", ["\19"] = "S-BLOCK",
+  i = "INSERT", ic = "INSERT", ix = "INSERT",
+  R = "REPLACE", Rc = "REPLACE", Rx = "REPLACE", Rv = "V-REPLACE",
+  c = "COMMAND", cv = "EX", ce = "EX",
+  r = "PROMPT", rm = "MORE", ["r?"] = "CONFIRM",
+  ["!"] = "SHELL", t = "TERMINAL",
+}
+
+-- Highlight group per mode display name (see mode_names). Keyed by the name, not
+-- the mode code, so the group is derived from what's actually shown -- keeping the
+-- mode block and the location block that reuses it in agreement.
+local mode_groups = {
+  NORMAL = "StModeNormal", ["O-PENDING"] = "StModeNormal",
+  INSERT = "StModeInsert",
+  VISUAL = "StModeVisual", ["V-LINE"] = "StModeVisual", ["V-BLOCK"] = "StModeVisual",
+  SELECT = "StModeVisual", ["S-LINE"] = "StModeVisual", ["S-BLOCK"] = "StModeVisual",
+  REPLACE = "StModeReplace", ["V-REPLACE"] = "StModeReplace",
+  COMMAND = "StModeCommand", EX = "StModeCommand", PROMPT = "StModeCommand",
+  MORE = "StModeCommand", CONFIRM = "StModeCommand", SHELL = "StModeCommand",
+  TERMINAL = "StModeTerminal",
+}
+
+-- Display name for the current mode, or NORMAL while a float has focus (the main
+-- buffer isn't the one being edited). nvim_get_mode().mode may be multi-char; fall
+-- back to a first-char lookup, then uppercase.
+local function mode_name(floating)
+  local mode = floating and "n" or vim.api.nvim_get_mode().mode
+  return mode_names[mode] or mode_names[mode:sub(1, 1)] or mode:upper()
+end
+
+-- Highlight group for a mode display name (see mode_groups), shared by the mode
+-- block and the location block. Unknown names fall back to normal.
+local function mode_group(name)
+  return mode_groups[name] or "StModeNormal"
+end
 
 local function branch(buf)
   if vim.fn.exists("*FugitiveHead") == 1 then
@@ -184,27 +210,6 @@ local function diagnostics(buf)
   return nil
 end
 
--- Search match count, e.g. "[6/10]", while hlsearch is active. Returns nil when
--- there's no active highlighted search (so it clears on :nohlsearch). Counted in
--- win's context (searchcount is window/cursor-relative), so the count and current
--- index track the shown window rather than a focused float.
-local function search(win)
-  if vim.v.hlsearch == 0 then
-    return nil
-  end
-  local ok, s = pcall(vim.api.nvim_win_call, win, function()
-    return vim.fn.searchcount({ maxcount = 999, timeout = 250 })
-  end)
-  if not ok or s.total == nil or s.total == 0 then
-    return nil
-  end
-  if s.incomplete == 1 then -- count timed out
-    return "[?/?]"
-  end
-  local total = s.incomplete == 2 and (">" .. s.maxcount) or s.total
-  return string.format("[%s/%s]", tostring(s.current), tostring(total))
-end
-
 -- Status marks: Unicode by default, ASCII on the Linux virtual console
 -- (TERM=linux), which can't render the glyphs. TERM is fixed for the session, so
 -- pick once here.
@@ -227,6 +232,27 @@ local function filename(buf)
   return vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":t") .. flags(buf)
 end
 
+-- Search match count, e.g. "[6/10]", while hlsearch is active. Returns nil when
+-- there's no active highlighted search (so it clears on :nohlsearch). Counted in
+-- win's context (searchcount is window/cursor-relative), so the count and current
+-- index track the shown window rather than a focused float.
+local function search(win)
+  if vim.v.hlsearch == 0 then
+    return nil
+  end
+  local ok, s = pcall(vim.api.nvim_win_call, win, function()
+    return vim.fn.searchcount({ maxcount = 999, timeout = 250 })
+  end)
+  if not ok or s.total == nil or s.total == 0 then
+    return nil
+  end
+  if s.incomplete == 1 then -- count timed out
+    return "[?/?]"
+  end
+  local total = s.incomplete == 2 and (">" .. s.maxcount) or s.total
+  return string.format("[%s/%s]", tostring(s.current), tostring(total))
+end
+
 -- Cursor position for win as "line:col", matching the native %3l:%-2c layout.
 -- (%c counts bytes from 1; nvim_win_get_cursor's column is 0-based.)
 local function location(win)
@@ -234,19 +260,7 @@ local function location(win)
   return string.format("%3d:%-2d", row, col + 1)
 end
 
--- Display name for the current mode, or NORMAL while a float has focus (the main
--- buffer isn't the one being edited). nvim_get_mode().mode may be multi-char; fall
--- back to a first-char lookup, then uppercase.
-local function mode_name(floating)
-  local mode = floating and "n" or vim.api.nvim_get_mode().mode
-  return mode_names[mode] or mode_names[mode:sub(1, 1)] or mode:upper()
-end
-
--- Highlight group for a mode display name (see mode_groups), shared by the mode
--- block and the location block. Unknown names fall back to normal.
-local function mode_group(name)
-  return mode_groups[name] or "StModeNormal"
-end
+-- Click actions --------------------------------------------------------------
 
 -- fzf-lua module if available, else nil -- keeps the picker optional so the
 -- click actions can fall back to native equivalents.
@@ -291,6 +305,8 @@ function StatuslineClick(id, _clicks, _button, _mods)
   -- drained, guaranteeing fzf spawns into a clean queue and its insert sticks.
   vim.api.nvim_create_autocmd("SafeState", { once = true, callback = action })
 end
+
+-- Statusline -----------------------------------------------------------------
 
 -- The window/buffer that best represents a tab page: its active window, unless
 -- that's a floating window (e.g. an fzf picker), in which case the first
@@ -341,6 +357,8 @@ function StatuslineRender()
     hl(mg, pad(location(t.win)))
   )
 end
+
+-- Tabline --------------------------------------------------------------------
 
 -- First char of a path component, but keeping a leading dot so a hidden dir
 -- collapses to ".c" rather than a bare "." (which reads as the current dir).
@@ -427,6 +445,8 @@ function TablineRender()
   parts[#parts + 1] = "%T" .. hl("StTabFill", "")
   return table.concat(parts)
 end
+
+-- Setup ----------------------------------------------------------------------
 
 -- All the sourcing-time wiring in one place, run inline below: install the
 -- highlights (and keep them synced on ColorScheme), set the statusline/tabline
