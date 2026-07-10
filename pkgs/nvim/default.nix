@@ -107,7 +107,7 @@
       -- marker typed on that line dedents to start a sibling. See utils.markdown.
       -- (treesitter.lua deliberately leaves markdown's indentexpr unset for us.)
       vim.opt_local.indentexpr = "v:lua.require'utils.markdown'.indentexpr()"
-      vim.opt_local.indentkeys = "o,O,0-,0*,0+,00,01,02,03,04,05,06,07,08,09"
+      vim.opt_local.indentkeys = require("utils.markdown").indentkeys
 
       -- Try to detect floating LSP windows
       -- May be a better option if https://github.com/neovim/neovim/issues/31206

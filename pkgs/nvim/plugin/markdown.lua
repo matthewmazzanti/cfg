@@ -8,7 +8,7 @@
 -- from an ftplugin with:
 --
 --   vim.opt_local.indentexpr = "v:lua.require'utils.markdown'.indentexpr()"
---   vim.opt_local.indentkeys = "o,O,0-,0*,0+,00,01,02,03,04,05,06,07,08,09"
+--   vim.opt_local.indentkeys = require("utils.markdown").indentkeys
 --
 -- The work splits by which tool fits the question. Structure -- which list item
 -- a settled line belongs to, and whether we're in a code block -- is read from
@@ -18,6 +18,16 @@
 -- active treesitter parser; there is no lexical fallback for a missing tree.
 
 local M = {}
+
+-- Keystrokes that should re-run indentexpr, to pair with M.indentexpr when
+-- wiring the ftplugin (:h indentkeys, :h cinkeys-format):
+--   o, O   -- opening a line below / above. `o` also gates the <CR> newline
+--            indent, so it's what makes the hanging wrap fire on <CR>.
+--   0-,0*,0+ and 00..09 -- the `0` prefix means "only when this is the first
+--            non-blank char", so typing a list marker (-, *, + or a digit) at
+--            the line start re-indents it -- the dedent to a sibling. Digits are
+--            spelled out because indentkeys has no range syntax.
+M.indentkeys = "o,O,0-,0*,0+,00,01,02,03,04,05,06,07,08,09"
 
 -- Leading-whitespace width of a line.
 local function indent_of(line)
