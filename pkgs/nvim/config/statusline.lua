@@ -91,15 +91,18 @@ local mode_names = {
   ["!"] = "SHELL", t = "TERMINAL",
 }
 
--- Highlight group per mode, keyed by first char of the mode code.
-local mode_hl = {
-  n = "StModeNormal",
-  i = "StModeInsert",
-  v = "StModeVisual", V = "StModeVisual", ["\22"] = "StModeVisual",
-  s = "StModeVisual", S = "StModeVisual", ["\19"] = "StModeVisual",
-  R = "StModeReplace",
-  c = "StModeCommand", r = "StModeCommand", ["!"] = "StModeCommand",
-  t = "StModeTerminal",
+-- Highlight group per mode display name (see mode_names). Keyed by the name, not
+-- the mode code, so the group is derived from what's actually shown -- keeping the
+-- mode block and the location block that reuses it in agreement.
+local mode_groups = {
+  NORMAL = "StModeNormal", ["O-PENDING"] = "StModeNormal",
+  INSERT = "StModeInsert",
+  VISUAL = "StModeVisual", ["V-LINE"] = "StModeVisual", ["V-BLOCK"] = "StModeVisual",
+  SELECT = "StModeVisual", ["S-LINE"] = "StModeVisual", ["S-BLOCK"] = "StModeVisual",
+  REPLACE = "StModeReplace", ["V-REPLACE"] = "StModeReplace",
+  COMMAND = "StModeCommand", EX = "StModeCommand", PROMPT = "StModeCommand",
+  MORE = "StModeCommand", CONFIRM = "StModeCommand", SHELL = "StModeCommand",
+  TERMINAL = "StModeTerminal",
 }
 
 --- Wrap a statusline snippet in a highlight block. Sticky: the group carries
@@ -120,13 +123,37 @@ local function click(id, snippet)
   return "%" .. id .. "@v:lua.StatuslineClick@" .. snippet .. "%X"
 end
 
+--- Standard one-space gutter on each side of a segment's text.
+local function pad(s)
+  return " " .. s .. " "
+end
+
+--- Concatenate statusline chunks, skipping any that are nil/false -- so an absent
+--- optional section (branch, diagnostics, search) just contributes nothing rather
+--- than needing an `... or ""` at each call site. `%=` is passed as a literal
+--- chunk to split the left group from the right.
+local function join(...)
+  local out = {}
+  for i = 1, select("#", ...) do
+    local chunk = select(i, ...)
+    if chunk then
+      out[#out + 1] = chunk
+    end
+  end
+  return table.concat(out)
+end
+
 -- Section helpers return the section's text (or nil), not a highlight block --
 -- render() wraps each in its top-level group. The returned text may itself
 -- contain nested hl() switches for internal re-highlighting.
 
-local function branch()
+local function branch(buf)
   if vim.fn.exists("*FugitiveHead") == 1 then
-    local head = vim.fn.FugitiveHead()
+    -- Resolve in buf's context so the head tracks the shown buffer's repo, not
+    -- whatever holds focus (a float has no fugitive dir -> "").
+    local head = vim.api.nvim_buf_call(buf, function()
+      return vim.fn.FugitiveHead()
+    end)
     if head ~= "" then
       return " " .. head .. " "
     end
@@ -141,8 +168,8 @@ local diag_spec = {
   { 4, "StDiagHint", "H" },
 }
 
-local function diagnostics()
-  local counts = vim.diagnostic.count(0)
+local function diagnostics(buf)
+  local counts = vim.diagnostic.count(buf)
   local out = {}
   for _, s in ipairs(diag_spec) do
     local n = counts[s[1]]
@@ -157,12 +184,16 @@ local function diagnostics()
 end
 
 -- Search match count, e.g. "[6/10]", while hlsearch is active. Returns nil when
--- there's no active highlighted search (so it clears on :nohlsearch).
-local function search()
+-- there's no active highlighted search (so it clears on :nohlsearch). Counted in
+-- win's context (searchcount is window/cursor-relative), so the count and current
+-- index track the shown window rather than a focused float.
+local function search(win)
   if vim.v.hlsearch == 0 then
     return nil
   end
-  local ok, s = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 250 })
+  local ok, s = pcall(vim.api.nvim_win_call, win, function()
+    return vim.fn.searchcount({ maxcount = 999, timeout = 250 })
+  end)
   if not ok or s.total == nil or s.total == 0 then
     return nil
   end
@@ -181,6 +212,32 @@ local function flags(buf)
   local bo = vim.bo[buf]
   local s = (bo.modified and "●" or "") .. (bo.readonly and "○" or "")
   return s ~= "" and (" " .. s) or ""
+end
+
+-- Filename tail followed by its status flags -- the file segment's text.
+local function filename(buf)
+  return vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":t") .. flags(buf)
+end
+
+-- Cursor position for win as "line:col", matching the native %3l:%-2c layout.
+-- (%c counts bytes from 1; nvim_win_get_cursor's column is 0-based.)
+local function location(win)
+  local row, col = unpack(vim.api.nvim_win_get_cursor(win))
+  return string.format("%3d:%-2d", row, col + 1)
+end
+
+-- Display name for the current mode, or NORMAL while a float has focus (the main
+-- buffer isn't the one being edited). nvim_get_mode().mode may be multi-char; fall
+-- back to a first-char lookup, then uppercase.
+local function mode_name(floating)
+  local mode = floating and "n" or vim.api.nvim_get_mode().mode
+  return mode_names[mode] or mode_names[mode:sub(1, 1)] or mode:upper()
+end
+
+-- Highlight group for a mode display name (see mode_groups), shared by the mode
+-- block and the location block. Unknown names fall back to normal.
+local function mode_group(name)
+  return mode_groups[name] or "StModeNormal"
 end
 
 -- fzf-lua module if available, else nil -- keeps the picker optional so the
@@ -228,25 +285,54 @@ local function on_click(id, _clicks, _button, _mods)
   vim.api.nvim_create_autocmd("SafeState", { once = true, callback = action })
 end
 
+-- The window/buffer that best represents a tab page: its active window, unless
+-- that's a floating window (e.g. an fzf picker), in which case the first
+-- non-floating window -- so a transient float doesn't hijack what we show for the
+-- tab. Returns { win, buf, floating }, where `floating` reports that a float was
+-- bypassed (the active window differs from the chosen one). Shared by the
+-- statusline (current tab) and the tabline (every tab): with a global statusline
+-- (laststatus=3) a focused float would otherwise replace the filename/filetype
+-- with its own, just as it would a tab's label.
+local function tab_target(tab)
+  local active = vim.api.nvim_tabpage_get_win(tab)
+  local win = active
+  if vim.api.nvim_win_get_config(active).relative ~= "" then
+    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      if vim.api.nvim_win_get_config(w).relative == "" then
+        win = w
+        break
+      end
+    end
+  end
+  return { win = win, buf = vim.api.nvim_win_get_buf(win), floating = win ~= active }
+end
+
 local function render()
-  local mode = vim.api.nvim_get_mode().mode
-  local mg = mode_hl[mode:sub(1, 1)] or "StModeNormal"
-  local name = mode_names[mode] or mode_names[mode:sub(1, 1)] or mode:upper()
+  -- Everything is resolved against a single window/buffer, picked once here: the
+  -- focused window, or the first non-floating one when a float (fzf picker, etc.)
+  -- has focus -- so a transient float never hijacks any segment. The section
+  -- helpers take this win/buf explicitly (rather than reading the current window),
+  -- which keeps them consistent with each other and with the file section. While a
+  -- float has focus the mode reads NORMAL: the main buffer isn't being edited.
+  local t = tab_target(vim.api.nvim_get_current_tabpage())
 
-  local br = branch()
-  local diag = diagnostics()
-  local sc = search()
+  local name = mode_name(t.floating)
+  local mg = mode_group(name)
+  local br = branch(t.buf)
+  local diag = diagnostics(t.buf)
+  local sc = search(t.win)
 
-  return table.concat({
-    hl(mg, " " .. name .. " "),
-    br and hl("StSection", br) or "",
-    diag and hl("StSection", click(CLICK.diagnostics, diag)) or "",
-    hl("StFile", " %t" .. flags(0) .. " "),
+  -- Each line is one segment; optional ones fall to nil and join() drops them.
+  return join(
+    hl(mg, pad(name)),
+    br and hl("StSection", br),
+    diag and hl("StSection", click(CLICK.diagnostics, diag)),
+    hl("StFile", pad(filename(t.buf))),
     "%=",
-    hl("StFile", click(CLICK.filetype, " %{&filetype} ")),
-    sc and hl("StSection", " " .. sc .. " ") or "",
-    hl(mg, " %3l:%-2c "),
-  })
+    hl("StFile", click(CLICK.filetype, pad(vim.bo[t.buf].filetype))),
+    sc and hl("StSection", pad(sc)),
+    hl(mg, pad(location(t.win)))
+  )
 end
 
 -- Cwd-relative path, collapsing each dir to its first char and keeping the
@@ -278,22 +364,6 @@ local function short_path(fname)
   local anchored = vim.fn.pathshorten(vim.fn.fnamemodify(fname, ":~"))
   local relative = cwd_relative(fname)
   return #relative < #anchored and relative or anchored
-end
-
--- Buffer that best represents a tab page: its active window, unless that's a
--- floating window (e.g. an fzf picker), in which case the first non-floating
--- window -- so a transient float doesn't hijack the tab's label.
-local function tab_buf(tab)
-  local win = vim.api.nvim_tabpage_get_win(tab)
-  if vim.api.nvim_win_get_config(win).relative ~= "" then
-    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
-      if vim.api.nvim_win_get_config(w).relative == "" then
-        win = w
-        break
-      end
-    end
-  end
-  return vim.api.nvim_win_get_buf(win)
 end
 
 -- Display name for a tab's buffer. Special buffers get readable labels keyed off
@@ -328,7 +398,7 @@ local function render_tabline()
   local parts = {}
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local group = (tab == cur) and "StTabSel" or "StTab"
-    local buf = tab_buf(tab)
+    local buf = tab_target(tab).buf
     local name = buf_name(buf)
     parts[#parts + 1] = "%" .. i .. "T" .. hl(group, " " .. name .. flags(buf) .. " ")
   end
