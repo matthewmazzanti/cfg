@@ -82,8 +82,15 @@ function M.indentexpr()
   if prev > 0 then marker_col, content_col = enclosing_item(prev - 1) end
 
   -- A marker being typed dedents to the enclosing item's marker column,
-  -- starting a sibling.
-  if typing_marker(cur) then return marker_col or -1 end
+  -- starting a sibling. A line opened above a more-indented item (O on a nested
+  -- item) belongs to that item below, not the shallower one above, so prefer
+  -- whichever neighbour is deeper.
+  if typing_marker(cur) then
+    local next = vim.fn.nextnonblank(lnum + 1)
+    local below = next > 0 and enclosing_item(next - 1) or nil
+    if below and (not marker_col or below > marker_col) then return below end
+    return marker_col or -1
+  end
 
   -- A finished list item carries intentional nesting we can't second-guess
   -- (e.g. under '='), so leave its indent untouched.
