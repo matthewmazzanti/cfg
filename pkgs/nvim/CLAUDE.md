@@ -15,14 +15,18 @@ gotchas that will otherwise cost you a debugging cycle.
 - **`default.nix`** turns those options into three things: the `plugins` list,
   the treesitter `grammars` list, and the `init` list of `config/*.lua` files to
   load. Most `config/*` files are gated behind `opts.plugins` — the plugin-less
-  `nvim/root` only gets a handful (`init`, `gruvbox`, `statusline`, `clip`).
+  `nvim/root` gets only the plugin-free base set (`init`, `autoread`, `gruvbox`,
+  `statusline`, `clip`, `readline`, `marks`).
 - **`config/*.lua`** — feature/plugin setup, loaded in list order. `wrapper.nix`
   builds an `init.lua` that `safe_dofile`s each one (pcall-wrapped: a broken
   module prints its error instead of crashing the editor, so failures can be
   silent — check `:messages`).
 - **`plugin/*.lua`** — hand-rolled utility *libraries* (`readline`, `marks`,
   `markdown`). The dir is copied to `lua/utils/`, so a file `plugin/foo.lua` is
-  `require("utils.foo")`. **Only present in the plugins variant.**
+  `require("utils.foo")`. **Loaded in every variant, including the plugin-less
+  `root`** — the utils derivation sits *outside* the `opts.plugins` gate (that
+  gate is a trust boundary for unreviewed external plugins; this is owned code),
+  so even a `config/*` that loads everywhere (like `statusline`) may `require` it.
 - **`ftplugin`** — the `ftplugin` attrset in `default.nix` maps a filetype to a
   Lua **string**, built into a derivation as `ftplugin/<ft>.lua` (buffer-local
   settings/keymaps). It's Nix strings, so keep real logic in a `plugin/` util and
