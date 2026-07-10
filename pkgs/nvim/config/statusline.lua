@@ -205,13 +205,20 @@ local function search(win)
   return string.format("[%s/%s]", tostring(s.current), tostring(total))
 end
 
+-- Status marks: Unicode by default, ASCII on the Linux virtual console
+-- (TERM=linux), which can't render the glyphs. TERM is fixed for the session, so
+-- pick once here.
+local marks = vim.env.TERM == "linux"
+    and { modified = "+", readonly = "-" }
+    or { modified = "●", readonly = "○" }
+
 -- Buffer status indicator, shared by the statusline and the tabline so the two
--- never diverge: ● modified, ○ readonly (both may show). Replaces the native
+-- never diverge: modified and readonly marks (both may show). Replaces the native
 -- `%m%r` -- which the tabline can't use, as it'd report the current buffer for
 -- every tab. Returns a leading-space-padded string, or "" when nothing to show.
 local function flags(buf)
   local bo = vim.bo[buf]
-  local s = (bo.modified and "●" or "") .. (bo.readonly and "○" or "")
+  local s = (bo.modified and marks.modified or "") .. (bo.readonly and marks.readonly or "")
   return s ~= "" and (" " .. s) or ""
 end
 
