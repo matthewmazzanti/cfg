@@ -335,6 +335,13 @@ function StatuslineRender()
   )
 end
 
+-- First char of a path component, but keeping a leading dot so a hidden dir
+-- collapses to ".c" rather than a bare "." (which reads as the current dir).
+-- Matches vim's pathshorten, which the anchored form uses.
+local function short_comp(comp)
+  return comp:sub(1, 1) == "." and comp:sub(1, 2) or comp:sub(1, 1)
+end
+
 -- Cwd-relative path, collapsing each dir to its first char and keeping the
 -- filename whole. Unlike vim's `:.` (which only relativizes descendants of cwd
 -- and otherwise returns an absolute path), this climbs out of shared ancestors
@@ -351,7 +358,7 @@ local function cwd_relative(fname)
     out[#out + 1] = ".." -- one level up per un-shared cwd component
   end
   for j = i, #f - 1 do
-    out[#out + 1] = f[j]:sub(1, 1) -- shortened dir; `..` above is left intact
+    out[#out + 1] = short_comp(f[j]) -- shortened dir; `..` above is left intact
   end
   out[#out + 1] = f[#f] -- filename kept whole
   return table.concat(out, "/")
