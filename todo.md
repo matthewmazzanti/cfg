@@ -32,6 +32,7 @@
 - [x] Pre-compile Lua code? - not worth it; complexity/error messages outweigh the minimal startup savings
 - [x] Per-project editor config, lines, tabs etc - supported natively via editorconfig (built in since 0.9)
 - [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
+- [ ] Flesh out utils.render-marks handler API - currently only `toggle` (bound to `m`). Planned: `list`/`delete`/`set` over a `{ buf, line, names }` selector (local/global implicit in case), plus `set_next` and `jump`/`next`/`prev`. Prototype landed in git history around commit 597a6c3 if wanted back.
 
 ## Zsh
 

@@ -119,30 +119,19 @@ with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
 The sign glyph uses the `MarkGutter` highlight (installed by `setup`, linked to
 `Identifier` by default — re-link it to restyle).
 
-The engine lives in `plugin/render-marks.lua`. It installs no key mappings —
-bind the handlers yourself in `config/marks.lua`. It exposes:
-
-All under `require("utils.render-marks")`. A **selector** is
-`{ buf, line, names }`: `buf` defaults to the current buffer (`0` also means
-current); `line` is a number or `{lo, hi}` range; `names` is a string
-(`"ab"` = a and b), a list, or nil for all. Local vs global is implicit in the
-mark's case (`a` local, `A` global).
+The engine lives in `plugin/render-marks.lua` and installs no key mappings —
+bind handlers yourself in `config/marks.lua`. It currently exposes (all under
+`require("utils.render-marks")`):
 
 | Call | Effect |
 |------|--------|
 | `setup({ hl_group, priority })` | Install triggers + default highlight; `config/marks.lua` calls this |
 | `render(bufnr)` | Force a repaint (nil = all loaded, 0 = current) |
-| `list(sel?)` | Marks matching the selector → records `{name, buf, lnum, col, global?}` |
-| `delete(sel?)` | Delete the marks `list` would return → deleted names |
-| `set(name, where?)` | Set `name`; `where = { buf, line, col }` (default cursor) |
-| `prompt()` | Read a mark name from the next keypress (nil if not a–zA–Z) |
-| `set_next()` | Place the next unused `a`–`z` mark at the cursor |
-| `toggle()` | Clear the current line's marks, or place the next if none |
-| `jump(dir, opts?)` / `next(opts?)` / `prev(opts?)` | Jump by position; `opts = { from, wrap, names }` |
+| `toggle()` | Read a mark from the next keypress and toggle it: set/move to the cursor, or remove it if already on the line. Bind to `m` for a toggling `m{a-zA-Z}`. |
 
-Examples: `delete({ names = "a" })`, `delete({ line = 42 })`, `delete()`
-(whole buffer), `list({ names = "A" })` (just global `A` pointing here),
-`set("q", { line = 42 })`.
+A fuller selection/manipulation API (`list`/`delete`/`set` by a
+`{ buf, line, names }` selector, `set_next`, `jump`/`next`/`prev`) is planned —
+see `todo.md`.
 
 ### Readline (command mode)
 | Key | Action |

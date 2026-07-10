@@ -27,78 +27,21 @@ local function place(buf, name, lnum, line_count)
   })
 end
 
--- Resolve a `buf` argument: nil or 0 means the current buffer.
-local function resolve(buf)
-  if buf == nil or buf == 0 then
-    return vim.api.nvim_get_current_buf()
-  end
-  return buf
-end
-
--- Predicate for opts.names: a string (each char a mark, so "ab" = a and b), a
--- list of names, or nil (any letter mark). Case is significant -- "a" is a
--- buffer-local mark, "A" is a global one.
-local function name_match(names)
-  if names == nil then
-    return function() return true end
-  end
-  local set = {}
-  if type(names) == "string" then
-    for i = 1, #names do set[names:sub(i, i)] = true end
-  else
-    for _, n in ipairs(names) do set[n] = true end
-  end
-  return function(n) return set[n] == true end
-end
-
--- Predicate for opts.line: a number, a {lo, hi} range, or nil (any line).
-local function line_match(line)
-  if line == nil then
-    return function() return true end
-  end
-  if type(line) == "table" then
-    return function(l) return l >= line[1] and l <= line[2] end
-  end
-  return function(l) return l == line end
-end
-
--- The letter marks in `buf` matching the selector { line, names }: buffer-local
--- a-z plus global A-Z pointing into buf. Columns are 0-based (for cursor APIs);
--- the renderer ignores them. Single source the renderer and handlers read from.
-local function query(buf, opts)
-  opts = opts or {}
-  local want_name = name_match(opts.names)
-  local want_line = line_match(opts.line)
-  local out = {}
-  for _, m in ipairs(vim.fn.getmarklist(buf)) do -- buffer-local a-z
-    local name = m.mark:sub(2)
-    if name:match("^%l$") and want_name(name) and want_line(m.pos[2]) then
-      out[#out + 1] = { name = name, buf = buf, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1) }
-    end
-  end
-  for _, m in ipairs(vim.fn.getmarklist()) do -- global A-Z pointing into this buffer
-    local name = m.mark:sub(2)
-    if name:match("^%u$") and m.pos[1] == buf and want_name(name) and want_line(m.pos[2]) then
-      out[#out + 1] = { name = name, buf = buf, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1), global = true }
-    end
-  end
-  return out
-end
-
-local function del(buf, mk)
-  if mk.global then
-    vim.api.nvim_del_mark(mk.name)
-  else
-    vim.api.nvim_buf_del_mark(buf, mk.name)
-  end
-end
-
 local function reconcile(buf)
   if not vim.api.nvim_buf_is_valid(buf) then return end
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   local line_count = vim.api.nvim_buf_line_count(buf)
-  for _, mk in ipairs(query(buf)) do
-    place(buf, mk.name, mk.lnum, line_count)
+  for _, m in ipairs(vim.fn.getmarklist(buf)) do -- buffer-local a-z
+    local name = m.mark:sub(2)
+    if name:match("^%l$") then
+      place(buf, name, m.pos[2], line_count)
+    end
+  end
+  for _, m in ipairs(vim.fn.getmarklist()) do -- global A-Z pointing into this buffer
+    local name = m.mark:sub(2)
+    if name:match("^%u$") and m.pos[1] == buf then
+      place(buf, name, m.pos[2], line_count)
+    end
   end
 end
 
@@ -216,139 +159,40 @@ function M.render(bufno)
     end
     return
   end
-  reconcile(resolve(bufno))
-end
-
--- Selection / manipulation handlers -- pure functions, no key mappings; bind
--- them in your own config. A selector is { buf, line, names }: buf defaults to
--- the current buffer (0 also means current); line is a number or a { lo, hi }
--- range (default any); names is a string ("ab" = a and b), a list, or nil for
--- all. Local vs global is implicit in the mark's case -- "a" is buffer-local,
--- "A" is a global mark pointing into the buffer. Mutating handlers repaint
--- synchronously and return the affected mark name(s), so a mapping can echo it.
-
--- Marks matching the selector. Records are { name, buf, lnum, col, global? }.
-function M.list(sel)
-  sel = sel or {}
-  return query(resolve(sel.buf), sel)
-end
-
--- Delete the marks that list(sel) would return. Returns the deleted names.
-function M.delete(sel)
-  sel = sel or {}
-  local buf = resolve(sel.buf)
-  local deleted = {}
-  for _, mk in ipairs(query(buf, sel)) do
-    del(buf, mk)
-    deleted[#deleted + 1] = mk.name
+  if bufno == 0 then
+    bufno = vim.api.nvim_get_current_buf()
   end
-  reconcile(buf)
-  return deleted
+  reconcile(bufno)
 end
 
--- Set mark `name`. where = { buf, line, col }, defaulting to the cursor.
-function M.set(name, where)
-  where = where or {}
-  local buf = resolve(where.buf)
-  local line, col = where.line, where.col
-  if not line then
-    local cur = vim.api.nvim_win_get_cursor(0)
-    line, col = cur[1], col or cur[2]
-  end
-  vim.api.nvim_buf_set_mark(buf, name, line, col or 0, {})
-  reconcile(buf)
-  return name
-end
-
--- Read a single mark name from the next keypress; nil if it isn't a-zA-Z. Lets
--- you build "dm{a}"-style maps: `local n = prompt(); if n then delete(0, {names=n}) end`.
-function M.prompt()
-  local ch = vim.fn.getcharstr()
-  return ch:match("^%a$") and ch or nil
-end
-
--- Place the next unused a-z mark at the cursor. Returns nil if all are taken.
-function M.set_next()
-  local buf = vim.api.nvim_get_current_buf()
-  local used = {}
-  for _, mk in ipairs(query(buf)) do
-    used[mk.name] = true
-  end
-  local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
-  for c = string.byte("a"), string.byte("z") do
-    local name = string.char(c)
-    if not used[name] then
-      vim.api.nvim_buf_set_mark(buf, name, cur[1], cur[2], {})
-      reconcile(buf)
-      return name
-    end
-  end
-end
-
--- If the current line has any mark, clear the line; else place the next.
+-- Toggle a mark, reading its name from the next keypress -- bind to `m` for a
+-- toggling m{a-zA-Z}. If the mark already sits on the current line, remove it;
+-- otherwise set (or move) it to the cursor. Local vs global is implicit in the
+-- case: "a" is buffer-local, "A" is a global mark.
+--
+-- The fuller selection/manipulation API -- list/delete/set by a { buf, line,
+-- names } selector, set_next, jump/next/prev -- is deferred; see todo.md.
 function M.toggle()
-  local lnum = vim.fn.line(".")
-  if #M.list({ line = lnum }) > 0 then
-    return M.delete({ line = lnum })
-  end
-  return M.set_next()
-end
-
--- Jump to the next/prev mark by file position. opts = { from, wrap, names }:
--- from is a { row, col } to search from (default cursor); wrap (default true)
--- cycles past the last/first mark; names restricts the candidates. Jumps via the
--- mark itself, so the jumplist updates.
-local function do_jump(step, opts)
-  opts = opts or {}
-  local wrap = opts.wrap ~= false
-  local buf = vim.api.nvim_get_current_buf()
-  local marks = query(buf, { names = opts.names })
-  if #marks == 0 then
+  local name = vim.fn.getcharstr()
+  if not name:match("^%a$") then
     return
   end
-  table.sort(marks, function(a, b)
-    if a.lnum ~= b.lnum then
-      return a.lnum < b.lnum
+  local buf = vim.api.nvim_get_current_buf()
+  local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
+  local pos = vim.fn.getpos("'" .. name)     -- { bufnum, lnum, col, off }
+  local lower = name:match("%l") ~= nil
+  local in_buf = lower and pos[2] > 0 or pos[1] == buf
+  if in_buf and pos[2] == cur[1] then -- already on this line -> remove
+    if lower then
+      vim.api.nvim_buf_del_mark(buf, name)
+    else
+      vim.api.nvim_del_mark(name)
     end
-    return a.col < b.col
-  end)
-  local from = opts.from or vim.api.nvim_win_get_cursor(0)
-  local crow, ccol = from[1], from[2]
-  local target
-  if step > 0 then
-    for _, mk in ipairs(marks) do
-      if mk.lnum > crow or (mk.lnum == crow and mk.col > ccol) then
-        target = mk
-        break
-      end
-    end
-    target = target or (wrap and marks[1] or nil)
-  else
-    for i = #marks, 1, -1 do
-      local mk = marks[i]
-      if mk.lnum < crow or (mk.lnum == crow and mk.col < ccol) then
-        target = mk
-        break
-      end
-    end
-    target = target or (wrap and marks[#marks] or nil)
+  else -- set (or move) it to the cursor
+    vim.api.nvim_buf_set_mark(buf, name, cur[1], cur[2], {})
   end
-  if target then
-    vim.cmd("normal! `" .. target.name)
-    return target.name
-  end
-end
-
-function M.jump(dir, opts)
-  return do_jump(dir == "prev" and -1 or 1, opts)
-end
-
-function M.next(opts)
-  return do_jump(1, opts)
-end
-
-function M.prev(opts)
-  return do_jump(-1, opts)
+  reconcile(buf)
+  return name
 end
 
 return M
