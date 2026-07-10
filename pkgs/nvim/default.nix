@@ -249,7 +249,7 @@
         ./config/surround.lua
         ./config/fzf.lua
         ./config/spider.lua
-        ./config/markdown.lua
+        ./config/render-markdown.lua
       ]
       ++ optionals opts.treesitter [
         ./config/treesitter.lua
