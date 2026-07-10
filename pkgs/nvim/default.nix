@@ -103,6 +103,12 @@
       -- Skip vim's overrides for 4 spaces indent, breaks list formatting
       vim.g.markdown_recommended_style = 0
 
+      -- List-aware indentation: <CR> wraps an item with a hanging indent, and a
+      -- marker typed on that line dedents to start a sibling. See utils.markdown.
+      -- (treesitter.lua deliberately leaves markdown's indentexpr unset for us.)
+      vim.opt_local.indentexpr = "v:lua.require'utils.markdown'.indentexpr()"
+      vim.opt_local.indentkeys = "o,O,0-,0*,0+,00,01,02,03,04,05,06,07,08,09"
+
       -- Try to detect floating LSP windows
       -- May be a better option if https://github.com/neovim/neovim/issues/31206
       -- makes any progress
