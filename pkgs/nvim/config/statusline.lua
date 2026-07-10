@@ -314,11 +314,9 @@ local actions = {
     if f then
       f.filetypes()
     else
-      vim.ui.select(vim.fn.getcompletion("", "filetype"), { prompt = "Filetype" }, function(ft)
-        if ft then
-          vim.bo.filetype = ft
-        end
-      end)
+      -- No picker: drop to the cmdline pre-loaded with `:set filetype=`, so the
+      -- user can tab-complete or type it (set filetype= has native completion).
+      vim.api.nvim_feedkeys(":set filetype=", "n", false)
     end
   end,
 }
