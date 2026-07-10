@@ -164,6 +164,18 @@
   plugins = with pkgs.vimPlugins;
     [
       gruvbox-nvim
+
+      # My own utils, factored as a plugin: `require("utils.whatever")`. Loaded
+      # in every variant, including the plugin-less root nvim. The opts.plugins
+      # gate is a trust boundary -- unreviewed external plugins that must not run
+      # as root -- and this is owned, reviewed code, so it sits outside it.
+      (stdenvNoCC.mkDerivation {
+        name = "utils";
+        buildCommand = ''
+          mkdir -p "$out/lua"
+          cp -r ${./plugin} "$out/lua/utils"
+        '';
+      })
     ]
     # Nix syntax/indent for the plugin-less variant. When plugins are on,
     # the nix treesitter grammar supersedes it.
@@ -197,15 +209,6 @@
             done
           '';
         }))
-
-        # My own utils, factored as a plugin. `require("utils.whatever")`
-        (stdenvNoCC.mkDerivation {
-          name = "utils";
-          buildCommand = ''
-            mkdir -p "$out/lua"
-            cp -r ${./plugin} "$out/lua/utils"
-          '';
-        })
       ]
       ++ optionals opts.treesitter [
         # Treesitter
