@@ -409,28 +409,35 @@ local function render_tabline()
   return table.concat(parts)
 end
 
--- Expose for the v:lua references in 'statusline'/'tabline' and the click labels.
-_G.StatuslineRender = render
-_G.TablineRender = render_tabline
-_G.StatuslineClick = on_click
+-- All the sourcing-time wiring in one place, run inline below: expose the render
+-- entry points for the v:lua references in 'statusline'/'tabline' and the click
+-- labels, install the highlights (and keep them synced on ColorScheme), set the
+-- statusline/tabline options, and keep the tabline's mode accent in step.
+local function setup()
+  _G.StatuslineRender = render
+  _G.TablineRender = render_tabline
+  _G.StatuslineClick = on_click
 
-setup_highlights()
-vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_highlights })
+  setup_highlights()
+  vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_highlights })
 
-vim.o.laststatus = 3 -- global statusline (was lualine's globalstatus)
-vim.o.showmode = false -- mode shown in the statusline instead
-vim.o.statusline = "%!v:lua.StatuslineRender()"
--- The statusline shows the search count, so drop the native cmdline "[1/5]".
-vim.opt.shortmess:append("S")
+  vim.o.laststatus = 3 -- global statusline (was lualine's globalstatus)
+  vim.o.showmode = false -- mode shown in the statusline instead
+  vim.o.statusline = "%!v:lua.StatuslineRender()"
+  -- The statusline shows the search count, so drop the native cmdline "[1/5]".
+  vim.opt.shortmess:append("S")
 
-vim.o.showtabline = 1 -- tabline appears only with 2+ tab pages
-vim.o.tabline = "%!v:lua.TablineRender()"
+  vim.o.showtabline = 1 -- tabline appears only with 2+ tab pages
+  vim.o.tabline = "%!v:lua.TablineRender()"
 
--- The statusline redraws on mode change on its own, but the tabline doesn't --
--- and the selected tab's color now tracks the mode -- so redraw it explicitly to
--- keep that accent in step.
-vim.api.nvim_create_autocmd("ModeChanged", {
-  callback = function()
-    vim.cmd("redrawtabline")
-  end,
-})
+  -- The statusline redraws on mode change on its own, but the tabline doesn't --
+  -- and the selected tab's color now tracks the mode -- so redraw it explicitly to
+  -- keep that accent in step.
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    callback = function()
+      vim.cmd("redrawtabline")
+    end,
+  })
+end
+
+setup()
