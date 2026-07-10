@@ -27,21 +27,40 @@ local function place(buf, name, lnum, line_count)
   })
 end
 
-local function reconcile(buf)
-  if not vim.api.nvim_buf_is_valid(buf) then return end
-  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-  local line_count = vim.api.nvim_buf_line_count(buf)
+-- The letter marks relevant to `buf`: buffer-local a-z plus global A-Z that
+-- point into buf. Columns are 0-based (for cursor APIs); rendering ignores them.
+-- This is the single source the renderer and every handler enumerate from.
+local function marks_for(buf)
+  local out = {}
   for _, m in ipairs(vim.fn.getmarklist(buf)) do -- buffer-local a-z
     local name = m.mark:sub(2)
     if name:match("^%l$") then
-      place(buf, name, m.pos[2], line_count)
+      out[#out + 1] = { name = name, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1) }
     end
   end
   for _, m in ipairs(vim.fn.getmarklist()) do -- global A-Z pointing into this buffer
     local name = m.mark:sub(2)
     if name:match("^%u$") and m.pos[1] == buf then
-      place(buf, name, m.pos[2], line_count)
+      out[#out + 1] = { name = name, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1), global = true }
     end
+  end
+  return out
+end
+
+local function del(buf, mk)
+  if mk.global then
+    vim.api.nvim_del_mark(mk.name)
+  else
+    vim.api.nvim_buf_del_mark(buf, mk.name)
+  end
+end
+
+local function reconcile(buf)
+  if not vim.api.nvim_buf_is_valid(buf) then return end
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  for _, mk in ipairs(marks_for(buf)) do
+    place(buf, mk.name, mk.lnum, line_count)
   end
 end
 
@@ -163,6 +182,130 @@ function M.render(bufno)
     bufno = vim.api.nvim_get_current_buf()
   end
   reconcile(bufno)
+end
+
+-- Handlers -- pure functions, no key mappings. Bind them in your own config.
+-- Each mutates marks then repaints synchronously (MarkSet would repaint too, but
+-- an explicit reconcile keeps them self-contained). They return the mark
+-- name(s) affected, so a mapping can echo feedback if it wants.
+
+-- Delete a mark. Without `name`, reads the next keypress to choose it.
+function M.delete(name)
+  name = name or vim.fn.getcharstr()
+  if not name:match("^%a$") then
+    return
+  end
+  local buf = vim.api.nvim_get_current_buf()
+  del(buf, { name = name, global = name:match("%u") ~= nil })
+  reconcile(buf)
+  return name
+end
+
+-- Delete every letter mark on the current line.
+function M.delete_line()
+  local buf = vim.api.nvim_get_current_buf()
+  local lnum = vim.fn.line(".")
+  local deleted = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    if mk.lnum == lnum then
+      del(buf, mk)
+      deleted[#deleted + 1] = mk.name
+    end
+  end
+  reconcile(buf)
+  return deleted
+end
+
+-- Delete every letter mark in the buffer (a-z and any A-Z pointing here).
+function M.delete_buf()
+  local buf = vim.api.nvim_get_current_buf()
+  local deleted = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    del(buf, mk)
+    deleted[#deleted + 1] = mk.name
+  end
+  reconcile(buf)
+  return deleted
+end
+
+-- Place the next unused a-z mark at the cursor. Returns nil if all are taken.
+function M.set_next()
+  local buf = vim.api.nvim_get_current_buf()
+  local used = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    used[mk.name] = true
+  end
+  local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
+  for c = string.byte("a"), string.byte("z") do
+    local name = string.char(c)
+    if not used[name] then
+      vim.api.nvim_buf_set_mark(buf, name, cur[1], cur[2], {})
+      reconcile(buf)
+      return name
+    end
+  end
+end
+
+-- If the current line has any letter mark, clear the line; else place the next.
+function M.toggle()
+  local buf = vim.api.nvim_get_current_buf()
+  local lnum = vim.fn.line(".")
+  for _, mk in ipairs(marks_for(buf)) do
+    if mk.lnum == lnum then
+      return M.delete_line()
+    end
+  end
+  return M.set_next()
+end
+
+-- Jump to the next/prev mark by file position. opts.wrap (default true) cycles
+-- past the last/first mark. Jumps via the mark itself, so the jumplist updates.
+local function goto_mark(step, opts)
+  local wrap = not (opts and opts.wrap == false)
+  local buf = vim.api.nvim_get_current_buf()
+  local marks = marks_for(buf)
+  if #marks == 0 then
+    return
+  end
+  table.sort(marks, function(a, b)
+    if a.lnum ~= b.lnum then
+      return a.lnum < b.lnum
+    end
+    return a.col < b.col
+  end)
+  local cur = vim.api.nvim_win_get_cursor(0)
+  local crow, ccol = cur[1], cur[2]
+  local target
+  if step > 0 then
+    for _, mk in ipairs(marks) do
+      if mk.lnum > crow or (mk.lnum == crow and mk.col > ccol) then
+        target = mk
+        break
+      end
+    end
+    target = target or (wrap and marks[1] or nil)
+  else
+    for i = #marks, 1, -1 do
+      local mk = marks[i]
+      if mk.lnum < crow or (mk.lnum == crow and mk.col < ccol) then
+        target = mk
+        break
+      end
+    end
+    target = target or (wrap and marks[#marks] or nil)
+  end
+  if target then
+    vim.cmd("normal! `" .. target.name)
+    return target.name
+  end
+end
+
+function M.next(opts)
+  return goto_mark(1, opts)
+end
+
+function M.prev(opts)
+  return goto_mark(-1, opts)
 end
 
 return M

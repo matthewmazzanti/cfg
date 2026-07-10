@@ -119,12 +119,21 @@ with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
 The sign glyph uses the `MarkGutter` highlight (installed by `setup`, linked to
 `Identifier` by default — re-link it to restyle).
 
-The engine lives in `plugin/render-marks.lua` and exposes:
+The engine lives in `plugin/render-marks.lua`. It installs no key mappings —
+bind the handlers yourself in `config/marks.lua`. It exposes:
 
 | Call | Effect |
 |------|--------|
-| `require("utils.render-marks").setup({ hl_group, priority })` | Install triggers + default highlight; `config/marks.lua` calls this |
-| `require("utils.render-marks").render(bufnr)` | Force a repaint of `bufnr` (nil = all loaded buffers) |
+| `setup({ hl_group, priority })` | Install triggers + default highlight; `config/marks.lua` calls this |
+| `render(bufnr)` | Force a repaint of `bufnr` (nil = all loaded, 0 = current) |
+| `delete(name?)` | Delete a mark; without `name`, reads the next keypress |
+| `delete_line()` | Delete every letter mark on the current line |
+| `delete_buf()` | Delete every letter mark in the buffer |
+| `set_next()` | Place the next unused `a`–`z` mark at the cursor |
+| `toggle()` | Clear the current line's marks, or place the next if none |
+| `next(opts?)` / `prev(opts?)` | Jump to next/prev mark by position (`opts.wrap`, default true) |
+
+(all under `require("utils.render-marks")`)
 
 ### Readline (command mode)
 | Key | Action |
