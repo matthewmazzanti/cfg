@@ -15,11 +15,15 @@ local M = {}
 local ns = vim.api.nvim_create_namespace("marks_gutter")
 
 -- Publicly settable styling -- set these on the module (before or after setup) to
--- restyle, e.g. require("utils.render-marks").number_hl_group = "CursorLineNr".
+-- restyle, e.g. require("utils.marks").number_hl_group = "CursorLineNr".
 M.hl_group = "MarkGutter" -- sign glyph highlight group
 M.number_hl_group = nil -- line-number highlight for marked lines (opt-in; nil = off)
 M.priority = 10 -- sign priority
 
+---@param buf integer
+---@param name string mark letter
+---@param lnum integer 1-based line
+---@param line_count integer buffer line count
 local function place(buf, name, lnum, line_count)
   if lnum < 1 or lnum > line_count then
     return -- mark left dangling past EOF by an edit; skip until it's back in range
@@ -32,26 +36,57 @@ local function place(buf, name, lnum, line_count)
   })
 end
 
-local function reconcile(buf)
-  if not vim.api.nvim_buf_is_valid(buf) then return end
-  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-  local line_count = vim.api.nvim_buf_line_count(buf)
+---@class marks.Mark
+---@field name string letter (a-z buffer-local, A-Z global)
+---@field lnum integer 1-based line
+---@field col integer 0-based column
+---@field global? boolean set for A-Z global marks pointing into the buffer
+
+-- The letter marks relevant to `buf`: buffer-local a-z plus global A-Z that
+-- point into buf. Columns are 0-based (for cursor APIs); rendering ignores them.
+-- This is the single source the renderer and every handler enumerate from.
+---@param buf integer
+---@return marks.Mark[]
+local function marks_for(buf)
+  local out = {}
   for _, m in ipairs(vim.fn.getmarklist(buf)) do -- buffer-local a-z
     local name = m.mark:sub(2)
     if name:match("^%l$") then
-      place(buf, name, m.pos[2], line_count)
+      out[#out + 1] = { name = name, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1) }
     end
   end
   for _, m in ipairs(vim.fn.getmarklist()) do -- global A-Z pointing into this buffer
     local name = m.mark:sub(2)
     if name:match("^%u$") and m.pos[1] == buf then
-      place(buf, name, m.pos[2], line_count)
+      out[#out + 1] = { name = name, lnum = m.pos[2], col = math.max(0, m.pos[3] - 1), global = true }
     end
+  end
+  return out
+end
+
+---@param buf integer
+---@param mk marks.Mark
+local function del(buf, mk)
+  if mk.global then
+    vim.api.nvim_del_mark(mk.name)
+  else
+    vim.api.nvim_buf_del_mark(buf, mk.name)
+  end
+end
+
+---@param buf integer
+local function reconcile(buf)
+  if not vim.api.nvim_buf_is_valid(buf) then return end
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  for _, mk in ipairs(marks_for(buf)) do
+    place(buf, mk.name, mk.lnum, line_count)
   end
 end
 
 -- Collapse a burst of triggers into a single reconcile on the next tick.
 local pending = {}
+---@param buf integer
 local function schedule(buf)
   if pending[buf] then return end
   pending[buf] = true
@@ -65,6 +100,7 @@ end
 -- changes only (see the on_lines gate below). Nvim already coalesces bulk edits,
 -- so a :%s touching many lines fires on_lines once, not per line.
 local attached = {}
+---@param attach_buf integer
 local function attach(attach_buf)
   if attached[attach_buf] then
     return
@@ -108,6 +144,11 @@ end
 --   hl_group         sign glyph highlight group (default "MarkGutter")
 --   number_hl_group  line-number highlight for marked lines (default nil / off)
 --   priority         sign priority (default 10)
+---@class marks.Opts
+---@field hl_group? string sign glyph highlight group
+---@field number_hl_group? string line-number highlight for marked lines
+---@field priority? integer sign priority
+---@param opts? marks.Opts
 function M.setup(opts)
   opts = opts or {}
   M.hl_group = opts.hl_group or M.hl_group
@@ -118,7 +159,7 @@ function M.setup(opts)
   vim.api.nvim_set_hl(0, "MarkGutter", { link = "Identifier", default = true })
 
   -- Idempotent: a re-run (live :source) clears the group rather than stacking.
-  local group = vim.api.nvim_create_augroup("render_marks", { clear = true })
+  local group = vim.api.nvim_create_augroup("marks", { clear = true })
 
   -- Add/remove/re-set: universal, so no need to remap m/dm to notice.
   vim.api.nvim_create_autocmd("MarkSet", {
@@ -159,6 +200,7 @@ end
 -- getmarklist() won't accept a literal 0, so resolve it). Rendering is
 -- event-driven, so this is only an escape hatch for changes that bypass the
 -- tracked triggers.
+---@param bufno? integer nil = every loaded buffer; 0 = current buffer
 function M.render(bufno)
   if bufno == nil then
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
@@ -174,17 +216,26 @@ function M.render(bufno)
   reconcile(bufno)
 end
 
--- Toggle a mark, reading its name from the next keypress -- bind to `m` for a
--- toggling m{a-zA-Z}. If the mark already sits on the current line, remove it;
--- otherwise set (or move) it to the cursor. Local vs global is implicit in the
--- case: "a" is buffer-local, "A" is a global mark.
---
--- The fuller selection/manipulation API -- list/delete/set by a { buf, line,
--- names } selector, set_next, jump/next/prev -- is deferred; see todo.md.
-function M.toggle()
-  -- pcall so <C-c> during the read (Vim:Interrupt) cancels cleanly.
-  local ok, name = pcall(vim.fn.getcharstr)
-  if not ok or not name:match("^%a$") then
+-- Handlers -- pure functions, no key mappings. Bind them in your own config.
+-- Each mutates marks and lets the MarkSet-driven reconcile repaint (as toggle
+-- does -- the set/del APIs fire MarkSet), then returns the mark name(s) affected
+-- so a mapping can echo feedback if it wants. They act only on the current
+-- buffer. Local vs global is implicit in the case: "a" is buffer-local, "A" is a
+-- global mark pointing into this buffer.
+
+-- Toggle a mark. Without `name`, reads it from the next keypress -- bind to `m`
+-- for a toggling m{a-zA-Z}. If the mark already sits on the current line, remove
+-- it; otherwise set (or move) it to the cursor.
+---@param name? string mark letter; reads the next keypress if omitted
+---@return string? name toggled mark, or nil if the read was cancelled/invalid
+function M.toggle(name)
+  if not name then
+    -- pcall so <C-c> during the read (Vim:Interrupt) cancels cleanly.
+    local ok, ch = pcall(vim.fn.getcharstr)
+    if not ok then return end
+    name = ch
+  end
+  if not name:match("^%a$") then
     return
   end
   -- nvim_buf_* take 0 for the current buffer, and nvim_buf_get_mark is
@@ -204,6 +255,129 @@ function M.toggle()
     vim.api.nvim_buf_del_mark(0, name)
   end
   return name
+end
+
+-- Delete a mark on the current buffer. Without `name`, reads the next keypress
+-- to choose it. A no-op (returns nil) if the mark isn't set in this buffer, so a
+-- global pointing elsewhere is left alone. Returns the name when it deletes.
+---@param name? string mark letter; reads the next keypress if omitted
+---@return string? name deleted mark, or nil if none matched in this buffer
+function M.delete(name)
+  if not name then
+    -- pcall so <C-c> during the read (Vim:Interrupt) cancels cleanly.
+    local ok, ch = pcall(vim.fn.getcharstr)
+    if not ok then return end
+    name = ch
+  end
+
+  if not name:match("^%a$") then return end
+
+  local buf = vim.api.nvim_get_current_buf()
+  for _, mk in ipairs(marks_for(buf)) do
+    if mk.name == name then
+      del(buf, mk)
+      return name
+    end
+  end
+end
+
+-- Delete every letter mark on the current line.
+---@return string[] deleted names cleared from the line
+function M.delete_line()
+  local buf = vim.api.nvim_get_current_buf()
+  local lnum = vim.fn.line(".")
+  local deleted = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    if mk.lnum == lnum then
+      del(buf, mk)
+      deleted[#deleted + 1] = mk.name
+    end
+  end
+  return deleted
+end
+
+-- Delete every letter mark in the buffer (a-z and any A-Z pointing here).
+---@return string[] deleted names cleared from the buffer
+function M.delete_buf()
+  local buf = vim.api.nvim_get_current_buf()
+  local deleted = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    del(buf, mk)
+    deleted[#deleted + 1] = mk.name
+  end
+  return deleted
+end
+
+-- Place the next unused a-z mark at the cursor. Returns nil if all are taken.
+---@return string? name placed mark, or nil if a-z are all in use
+function M.set_next()
+  local buf = vim.api.nvim_get_current_buf()
+  local used = {}
+  for _, mk in ipairs(marks_for(buf)) do
+    used[mk.name] = true
+  end
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0)) -- row 1-based, col 0-based
+  for c = string.byte("a"), string.byte("z") do
+    local name = string.char(c)
+    if not used[name] then
+      vim.api.nvim_buf_set_mark(buf, name, row, col, {})
+      return name
+    end
+  end
+end
+
+---@class marks.JumpOpts
+---@field wrap? boolean cycle past the last/first mark (default true)
+
+-- Jump to the next/prev mark by file position. opts.wrap (default true) cycles
+-- past the last/first mark. Jumps via the mark itself, so the jumplist updates.
+---@param step integer 1 to go forward, -1 to go backward
+---@param opts? marks.JumpOpts
+---@return string? name mark jumped to, or nil if there are none
+local function goto_mark(step, opts)
+  local wrap = not (opts and opts.wrap == false)
+  local buf = vim.api.nvim_get_current_buf()
+  local marks = marks_for(buf)
+  if #marks == 0 then
+    return
+  end
+
+  -- Ascending file-order delta between two positions. Multiplying by `step` (+-1)
+  -- flips the sign for prev, so one comparator drives both directions: sort into
+  -- travel order, then the target is the first mark strictly past the cursor
+  -- (treated as a pseudo-mark), wrapping to marks[1] -- always the travel-first.
+  local function poscmp(a, b)
+    if a.lnum ~= b.lnum then return a.lnum - b.lnum end
+    return a.col - b.col
+  end
+  table.sort(marks, function(a, b) return step * poscmp(a, b) < 0 end)
+
+  local crow, ccol = unpack(vim.api.nvim_win_get_cursor(0)) -- row 1-based, col 0-based
+  local cursor = { lnum = crow, col = ccol }
+  local target
+  for _, mk in ipairs(marks) do
+    if step * poscmp(cursor, mk) < 0 then
+      target = mk
+      break
+    end
+  end
+  target = target or (wrap and marks[1] or nil)
+
+  if not target then return end
+  vim.cmd.normal({ "`" .. target.name, bang = true }) -- bang so it ignores mappings
+  return target.name
+end
+
+---@param opts? marks.JumpOpts
+---@return string? name mark jumped to, or nil if there are none
+function M.next(opts)
+  return goto_mark(1, opts)
+end
+
+---@param opts? marks.JumpOpts
+---@return string? name mark jumped to, or nil if there are none
+function M.prev(opts)
+  return goto_mark(-1, opts)
 end
 
 return M

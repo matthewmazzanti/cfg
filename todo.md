@@ -10,6 +10,7 @@
   - Root/user/home manager level - who owns what?
   - How do I sync between them?
   - System overrides
+- [ ] wayland/wm fast iteration thing
 
 ## Packages
 
@@ -32,8 +33,8 @@
 - [x] Pre-compile Lua code? - not worth it; complexity/error messages outweigh the minimal startup savings
 - [x] Per-project editor config, lines, tabs etc - supported natively via editorconfig (built in since 0.9)
 - [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
-- [ ] Flesh out utils.render-marks handler API - currently only `toggle` (bound to `m`). Planned: `list`/`delete`/`set` over a `{ buf, line, names }` selector (local/global implicit in case), plus `set_next` and `jump`/`next`/`prev`. Prototype landed in git history around commit 597a6c3 if wanted back.
-- [ ] Upstream a Neovim "mark moved" event (e.g. `MarkUpdate`) - `MarkSet` only fires on add/remove/re-set, not when a mark's line *drifts* from edits (insert/delete lines, `:sort`). render-marks papers over that with `nvim_buf_attach`/`on_lines` edit-tracking gated to structural changes. A native event when a mark's position changes would let render-marks (and similar) drop that machinery and just re-derive on notification.
+- [x] Flesh out utils.marks handler API - shipped simple bindable verbs (`toggle`/`delete`/`delete_line`/`delete_buf`/`set_next`/`next`/`prev`) instead of the planned `{ buf, line, names }` selector; bound marks.nvim-style (`m{a-zA-Z}`/`m]`/`m[`/`m,`/`dm*`) in `config/marks.lua`.
+- [ ] Upstream a Neovim "mark moved" event (e.g. `MarkUpdate`) - `MarkSet` only fires on add/remove/re-set, not when a mark's line *drifts* from edits (insert/delete lines, `:sort`). utils.marks papers over that with `nvim_buf_attach`/`on_lines` edit-tracking gated to structural changes. A native event when a mark's position changes would let utils.marks (and similar) drop that machinery and just re-derive on notification.
 
 ## Zsh
 

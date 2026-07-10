@@ -20,11 +20,11 @@ pkgs/nvim/
 │   ├── fidget.lua       # LSP progress notifications
 │   ├── surround.lua     # Surround text objects
 │   ├── clip.lua         # Cut/yank/paste register model (loads everywhere)
-│   ├── marks.lua        # Sign-column marks (configures utils.render-marks)
+│   ├── marks.lua        # Sign-column marks (configures utils.marks)
 │   └── readline.lua     # Readline keybindings for cmdline
 ├── plugin/
 │   ├── readline.lua     # Readline utilities library
-│   └── render-marks.lua # Event-driven mark rendering engine
+│   └── marks.lua        # Event-driven mark rendering engine
 └── test/                # Test files for various filetypes
 ```
 
@@ -108,13 +108,13 @@ clipboard (`unnamedplus`); over SSH it stays in-editor so nothing reaches OSC 52
 | `y` / `yy` / `Y` | Yank → default register |
 | `p` / `P` | Paste from default register (repeatable) |
 
-### Marks (marks.lua → utils.render-marks)
+### Marks (marks.lua → utils.marks)
 Shows the `a`–`z` (buffer-local) and `A`–`Z` (global) marks in the sign column,
 replacing vim-signature. The renderer is fully event-driven — no polling timer,
 zero idle cost. Signs are re-derived from `getmarklist()` on each change, so they
-stay correct even through `:sort` (which pins marks to line numbers). Set marks
-with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
-`:delmarks`. `<leader>m` opens the fzf mark picker (see Navigation).
+stay correct even through `:sort` (which pins marks to line numbers). Jump with
+`` `{mark} ``/`'{mark}` and clear with `:delmarks` as usual; `<leader>m` opens
+the fzf mark picker (see Navigation).
 
 Styling is via settable module fields (also seedable through `setup(opts)`), read
 on every repaint so they can change at runtime:
@@ -125,19 +125,31 @@ on every repaint so they can change at runtime:
 | `number_hl_group` | `nil` | Line-number highlight for marked lines (opt-in, e.g. `"CursorLineNr"`) |
 | `priority` | `10` | Sign priority |
 
-The engine lives in `plugin/render-marks.lua` and installs no key mappings —
-bind handlers yourself in `config/marks.lua`. It currently exposes (all under
-`require("utils.render-marks")`):
+The engine lives in `plugin/marks.lua` and installs no key mappings — bind the
+handlers yourself in `config/marks.lua`. All are exposed under
+`require("utils.marks")` and act on the current buffer:
 
 | Call | Effect |
 |------|--------|
 | `setup(opts?)` | Install triggers + default highlight; seeds the styling fields from `opts` |
-| `render(bufnr)` | Force a repaint (nil = all loaded, 0 = current) |
-| `toggle()` | Read a mark from the next keypress and toggle it: set/move to the cursor, or remove it if already on the line. Bind to `m` for a toggling `m{a-zA-Z}`. |
+| `render(bufnr?)` | Force a repaint (nil = all loaded, 0 = current) |
+| `toggle(name?)` | Toggle a mark: set/move it to the cursor, or remove it if already on the line. Reads the next keypress when `name` is omitted. |
+| `set_next()` | Place the next unused `a`–`z` mark at the cursor |
+| `delete(name?)` | Delete a mark (reads the next keypress when omitted) |
+| `delete_line()` / `delete_buf()` | Delete every mark on the line / in the buffer |
+| `next(opts?)` / `prev(opts?)` | Jump to the next / previous mark by file position; `opts.wrap` (default `true`) cycles past the ends |
 
-A fuller selection/manipulation API (`list`/`delete`/`set` by a
-`{ buf, line, names }` selector, `set_next`, `jump`/`next`/`prev`) is planned —
-see `todo.md`.
+`config/marks.lua` wires them into a marks.nvim-style layout. A single `m`
+mapping reads the next key and dispatches, so the whole `m`-prefix set works with
+no `timeoutlen` wait:
+
+| Key | Action |
+|-----|--------|
+| `m{a-zA-Z}` | Toggle that mark (replaces native set) |
+| `m]` / `m[` | Jump to next / previous mark (wraps) |
+| `m,` | Set the next unused `a`–`z` mark |
+| `dm` | Delete a mark (prompts) |
+| `dm-` / `dm<Space>` | Delete every mark on the line / in the buffer |
 
 ### Readline (command mode)
 | Key | Action |
