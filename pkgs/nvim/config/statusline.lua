@@ -11,8 +11,8 @@
 -- cheap -- every field here is O(1). Highlights are (re)derived from the active
 -- gruvbox groups on ColorScheme.
 --
--- Sections below: Highlights, Rendering primitives, Statusline segments, Click
--- actions, Statusline, Tabline, Setup.
+-- Sections below: Highlights, Rendering primitives, Window resolution,
+-- Statusline segments, Click actions, Statusline, Tabline, Setup.
 
 -- Highlights -----------------------------------------------------------------
 
@@ -122,6 +122,30 @@ local function join(...)
     end
   end
   return table.concat(out)
+end
+
+-- Window resolution ----------------------------------------------------------
+
+-- The window/buffer that best represents a tab page: its active window, unless
+-- that's a floating window (e.g. an fzf picker), in which case the first
+-- non-floating window -- so a transient float doesn't hijack what we show for the
+-- tab. Returns { win, buf, floating }, where `floating` reports that a float was
+-- bypassed (the active window differs from the chosen one). Shared by the
+-- statusline (current tab) and the tabline (every tab): with a global statusline
+-- (laststatus=3) a focused float would otherwise replace the filename/filetype
+-- with its own, just as it would a tab's label.
+local function tab_target(tab)
+  local active = vim.api.nvim_tabpage_get_win(tab)
+  local win = active
+  if vim.api.nvim_win_get_config(active).relative ~= "" then
+    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      if vim.api.nvim_win_get_config(w).relative == "" then
+        win = w
+        break
+      end
+    end
+  end
+  return { win = win, buf = vim.api.nvim_win_get_buf(win), floating = win ~= active }
 end
 
 -- Statusline segments --------------------------------------------------------
@@ -307,28 +331,6 @@ function StatuslineClick(id, _clicks, _button, _mods)
 end
 
 -- Statusline -----------------------------------------------------------------
-
--- The window/buffer that best represents a tab page: its active window, unless
--- that's a floating window (e.g. an fzf picker), in which case the first
--- non-floating window -- so a transient float doesn't hijack what we show for the
--- tab. Returns { win, buf, floating }, where `floating` reports that a float was
--- bypassed (the active window differs from the chosen one). Shared by the
--- statusline (current tab) and the tabline (every tab): with a global statusline
--- (laststatus=3) a focused float would otherwise replace the filename/filetype
--- with its own, just as it would a tab's label.
-local function tab_target(tab)
-  local active = vim.api.nvim_tabpage_get_win(tab)
-  local win = active
-  if vim.api.nvim_win_get_config(active).relative ~= "" then
-    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
-      if vim.api.nvim_win_get_config(w).relative == "" then
-        win = w
-        break
-      end
-    end
-  end
-  return { win = win, buf = vim.api.nvim_win_get_buf(win), floating = win ~= active }
-end
 
 function StatuslineRender()
   -- Everything is resolved against a single window/buffer, picked once here: the
