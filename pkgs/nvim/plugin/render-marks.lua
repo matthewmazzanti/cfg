@@ -14,6 +14,7 @@ local M = {}
 
 local ns = vim.api.nvim_create_namespace("marks_gutter")
 local hl_group = "MarkGutter"
+local number_hl = "MarkGutterNr"
 local priority = 10
 
 local function place(buf, name, lnum, line_count)
@@ -23,6 +24,7 @@ local function place(buf, name, lnum, line_count)
   vim.api.nvim_buf_set_extmark(buf, ns, lnum - 1, 0, {
     sign_text = name,
     sign_hl_group = hl_group,
+    number_hl_group = number_hl, -- highlight the marked line's number too
     priority = priority,
   })
 end
@@ -98,11 +100,13 @@ local function attach(attach_buf)
 end
 
 -- opts:
---   hl_group  sign highlight group (default "MarkGutter")
---   priority  sign priority (default 10)
+--   hl_group         sign glyph highlight group (default "MarkGutter")
+--   number_hl_group  line-number highlight for marked lines (default "MarkGutterNr")
+--   priority         sign priority (default 10)
 function M.setup(opts)
   opts = opts or {}
   hl_group = opts.hl_group or hl_group
+  number_hl = opts.number_hl_group or number_hl
   priority = opts.priority or priority
 
   -- Idempotent: a re-run (live :source) clears the group rather than stacking.

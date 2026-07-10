@@ -116,11 +116,15 @@ stay correct even through `:sort` (which pins marks to line numbers). Set marks
 with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
 `:delmarks`. `<leader>m` opens the fzf mark picker (see Navigation).
 
+A marked line also gets its line number highlighted (`MarkGutterNr`, linked to
+`CursorLineNr`), in addition to the sign glyph (`MarkGutter`, linked to
+`Identifier`).
+
 The engine lives in `plugin/render-marks.lua` and exposes:
 
 | Call | Effect |
 |------|--------|
-| `require("utils.render-marks").setup({ hl_group, priority })` | Install triggers; `config/marks.lua` calls this |
+| `require("utils.render-marks").setup({ hl_group, number_hl_group, priority })` | Install triggers; `config/marks.lua` calls this |
 | `require("utils.render-marks").render(bufnr)` | Force a repaint of `bufnr` (nil = all loaded buffers) |
 
 ### Readline (command mode)
