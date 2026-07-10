@@ -187,19 +187,18 @@ function M.toggle()
   if not ok or not name:match("^%a$") then
     return
   end
-  local buf = vim.api.nvim_get_current_buf()
+  -- nvim_buf_* take 0 for the current buffer, and nvim_buf_get_mark is
+  -- buffer-scoped: it returns { 0, 0 } when the mark isn't in this buffer (unset,
+  -- or a global pointing elsewhere), so one call answers "is it on this line?".
   local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
-  local pos = vim.fn.getpos("'" .. name)     -- { bufnum, lnum, col, off }
-  local lower = name:match("%l") ~= nil
-  local in_buf = lower and pos[2] > 0 or pos[1] == buf
-  if in_buf and pos[2] == cur[1] then -- already on this line -> remove
-    if lower then
-      vim.api.nvim_buf_del_mark(buf, name)
+  if vim.api.nvim_buf_get_mark(0, name)[1] == cur[1] then -- already on this line -> remove
+    if name:match("%u") then
+      vim.api.nvim_del_mark(name) -- global marks aren't tied to a buffer
     else
-      vim.api.nvim_del_mark(name)
+      vim.api.nvim_buf_del_mark(0, name)
     end
   else -- set (or move) it to the cursor
-    vim.api.nvim_buf_set_mark(buf, name, cur[1], cur[2], {})
+    vim.api.nvim_buf_set_mark(0, name, cur[1], cur[2], {})
   end
   -- No explicit repaint: the set/del fires MarkSet, which schedules a reconcile.
   return name
