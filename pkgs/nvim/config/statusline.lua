@@ -1,12 +1,13 @@
--- Native statusline and tabline, replacing lualine. Inlined into this config file rather
--- than a utils module: render() and on_click() are exposed as globals
--- (StatuslineRender / StatuslineClick) so the 'statusline' `%!` expression and
--- the `%@..@` click labels can reach them via v:lua. A dofile'd config file
--- isn't on the Lua module path, so globals stand in for a require.
+-- Native statusline and tabline, replacing lualine. Inlined into this config file
+-- rather than a utils module: the entry points are defined directly as globals
+-- (StatuslineRender / TablineRender / StatuslineClick) so the 'statusline' and
+-- 'tabline' `%!` expressions and the `%@..@` click labels can reach them via
+-- v:lua. A dofile'd config file isn't on the Lua module path, so globals stand in
+-- for a require.
 --
--- The statusline is redraw-driven, not event-subscribed: render() is called by
--- Neovim's redraw cycle (mode change, cursor move, win/buf switch, ...), so the
--- mode segment and location update on their own. render() therefore must stay
+-- The statusline is redraw-driven, not event-subscribed: StatuslineRender is
+-- called by Neovim's redraw cycle (mode change, cursor move, win/buf switch, ...),
+-- so the mode segment and location update on their own. It therefore must stay
 -- cheap -- every field here is O(1). Highlights are (re)derived from the active
 -- gruvbox groups on ColorScheme.
 
@@ -107,17 +108,17 @@ local mode_groups = {
 
 --- Wrap a statusline snippet in a highlight block. Sticky: the group carries
 --- through until the next hl()/`%#..#`, which is what lets a section's color
---- fill across the `%=` gap. render() applies the top-level group per section;
+--- fill across the `%=` gap. StatuslineRender applies the top-level group per section;
 --- a section's text may embed further hl() switches to re-highlight internally
 --- (see diagnostics()).
 local function hl(group, snippet)
   return "%#" .. group .. "#" .. snippet
 end
 
--- Click-target ids, routed by on_click.
+-- Click-target ids, routed by StatuslineClick.
 local CLICK = { diagnostics = 1, filetype = 2 }
 
---- Wrap a snippet in a click region routed to on_click with `id`. Composes
+--- Wrap a snippet in a click region routed to StatuslineClick with `id`. Composes
 --- inside hl(): highlight is the outer wrapper, the click region the inner.
 local function click(id, snippet)
   return "%" .. id .. "@v:lua.StatuslineClick@" .. snippet .. "%X"
@@ -144,7 +145,7 @@ local function join(...)
 end
 
 -- Section helpers return the section's text (or nil), not a highlight block --
--- render() wraps each in its top-level group. The returned text may itself
+-- StatuslineRender wraps each in its top-level group. The returned text may itself
 -- contain nested hl() switches for internal re-highlighting.
 
 local function branch(buf)
@@ -270,9 +271,8 @@ local actions = {
   end,
 }
 
---- Statusline click dispatcher. Exposed globally (below) so the `%@..@` label
---- can reach it via v:lua.
-local function on_click(id, _clicks, _button, _mods)
+--- Statusline click dispatcher. Global so the `%@..@` label can reach it via v:lua.
+function StatuslineClick(id, _clicks, _button, _mods)
   local action = actions[id]
   if not action then
     return
@@ -307,7 +307,7 @@ local function tab_target(tab)
   return { win = win, buf = vim.api.nvim_win_get_buf(win), floating = win ~= active }
 end
 
-local function render()
+function StatuslineRender()
   -- Everything is resolved against a single window/buffer, picked once here: the
   -- focused window, or the first non-floating one when a float (fzf picker, etc.)
   -- has focus -- so a transient float never hijacks any segment. The section
@@ -393,7 +393,7 @@ end
 --- its status flags. `%NT` makes each label switch to tab N on click (native, no
 --- dispatcher needed); a trailing `%T` closes the last region so the fill area
 --- to its right isn't part of the last tab's click target.
-local function render_tabline()
+function TablineRender()
   local cur = vim.api.nvim_get_current_tabpage()
   -- Selected tab wears the current mode's accent, matching the statusline's mode
   -- block (NORMAL while a float has focus, as it reads there too).
@@ -409,15 +409,11 @@ local function render_tabline()
   return table.concat(parts)
 end
 
--- All the sourcing-time wiring in one place, run inline below: expose the render
--- entry points for the v:lua references in 'statusline'/'tabline' and the click
--- labels, install the highlights (and keep them synced on ColorScheme), set the
--- statusline/tabline options, and keep the tabline's mode accent in step.
+-- All the sourcing-time wiring in one place, run inline below: install the
+-- highlights (and keep them synced on ColorScheme), set the statusline/tabline
+-- options, and keep the tabline's mode accent in step. The render entry points
+-- are defined as globals above, so v:lua reaches them without any wiring here.
 local function setup()
-  _G.StatuslineRender = render
-  _G.TablineRender = render_tabline
-  _G.StatuslineClick = on_click
-
   setup_highlights()
   vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_highlights })
 
