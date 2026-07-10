@@ -13,9 +13,9 @@
 -- The work splits by which tool fits the question. Structure -- which list item
 -- a settled line belongs to, and whether we're in a code block -- is read from
 -- the tree the highlighter already maintains. The volatile current line is not:
--- a half-typed marker ("  -") parses as a setext heading, so it is classified
--- lexically. And when no tree exists yet (a cold buffer, pre-first-parse) the
--- tree lookups return nil and everything falls back to the lexical path.
+-- mid-edit it is a half-typed marker ("  -") the parser reads as a setext
+-- heading, so the two reads of the current line stay lexical. This assumes an
+-- active treesitter parser; there is no lexical fallback for a missing tree.
 
 local M = {}
 
@@ -31,11 +31,11 @@ local function typing_marker(line)
       or line:match("^%s*%d+[.)]?%s*$") ~= nil
 end
 
--- Lexical fallback: content column of a list item line (indent + marker width),
--- or nil when the line is not a list item.
-local function marker_end(line)
-  local m = line:match("^%s*[-*+]%s+") or line:match("^%s*%d+[.)]%s+")
-  return m and #m or nil
+-- Does the current line already start a finished list item? Used to leave such
+-- a line's indent alone (e.g. under '='). A lexical read, for the same reason
+-- as typing_marker: the tree cannot be trusted for the line being edited.
+local function starts_item(line)
+  return line:match("^%s*[-*+]%s+") ~= nil or line:match("^%s*%d+[.)]%s+") ~= nil
 end
 
 -- Is `lnum` inside a code block? Reads the highlighter's tree (get_node does not
@@ -86,31 +86,14 @@ function M.indentexpr()
 
   -- A marker being typed dedents to the enclosing item's marker column,
   -- starting a sibling.
-  if typing_marker(cur) then
-    if marker_col then return marker_col end
-    -- Fallback: nearest lexical marker above, stopping when we leave the list.
-    for r = lnum - 1, 1, -1 do
-      local l = vim.fn.getline(r)
-      if marker_end(l) then return indent_of(l) end
-      if l:match("^%s*$") or indent_of(l) == 0 then break end
-    end
-    return -1
-  end
+  if typing_marker(cur) then return marker_col or -1 end
 
   -- A finished list item carries intentional nesting we can't second-guess
   -- (e.g. under '='), so leave its indent untouched.
-  if marker_end(cur) then return -1 end
+  if starts_item(cur) then return -1 end
 
   -- Otherwise this is a continuation line: hang under the item's content column.
-  if content_col then return content_col end
-  -- Fallback: a preceding lexical marker's content column, or its own indent.
-  if prev > 0 then
-    local pl = vim.fn.getline(prev)
-    local me = marker_end(pl)
-    if me then return me end
-    if indent_of(pl) > 0 then return indent_of(pl) end
-  end
-  return -1
+  return content_col or -1
 end
 
 return M
