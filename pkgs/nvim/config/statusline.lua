@@ -425,3 +425,12 @@ vim.opt.shortmess:append("S")
 
 vim.o.showtabline = 1 -- tabline appears only with 2+ tab pages
 vim.o.tabline = "%!v:lua.TablineRender()"
+
+-- The statusline redraws on mode change on its own, but the tabline doesn't --
+-- and the selected tab's color now tracks the mode -- so redraw it explicitly to
+-- keep that accent in step.
+vim.api.nvim_create_autocmd("ModeChanged", {
+  callback = function()
+    vim.cmd("redrawtabline")
+  end,
+})
