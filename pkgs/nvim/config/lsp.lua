@@ -78,7 +78,7 @@ vim.lsp.config("lua_ls", {
   },
 })
 
-vim.lsp.enable({
+local servers = {
   "gopls",
   "ts_ls",
   "nixd",
@@ -89,7 +89,85 @@ vim.lsp.enable({
   -- on PATH, so enabling them here is a no-op outside a relevant project.
   "clangd",
   "rust_analyzer",
-})
+}
+vim.lsp.enable(servers)
+
+-- :LspStop / :LspStart / :LspRestart for the current buffer -- the modern
+-- vim.lsp API ships none of them (nvim-lspconfig supplies them only when its
+-- plugin loads). The approach is adapted from nvim-lspconfig's new-API commands
+-- in plugin/lspconfig.lua (Apache-2.0):
+--   https://github.com/neovim/nvim-lspconfig
+-- Disabling a config gracefully detaches and shuts its clients down, and
+-- (re-)enabling autostarts a fresh one. All async, no blocking wait; `!` on
+-- stop/restart force-kills the clients instead of shutting them down gracefully.
+
+-- Server names of the clients attached to the current buffer.
+local function attached_servers()
+  local names = {}
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+    names[client.name] = true
+  end
+  return names
+end
+
+-- Enabled servers configured for the current buffer's filetype -- how to start,
+-- since with nothing attached there are no client names to read.
+local function filetype_servers()
+  local ft, matching = vim.bo.filetype, {}
+  for _, name in ipairs(servers) do
+    local cfg = vim.lsp.config[name]
+    if cfg and cfg.filetypes and vim.tbl_contains(cfg.filetypes, ft) then
+      matching[#matching + 1] = name
+    end
+  end
+  return matching
+end
+
+-- Disable each named config (graceful detach + shutdown), force-killing the
+-- clients too when `force`.
+local function stop(names, force)
+  for name in pairs(names) do
+    vim.lsp.enable(name, false)
+    if force then
+      for _, client in ipairs(vim.lsp.get_clients({ name = name })) do
+        client:stop(true)
+      end
+    end
+  end
+end
+
+vim.api.nvim_create_user_command("LspStop", function(info)
+  local names = attached_servers()
+  if vim.tbl_isempty(names) then
+    vim.notify("LspStop: no LSP client on this buffer", vim.log.levels.WARN)
+    return
+  end
+  stop(names, info.bang)
+end, { desc = "Stop the LSP clients on the current buffer", bang = true })
+
+vim.api.nvim_create_user_command("LspStart", function()
+  local matching = filetype_servers()
+  if vim.tbl_isempty(matching) then
+    vim.notify("LspStart: no server configured for this filetype", vim.log.levels.WARN)
+    return
+  end
+  vim.lsp.enable(matching)
+end, { desc = "Start the LSP servers for the current buffer" })
+
+vim.api.nvim_create_user_command("LspRestart", function(info)
+  local names = attached_servers()
+  if vim.tbl_isempty(names) then
+    vim.notify("LspRestart: no LSP client on this buffer", vim.log.levels.WARN)
+    return
+  end
+  stop(names, info.bang)
+  -- Re-enable off the loop, once the graceful shutdown has had time to land.
+  local timer = assert(vim.uv.new_timer())
+  timer:start(500, 0, function()
+    timer:close()
+    vim.schedule_wrap(vim.lsp.enable)(vim.tbl_keys(names))
+  end)
+end, { desc = "Restart the LSP clients on the current buffer", bang = true })
 
 -- Buffer-local LSP keymaps. These MUST live in an LspAttach autocmd, not in an
 -- `on_attach` on the "*" config: config merge (`:help lsp-config-merge`) uses
