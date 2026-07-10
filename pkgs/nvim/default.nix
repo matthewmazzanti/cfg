@@ -176,7 +176,6 @@
 
         # Misc
         vim-fugitive # Git management
-        vim-signature # Show marks
         nvim-spider # CamelCase and other motions
         nvim-surround # Surround
         fidget-nvim
@@ -234,6 +233,7 @@
         ./config/fidget.lua
         ./config/surround.lua
         ./config/fzf.lua
+        ./config/marks.lua
         ./config/spider.lua
         ./config/markdown.lua
         ./config/readline.lua
