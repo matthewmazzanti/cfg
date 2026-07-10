@@ -35,7 +35,7 @@
 - [x] Flesh out utils.marks handler API - shipped simple bindable verbs (`toggle`/`delete`/`delete_line`/`delete_buf`/`set_next`/`next`/`prev`) instead of the planned `{ buf, line, names }` selector; bound marks.nvim-style (`m{a-zA-Z}`/`m]`/`m[`/`m,`/`dm*`) in `config/marks.lua`.
 - [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
 - [ ] Upstream a Neovim "mark moved" event (e.g. `MarkUpdate`) - `MarkSet` only fires on add/remove/re-set, not when a mark's line *drifts* from edits (insert/delete lines, `:sort`). utils.marks papers over that with `nvim_buf_attach`/`on_lines` edit-tracking gated to structural changes. A native event when a mark's position changes would let utils.marks (and similar) drop that machinery and just re-derive on notification.
-- [ ] Add a CLAUDE.md for pkgs/nvim
+- [x] Add a CLAUDE.md for pkgs/nvim
 
 ## Zsh
 
