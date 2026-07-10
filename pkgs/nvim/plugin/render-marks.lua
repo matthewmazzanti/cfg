@@ -189,18 +189,20 @@ function M.toggle()
   end
   -- nvim_buf_* take 0 for the current buffer, and nvim_buf_get_mark is
   -- buffer-scoped: it returns { 0, 0 } when the mark isn't in this buffer (unset,
-  -- or a global pointing elsewhere), so one call answers "is it on this line?".
+  -- or a global pointing elsewhere), so its row answers "is it on this line?".
+  -- No explicit repaint anywhere: the set/del fires MarkSet, which reconciles.
   local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
-  if vim.api.nvim_buf_get_mark(0, name)[1] == cur[1] then -- already on this line -> remove
-    if name:match("%u") then
-      vim.api.nvim_del_mark(name) -- global marks aren't tied to a buffer
-    else
-      vim.api.nvim_buf_del_mark(0, name)
-    end
-  else -- set (or move) it to the cursor
-    vim.api.nvim_buf_set_mark(0, name, cur[1], cur[2], {})
+  if vim.api.nvim_buf_get_mark(0, name)[1] ~= cur[1] then
+    vim.api.nvim_buf_set_mark(0, name, cur[1], cur[2], {}) -- not here -> set (or move) it
+    return name
   end
-  -- No explicit repaint: the set/del fires MarkSet, which schedules a reconcile.
+
+  -- Already on this line -> remove it. Global marks aren't tied to a buffer.
+  if name:match("%u") then
+    vim.api.nvim_del_mark(name)
+  else
+    vim.api.nvim_buf_del_mark(0, name)
+  end
   return name
 end
 
