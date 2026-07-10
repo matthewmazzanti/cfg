@@ -396,21 +396,24 @@ local function buf_name(buf)
   return name ~= "" and short_path(name) or "[No Name]"
 end
 
---- Tabline: one label per tab page, showing that tab's active buffer name and
---- its status flags. `%NT` makes each label switch to tab N on click (native, no
---- dispatcher needed); a trailing `%T` closes the last region so the fill area
---- to its right isn't part of the last tab's click target.
+-- One tab's clickable label: buffer name plus status flags, in `group`, wrapped
+-- in a native `%nT` region so clicking it switches to tab n (no dispatcher needed).
+local function tab_label(n, group, buf)
+  return "%" .. n .. "T" .. hl(group, pad(buf_name(buf) .. flags(buf)))
+end
+
+--- Tabline: one label per tab page. The selected tab wears the current mode's
+--- accent (matching the statusline's mode block, NORMAL under a float); the
+--- trailing `%T` closes the last region so the editor-bg fill to its right isn't
+--- part of that tab's click target.
 function TablineRender()
   local cur = vim.api.nvim_get_current_tabpage()
-  -- Selected tab wears the current mode's accent, matching the statusline's mode
-  -- block (NORMAL while a float has focus, as it reads there too).
   local sel = mode_group(mode_name(tab_target(cur).floating))
+
   local parts = {}
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local group = (tab == cur) and sel or "StTab"
-    local buf = tab_target(tab).buf
-    local name = buf_name(buf)
-    parts[#parts + 1] = "%" .. i .. "T" .. hl(group, " " .. name .. flags(buf) .. " ")
+    parts[#parts + 1] = tab_label(i, group, tab_target(tab).buf)
   end
   parts[#parts + 1] = "%T" .. hl("StTabFill", "")
   return table.concat(parts)
