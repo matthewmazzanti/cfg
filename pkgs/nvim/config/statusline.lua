@@ -104,6 +104,13 @@ local function click(id, snippet)
   return "%" .. id .. "@v:lua.StatuslineClick@" .. snippet .. "%X"
 end
 
+-- Prefix a snippet with a native `%nT` tab-select region, so clicking it switches
+-- to tab n. Parallels click(), but vim dispatches this itself -- no handler needed;
+-- a later `%nT` or a closing `%T` ends the region.
+local function tab_label(n, snippet)
+  return "%" .. n .. "T" .. snippet
+end
+
 --- Standard one-space gutter on each side of a segment's text.
 local function pad(s)
   return " " .. s .. " "
@@ -421,13 +428,6 @@ local function buf_name(buf)
   end
 
   return name ~= "" and short_path(name) or "[No Name]"
-end
-
--- Prefix a snippet with a native `%nT` tab-select region, so clicking it switches
--- to tab n. Parallels click(), but vim dispatches this itself -- no handler needed;
--- a later `%nT` or a closing `%T` ends the region.
-local function tab_label(n, snippet)
-  return "%" .. n .. "T" .. snippet
 end
 
 --- Tabline: one label per tab page. The selected tab wears the current mode's
