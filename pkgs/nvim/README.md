@@ -122,18 +122,27 @@ The sign glyph uses the `MarkGutter` highlight (installed by `setup`, linked to
 The engine lives in `plugin/render-marks.lua`. It installs no key mappings —
 bind the handlers yourself in `config/marks.lua`. It exposes:
 
+All under `require("utils.render-marks")`. A **selector** is
+`{ buf, line, names }`: `buf` defaults to the current buffer (`0` also means
+current); `line` is a number or `{lo, hi}` range; `names` is a string
+(`"ab"` = a and b), a list, or nil for all. Local vs global is implicit in the
+mark's case (`a` local, `A` global).
+
 | Call | Effect |
 |------|--------|
 | `setup({ hl_group, priority })` | Install triggers + default highlight; `config/marks.lua` calls this |
-| `render(bufnr)` | Force a repaint of `bufnr` (nil = all loaded, 0 = current) |
-| `delete(name?)` | Delete a mark; without `name`, reads the next keypress |
-| `delete_line()` | Delete every letter mark on the current line |
-| `delete_buf()` | Delete every letter mark in the buffer |
+| `render(bufnr)` | Force a repaint (nil = all loaded, 0 = current) |
+| `list(sel?)` | Marks matching the selector → records `{name, buf, lnum, col, global?}` |
+| `delete(sel?)` | Delete the marks `list` would return → deleted names |
+| `set(name, where?)` | Set `name`; `where = { buf, line, col }` (default cursor) |
+| `prompt()` | Read a mark name from the next keypress (nil if not a–zA–Z) |
 | `set_next()` | Place the next unused `a`–`z` mark at the cursor |
 | `toggle()` | Clear the current line's marks, or place the next if none |
-| `next(opts?)` / `prev(opts?)` | Jump to next/prev mark by position (`opts.wrap`, default true) |
+| `jump(dir, opts?)` / `next(opts?)` / `prev(opts?)` | Jump by position; `opts = { from, wrap, names }` |
 
-(all under `require("utils.render-marks")`)
+Examples: `delete({ names = "a" })`, `delete({ line = 42 })`, `delete()`
+(whole buffer), `list({ names = "A" })` (just global `A` pointing here),
+`set("q", { line = 42 })`.
 
 ### Readline (command mode)
 | Key | Action |
