@@ -2,9 +2,9 @@
 -- polling timer. Draws the a-z (buffer-local) and A-Z (global) marks. Rendering
 -- is a plain loop over getmarklist(); the interesting part is knowing when to
 -- re-run it:
---   * add / remove / re-set  -> MarkSet   (fires for m, :mark, :delmarks, and API)
---   * line drift / reorder    -> on_lines  (gated to structural changes only)
---   * entering a buffer       -> BufEnter  (initial paint)
+--   * add / remove / re-set -> MarkSet   (fires for m, :mark, :delmarks, and API)
+--   * line drift / reorder  -> on_lines  (gated to structural changes only)
+--   * entering a buffer     -> BufEnter  (initial paint)
 -- All funnel through one schedule-once reconcile, so a burst of triggers
 -- collapses to a single redraw. We always re-derive from getmarklist rather than
 -- trusting a placed extmark to track the mark: :sort keeps a-z marks at their
@@ -76,8 +76,8 @@ local function attach(attach_buf)
     -- count but permutes lines). Skip single-line in-place edits so ordinary
     -- typing costs nothing. Examples (line numbers 0-based):
     --   type on line 4      first=4 last=5 new_last=5  span 1, no delta -> skip
-    --   insert below line 4 first=5 last=5 new_last=6  delta           -> redraw
-    --   delete line 4       first=4 last=5 new_last=4  delta           -> redraw
+    --   insert below line 4 first=5 last=5 new_last=6  delta            -> redraw
+    --   delete line 4       first=4 last=5 new_last=4  delta            -> redraw
     --   :sort 6 lines       first=0 last=6 new_last=6  span 6, no delta -> redraw
     on_lines = function(_, buf, _, first, last, new_last)
       if new_last ~= last or (last - first) > 1 then
@@ -140,6 +140,26 @@ function M.setup(opts)
       schedule(buf)
     end
   end
+end
+
+-- Force an immediate repaint. nil repaints every loaded buffer; a buffer number
+-- repaints just that one (0 = current buffer, per the usual convention --
+-- getmarklist() won't accept a literal 0, so resolve it). Rendering is
+-- event-driven, so this is only an escape hatch for changes that bypass the
+-- tracked triggers.
+function M.render(bufno)
+  if bufno == nil then
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(buf) then
+        reconcile(buf)
+      end
+    end
+    return
+  end
+  if bufno == 0 then
+    bufno = vim.api.nvim_get_current_buf()
+  end
+  reconcile(bufno)
 end
 
 return M

@@ -11,7 +11,7 @@ pkgs/nvim/
 ├── config/              # Lua configuration modules
 │   ├── init.lua         # Core editor settings
 │   ├── gruvbox.lua      # Color theme
-│   ├── lspconfig.lua    # Language server setup
+│   ├── lsp.lua          # Language server setup
 │   ├── blink.lua        # Completion (blink-cmp)
 │   ├── fzf.lua          # Fuzzy finder
 │   ├── statusline.lua   # Tab & Status line
@@ -20,9 +20,11 @@ pkgs/nvim/
 │   ├── fidget.lua       # LSP progress notifications
 │   ├── surround.lua     # Surround text objects
 │   ├── clip.lua         # Cut/yank/paste register model (loads everywhere)
+│   ├── marks.lua        # Sign-column marks (configures utils.render-marks)
 │   └── readline.lua     # Readline keybindings for cmdline
 ├── plugin/
-│   └── readline.lua     # Readline utilities library
+│   ├── readline.lua     # Readline utilities library
+│   └── render-marks.lua # Event-driven mark rendering engine
 └── test/                # Test files for various filetypes
 ```
 
@@ -105,6 +107,21 @@ clipboard (`unnamedplus`); over SSH it stays in-editor so nothing reaches OSC 52
 | `x` / `xx` / `X` | Cut → default register |
 | `y` / `yy` / `Y` | Yank → default register |
 | `p` / `P` | Paste from default register (repeatable) |
+
+### Marks (marks.lua → utils.render-marks)
+Shows the `a`–`z` (buffer-local) and `A`–`Z` (global) marks in the sign column,
+replacing vim-signature. The renderer is fully event-driven — no polling timer,
+zero idle cost. Signs are re-derived from `getmarklist()` on each change, so they
+stay correct even through `:sort` (which pins marks to line numbers). Set marks
+with the usual `m{a-zA-Z}`; jump with `` `{mark} ``/`'{mark}`; clear with
+`:delmarks`. `<leader>m` opens the fzf mark picker (see Navigation).
+
+The engine lives in `plugin/render-marks.lua` and exposes:
+
+| Call | Effect |
+|------|--------|
+| `require("utils.render-marks").setup({ hl_group, priority })` | Install triggers; `config/marks.lua` calls this |
+| `require("utils.render-marks").render(bufnr)` | Force a repaint of `bufnr` (nil = all loaded buffers) |
 
 ### Readline (command mode)
 | Key | Action |
