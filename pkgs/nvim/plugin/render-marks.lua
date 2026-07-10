@@ -191,9 +191,9 @@ function M.toggle()
   -- buffer-scoped: it returns { 0, 0 } when the mark isn't in this buffer (unset,
   -- or a global pointing elsewhere), so its row answers "is it on this line?".
   -- No explicit repaint anywhere: the set/del fires MarkSet, which reconciles.
-  local cur = vim.api.nvim_win_get_cursor(0) -- { row (1-based), col (0-based) }
-  if vim.api.nvim_buf_get_mark(0, name)[1] ~= cur[1] then
-    vim.api.nvim_buf_set_mark(0, name, cur[1], cur[2], {}) -- not here -> set (or move) it
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0)) -- row 1-based, col 0-based
+  if vim.api.nvim_buf_get_mark(0, name)[1] ~= row then
+    vim.api.nvim_buf_set_mark(0, name, row, col, {}) -- not here -> set (or move) it
     return name
   end
 
