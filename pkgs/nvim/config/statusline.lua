@@ -396,10 +396,11 @@ local function buf_name(buf)
   return name ~= "" and short_path(name) or "[No Name]"
 end
 
--- One tab's clickable label: buffer name plus status flags, in `group`, wrapped
--- in a native `%nT` region so clicking it switches to tab n (no dispatcher needed).
-local function tab_label(n, group, buf)
-  return "%" .. n .. "T" .. hl(group, pad(buf_name(buf) .. flags(buf)))
+-- Prefix a snippet with a native `%nT` tab-select region, so clicking it switches
+-- to tab n. Parallels click(), but vim dispatches this itself -- no handler needed;
+-- a later `%nT` or a closing `%T` ends the region.
+local function tab_label(n, snippet)
+  return "%" .. n .. "T" .. snippet
 end
 
 --- Tabline: one label per tab page. The selected tab wears the current mode's
@@ -413,7 +414,8 @@ function TablineRender()
   local parts = {}
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local group = (tab == cur) and sel or "StTab"
-    parts[#parts + 1] = tab_label(i, group, tab_target(tab).buf)
+    local buf = tab_target(tab).buf
+    parts[#parts + 1] = tab_label(i, hl(group, pad(buf_name(buf) .. flags(buf))))
   end
   parts[#parts + 1] = "%T" .. hl("StTabFill", "")
   return table.concat(parts)
