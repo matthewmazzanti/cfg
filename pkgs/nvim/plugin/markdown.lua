@@ -38,48 +38,45 @@ local function starts_item(line)
   return line:match("^%s*[-*+]%s+") ~= nil or line:match("^%s*%d+[.)]%s+") ~= nil
 end
 
--- Is `lnum` inside a code block? Reads the highlighter's tree (get_node does not
--- parse -- see :h vim.treesitter.get_node()), so it is a cheap lookup. nil (no
--- tree yet) reads as "not in a block", the safe default.
-local function in_code_block(lnum)
-  local ok, node = pcall(vim.treesitter.get_node, { pos = { lnum - 1, 0 } })
-  while ok and node do
-    local t = node:type()
-    if t == "fenced_code_block" or t == "indented_code_block" then return true end
-    node = node:parent()
-  end
-  return false
-end
-
--- The list item a settled line belongs to, from the tree. Querying at the
--- line's first non-blank column selects the innermost item at that depth and
--- resolves a continuation line back to its owning item (so a loose, blank-
--- separated nested item still dedents to the right column). Returns the item's
--- marker column (its indent, the dedent target) and content column (the hang),
--- or nil when there is no tree or the line is not in a list.
+-- The list item a settled line belongs to, from the tree (get_node does not
+-- parse -- see :h vim.treesitter.get_node() -- so this is a cheap lookup), or
+-- nil when the line is not list continuation. Querying at the line's first non-
+-- blank column selects the innermost item at that depth and resolves a
+-- continuation line back to its owning item (so a loose, blank-separated nested
+-- item still dedents to the right column). A code block enclosing the line
+-- before any list item wins -- a fence or indented block nested in a list is
+-- code, not continuation -- so we walk outward and stop at whichever comes
+-- first. Returns the item's marker column (its indent, the dedent target) and
+-- content column (the hang).
 local function enclosing_item(row)
   local ok, node = pcall(vim.treesitter.get_node,
     { pos = { row, indent_of(vim.fn.getline(row + 1)) } })
   if not ok then return nil end
-  while node and node:type() ~= "list_item" do node = node:parent() end
-  if not node then return nil end
-  local marker = node:child(0)
-  if not marker then return nil end
-  -- The marker's end column is the content column and is stable. Its start
-  -- column is not: tree-sitter folds a top-level item's <=3 leading spaces into
-  -- the marker node, so take the visual indent from the marker's own line.
-  local marker_row, _, _, content_col = marker:range()
-  return indent_of(vim.fn.getline(marker_row + 1)), content_col
+  while node do
+    local t = node:type()
+    if t == "fenced_code_block" or t == "indented_code_block" then return nil end
+    if t == "list_item" then
+      local marker = node:child(0)
+      if not marker then return nil end
+      -- The marker's end column is the content column and is stable. Its start
+      -- column is not: tree-sitter folds a top-level item's <=3 leading spaces
+      -- into the marker node, so take the visual indent from the marker's line.
+      local marker_row, _, _, content_col = marker:range()
+      return indent_of(vim.fn.getline(marker_row + 1)), content_col
+    end
+    node = node:parent()
+  end
+  return nil
 end
 
 function M.indentexpr()
   local lnum = vim.v.lnum
-  if in_code_block(lnum) then return -1 end
-
   local cur = vim.fn.getline(lnum)
 
-  -- Resolve the item we're working within from the previous settled line: it
-  -- exists in the tree even though the just-edited current line may not.
+  -- Resolve the item we're continuing from the previous settled line: it exists
+  -- in the tree even though the just-edited current line may not. A nil result
+  -- means we're not in list continuation (prose, or code), so we leave the
+  -- indent to the default -- there is no separate code-block gate.
   local prev = vim.fn.prevnonblank(lnum - 1)
   local marker_col, content_col
   if prev > 0 then marker_col, content_col = enclosing_item(prev - 1) end
