@@ -70,10 +70,10 @@ local function setup_highlights()
   set(0, "StDiagInfo", { fg = hl_fg("DiagnosticInfo", 0x83a598), bg = p.lightgray })
   set(0, "StDiagHint", { fg = hl_fg("DiagnosticHint", 0x8ec07c), bg = p.lightgray })
 
-  -- Tabline: active tab as an accent block (mirrors the mode block), inactive
-  -- tabs dim like the file section, empty fill on the editor bg -- darker than
-  -- the tabs, so the tabs read as distinct blocks.
-  set(0, "StTabSel", { fg = p.black, bg = p.gray, bold = true })
+  -- Tabline: the active tab reuses the statusline's mode-block groups (StMode*),
+  -- so it wears the current mode's accent; inactive tabs dim like the file section;
+  -- empty fill on the editor bg -- darker than the tabs, so they read as distinct
+  -- blocks.
   set(0, "StTab", { fg = p.gray, bg = p.darkgray })
   set(0, "StTabFill", { bg = p.black })
 end
@@ -395,9 +395,12 @@ end
 --- to its right isn't part of the last tab's click target.
 local function render_tabline()
   local cur = vim.api.nvim_get_current_tabpage()
+  -- Selected tab wears the current mode's accent, matching the statusline's mode
+  -- block (NORMAL while a float has focus, as it reads there too).
+  local sel = mode_group(mode_name(tab_target(cur).floating))
   local parts = {}
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
-    local group = (tab == cur) and "StTabSel" or "StTab"
+    local group = (tab == cur) and sel or "StTab"
     local buf = tab_target(tab).buf
     local name = buf_name(buf)
     parts[#parts + 1] = "%" .. i .. "T" .. hl(group, " " .. name .. flags(buf) .. " ")
