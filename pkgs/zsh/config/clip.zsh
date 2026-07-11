@@ -214,7 +214,7 @@ function clip_widget() {
 
   # Wrapper missing -> fallback
   if (( ! $+widgets[$wrapper] )); then
-    if ! [[ -n ${SSH_CONNECTION-}${SSH_CLIENT-}${SSH_TTY-} || ${TERM-} == linux ]]; then
+    if ! [[ -n ${SSH_CONNECTION-}${SSH_CLIENT-}${SSH_TTY-} || ${TERM-} == linux* ]]; then
         print -u2 -r -- "clip: wrapper widget not defined: $wrapper (using base widget: $widget)"
     fi
 
@@ -241,7 +241,7 @@ function _clip_select_backend() {
   fi
 
   # Avoid “local clipboard” in common remote / no-GUI contexts.
-  if [[ -n ${SSH_CONNECTION-}${SSH_CLIENT-}${SSH_TTY-} || ${TERM-} == linux ]]; then
+  if [[ -n ${SSH_CONNECTION-}${SSH_CLIENT-}${SSH_TTY-} || ${TERM-} == linux* ]]; then
     return 1
   fi
 

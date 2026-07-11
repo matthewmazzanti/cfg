@@ -71,7 +71,9 @@ vim.opt.spellfile = vim.fn.expand("~/.local/share/nvim/spell/en.utf-8.add")
 
 -- Nice visualization of trailing space/tabs
 vim.opt.list = true
-if vim.env.TERM == "linux" then
+-- Match the Linux virtual console and its variants (linux-16color, etc.), not
+-- just a bare TERM=linux.
+if (vim.env.TERM or ""):match("^linux") then
   vim.opt.listchars = {
     -- Apparently some of these work?
     tab = "» ",
@@ -195,7 +197,7 @@ vim.api.nvim_create_autocmd({"BufReadPost", "BufNewFile"}, {
 })
 
 -- Use rounded borders around windows
-if vim.env.TERM == "linux" then
+if (vim.env.TERM or ""):match("^linux") then
   vim.opt.winborder = "single"
 else
   vim.opt.winborder = "rounded"

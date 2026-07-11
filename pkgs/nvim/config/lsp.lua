@@ -202,7 +202,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-local symbol = vim.env.TERM == "linux" and "*" or "●"
+local symbol = (vim.env.TERM or ""):match("^linux") and "*" or "●"
 
 vim.diagnostic.config({
   virtual_text = true,

@@ -45,6 +45,15 @@
     "ebdbb2" # bright white
   ];
 
+  # The kernel hands VT logins TERM=linux, whose terminfo declares colors#8 --
+  # so anything asking for colors 8-15 (the bright half of the palette above)
+  # gets \e[39m "default foreground" and the color is lost. The console can show
+  # all 16; the linux-16color entry maps 8-15 onto its bold-attribute brights.
+  # agetty takes its term-type from $TERM, so setting it here makes login export
+  # linux-16color for the whole VT session, before any shell runs. autovt@ is a
+  # symlink to getty@, so on-demand VTs are covered too.
+  systemd.services."getty@".environment.TERM = "linux-16color";
+
   # Time zone.
   time.timeZone = "America/New_York";
 

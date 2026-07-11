@@ -242,9 +242,9 @@ local function diagnostics(buf)
 end
 
 -- Status marks: Unicode by default, ASCII on the Linux virtual console
--- (TERM=linux), which can't render the glyphs. TERM is fixed for the session, so
--- pick once here.
-local marks = vim.env.TERM == "linux"
+-- (TERM linux / linux-16color / ...), which can't render the glyphs. TERM is
+-- fixed for the session, so pick once here.
+local marks = (vim.env.TERM or ""):match("^linux")
     and { modified = "+", readonly = "-" }
     or { modified = "●", readonly = "○" }
 

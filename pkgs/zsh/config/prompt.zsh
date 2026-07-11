@@ -105,7 +105,7 @@ function prompt_shlvl() {
     fi
 
     local char="›"
-    if [[ "$TERM" == linux ]]; then
+    if [[ "$TERM" == linux* ]]; then
         char=">"
     fi
 
@@ -116,12 +116,12 @@ function prompt_shlvl() {
 # aesthetic and intended for short hostnames.
 #
 # Terminal caveat:
-# - On the Linux virtual console ($TERM == linux), Unicode glyph coverage is
+# - On the Linux virtual console ($TERM == linux*), Unicode glyph coverage is
 #   often limited. In that case we return the original string unchanged.
 function prompt_greek_letter() {
     local input="$1"
 
-    if [[ "$TERM" == "linux" ]]; then
+    if [[ "$TERM" == linux* ]]; then
         print -r -- "$input"
         return
     fi
@@ -305,7 +305,7 @@ function prompt_clear_screen() {
 
     PROMPT='$(prompt_shlvl)$(prompt_leader) $(prompt_pwd)$(prompt_separator) '
     RPROMPT=""
-    if [[ "$TERM" != linux ]]; then
+    if [[ "$TERM" != linux* ]]; then
         PS2='↳ '
     fi
 
