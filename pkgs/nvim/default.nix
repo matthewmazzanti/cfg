@@ -109,6 +109,10 @@
       vim.opt_local.indentexpr = "v:lua.require'utils.markdown'.indentexpr()"
       vim.opt_local.indentkeys = require("utils.markdown").indentkeys
 
+      -- <leader>x toggles the task checkbox on the list item under the cursor.
+      vim.keymap.set("n", "<leader>x", require("utils.markdown").toggle_check,
+        { buffer = true, desc = "Toggle markdown task checkbox" })
+
       -- Try to detect floating LSP windows
       -- May be a better option if https://github.com/neovim/neovim/issues/31206
       -- makes any progress

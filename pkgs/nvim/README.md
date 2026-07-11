@@ -161,6 +161,13 @@ no `timeoutlen` wait:
 | `<M-d>` | Kill word |
 | `<C-w>` | Unix word rubout |
 
+### Markdown (ftplugin → utils.markdown)
+Buffer-local, markdown only.
+
+| Key | Action |
+|-----|--------|
+| `<leader>x` | Toggle the task checkbox on the list item under the cursor (`[ ]` ↔ `[x]`, or add a box to a plain item; no-op outside a list item) |
+
 ## Language Support
 
 Per-language settings are generated via ftplugin:

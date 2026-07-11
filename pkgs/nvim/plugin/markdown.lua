@@ -48,35 +48,39 @@ local function starts_item(line)
   return line:match("^%s*[-*+]%s+") ~= nil or line:match("^%s*%d+[.)]%s+") ~= nil
 end
 
--- The list item a settled line belongs to, from the tree (get_node does not
--- parse -- see :h vim.treesitter.get_node() -- so this is a cheap lookup), or
--- nil when the line is not list continuation. Querying at the line's first non-
--- blank column selects the innermost item at that depth and resolves a
+-- The list_item node a settled line belongs to, from the tree (get_node does
+-- not parse -- see :h vim.treesitter.get_node() -- so this is a cheap lookup),
+-- or nil when the line is not inside a list item. Querying at the line's first
+-- non-blank column selects the innermost item at that depth and resolves a
 -- continuation line back to its owning item (so a loose, blank-separated nested
--- item still dedents to the right column). A code block enclosing the line
--- before any list item wins -- a fence or indented block nested in a list is
--- code, not continuation -- so we walk outward and stop at whichever comes
--- first. Returns the item's marker column (its indent, the dedent target) and
--- content column (the hang).
-local function enclosing_item(row)
+-- item still resolves to the right one). A code block enclosing the line before
+-- any list item wins -- a fence or indented block nested in a list is code, not
+-- continuation -- so we walk outward and stop at whichever comes first.
+local function enclosing_item_node(row)
   local ok, node = pcall(vim.treesitter.get_node,
     { pos = { row, indent_of(vim.fn.getline(row + 1)) } })
   if not ok then return nil end
   while node do
     local t = node:type()
     if t == "fenced_code_block" or t == "indented_code_block" then return nil end
-    if t == "list_item" then
-      local marker = node:child(0)
-      if not marker then return nil end
-      -- The marker's end column is the content column and is stable. Its start
-      -- column is not: tree-sitter folds a top-level item's <=3 leading spaces
-      -- into the marker node, so take the visual indent from the marker's line.
-      local marker_row, _, _, content_col = marker:range()
-      return indent_of(vim.fn.getline(marker_row + 1)), content_col
-    end
+    if t == "list_item" then return node end
     node = node:parent()
   end
   return nil
+end
+
+-- The enclosing item's marker column (its indent, the dedent target) and content
+-- column (the hang), or nil when the line is not list continuation.
+local function enclosing_item(row)
+  local item = enclosing_item_node(row)
+  if not item then return nil end
+  local marker = item:child(0)
+  if not marker then return nil end
+  -- The marker's end column is the content column and is stable. Its start
+  -- column is not: tree-sitter folds a top-level item's <=3 leading spaces into
+  -- the marker node, so take the visual indent from the marker's line.
+  local marker_row, _, _, content_col = marker:range()
+  return indent_of(vim.fn.getline(marker_row + 1)), content_col
 end
 
 function M.indentexpr()
@@ -108,6 +112,40 @@ function M.indentexpr()
 
   -- Otherwise this is a continuation line: hang under the item's content column.
   return content_col or -1
+end
+
+-- Toggle a GFM task checkbox on the list item under the cursor: a task item
+-- ("- [ ] x") flips its state, [ ] <-> [x], and a plain item ("- x") gains an
+-- unchecked box. A line outside any list item is left alone. Everything routes
+-- through the enclosing list_item, so the cursor may sit on the marker line or
+-- any of the item's wrapped/continuation lines, every marker (-, *, +, ordered)
+-- and nesting depth is handled uniformly, and only the checkbox characters are
+-- ever written -- the marker and its box always live on the item's first line.
+-- Bound buffer-locally from the markdown ftplugin.
+function M.toggle_check()
+  local buf = vim.api.nvim_get_current_buf()
+  local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local item = enclosing_item_node(row)
+  if not item then return end
+
+  -- A task item carries a checkbox node right after its marker; flip it.
+  for child in item:iter_children() do
+    local t = child:type()
+    if t == "task_list_marker_checked" or t == "task_list_marker_unchecked" then
+      local sr, sc, er, ec = child:range()
+      local box = t == "task_list_marker_checked" and "[ ]" or "[x]"
+      vim.api.nvim_buf_set_text(buf, sr, sc, er, ec, { box })
+      return
+    end
+  end
+
+  -- A plain item: insert an unchecked box at the marker's (stable) content
+  -- column, on the marker's own line.
+  local marker = item:child(0)
+  if not marker then return end
+  local marker_row, _, _, content_col = marker:range()
+  vim.api.nvim_buf_set_text(buf, marker_row, content_col, marker_row, content_col,
+    { "[ ] " })
 end
 
 return M
