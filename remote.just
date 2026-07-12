@@ -24,18 +24,24 @@ deploy system attr=file_stem(system) user=env_var('USER'):
     has nixosConfigurations "{{attr}}" \
         || { echo "error: no nixosConfigurations.{{attr}} in this flake" >&2; exit 1; }
 
-    paths=$(nix build --no-link --print-out-paths \
+    # `nix build --print-out-paths` prints one store path per line; collect into
+    # an array so expansion stays quoted and per-path rather than IFS-split.
+    readarray -t paths < <(nix build --no-link --print-out-paths \
         ".#nixosConfigurations.{{attr}}.config.system.build.toplevel")
+    [ "${#paths[@]}" -gt 0 ] || { echo "error: system build produced no paths" >&2; exit 1; }
 
     # Standalone home-manager only exists for some hosts; build+activate it only
     # when the flake actually defines it, so a real HM failure still aborts.
-    hm=""
+    hm=
     if has homeConfigurations '{{user}}@{{attr}}'; then
-        hm=$(nix build --no-link --print-out-paths \
+        before=${#paths[@]}
+        readarray -t -O "$before" paths < <(nix build --no-link --print-out-paths \
             ".#homeConfigurations.\"{{user}}@{{attr}}\".activationPackage")
+        [ "${#paths[@]}" -gt "$before" ] || { echo "error: home-manager build failed" >&2; exit 1; }
+        hm=1
     fi
 
-    nix copy --to "ssh://{{system}}" $paths $hm
+    nix copy --to "ssh://{{system}}" "${paths[@]}"
     git push {{system}}
     ssh -t {{system}} 'sudo nixos-rebuild switch --flake ~/src/nix/cfg -L'
     if [ -n "$hm" ]; then
