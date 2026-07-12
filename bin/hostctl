@@ -31,7 +31,6 @@ import argparse
 import getpass
 import os
 import platform
-import shlex
 import socket
 import subprocess
 import sys
@@ -118,6 +117,13 @@ class Host:
         # config.system.build.toplevel resolves for both NixOS and nix-darwin.
         return f"{FLAKE}#{self.config_output}.{self.attr}.config.system.build.toplevel"
 
+    def run(self, *argv: str) -> None:
+        """Do something on this host: run argv directly when it's the local
+        machine, else over ssh. Raises on a non-zero exit."""
+        log(f"{self.name or 'local'}: {' '.join(argv)}")
+        cmd = list(argv) if self.local else ["ssh", "-t", self.name, *argv]
+        subprocess.run(cmd, check=True)
+
 
 def resolve_host(target: str, attr: str | None, user: str) -> Host:
     short = socket.gethostname().split(".")[0]
@@ -141,31 +147,6 @@ def classify(host: Host) -> Host:
         host.kind = kind
         return host
     die(f"no nixos/darwin configuration '{host.attr}' in {FLAKE}")
-
-
-class Runner:
-    """Executes (or, in dry-run, prints) local and remote commands."""
-
-    def __init__(self, dry_run: bool) -> None:
-        self.dry_run = dry_run
-
-    def local(self, *argv: str) -> None:
-        """Run a local command from argv (no shell)."""
-        if self.dry_run:
-            print("  + " + " ".join(shlex.quote(a) for a in argv), file=sys.stderr)
-            return
-        subprocess.run(list(argv), check=True)
-
-    def sh(self, host: Host, cmd: str) -> None:
-        """Run a shell command string here or on the remote (the ssh hop)."""
-        where = "local" if host.local else host.name
-        log(f"{where}: {cmd}")
-        if self.dry_run:
-            return
-        if host.local:
-            subprocess.run(["bash", "-c", cmd], check=True)
-        else:
-            subprocess.run(["ssh", "-t", host.name, cmd], check=True)
 
 
 def flake_has(output: str, name: str) -> bool:
@@ -200,14 +181,8 @@ def nix_build_paths(installable: str) -> list[str]:
     return out.split()
 
 
-def build_closure(host: Host, do_hm: bool, runner: Runner) -> list[str]:
+def build_closure(host: Host, do_hm: bool) -> list[str]:
     """Build the system (and optional HM) closure locally; the paths to copy."""
-    if runner.dry_run:
-        paths = [f"<{host.attr} system closure>"]
-        if do_hm:
-            paths.append(f"<home-manager for {host.hm_key}>")
-        return paths
-
     log(f"building {host.attr} ({host.system}) locally")
     paths = nix_build_paths(host.toplevel)
     if not paths:
@@ -224,7 +199,7 @@ def build_closure(host: Host, do_hm: bool, runner: Runner) -> list[str]:
     return paths
 
 
-def cmd_upgrade(args: argparse.Namespace, runner: Runner) -> None:
+def cmd_upgrade(args: argparse.Namespace) -> None:
     host = classify(resolve_host(args.target, args.attr, args.user))
     do_system = not args.hm_only
     do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
@@ -238,35 +213,36 @@ def cmd_upgrade(args: argparse.Namespace, runner: Runner) -> None:
             log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; "
                 f"building on {host.name} instead")
         if build_here:
-            paths = build_closure(host, do_hm, runner)
+            paths = build_closure(host, do_hm)
             log(f"copying closure to {host.name}")
-            runner.local("nix", "copy", "--to", f"ssh://{host.name}", *paths)
-        runner.local("git", "-C", str(FLAKE), "push", host.name)
+            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
+        subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
 
-    # Activation is identical for local and remote -- Runner.sh inserts the ssh
-    # hop when needed; only the flake location and rebuild command vary by host.
-    flake = FLAKE if host.local else REMOTE_FLAKE
+    # Activation is one path for local and remote -- Host.run inserts the ssh hop
+    # when needed; only the flake location and rebuild command vary by host.
+    flake = str(FLAKE) if host.local else REMOTE_FLAKE
     if do_system:
-        runner.sh(host, f"sudo {host.rebuild} switch --flake {flake} -L")
+        host.run("sudo", host.rebuild, "switch", "--flake", flake, "-L")
     if do_hm:
-        runner.sh(host, f"home-manager switch --flake {flake} -L")
+        host.run("home-manager", "switch", "--flake", flake, "-L")
 
 
-def cmd_clean(args: argparse.Namespace, runner: Runner) -> None:
+def cmd_clean(args: argparse.Namespace) -> None:
     host = classify(resolve_host(args.target, args.attr, args.user))
-    runner.sh(host, "nix-collect-garbage --delete-old")
-    runner.sh(host, "sudo nix-collect-garbage --delete-old")
+    host.run("nix-collect-garbage", "--delete-old")
+    host.run("sudo", "nix-collect-garbage", "--delete-old")
     if host.is_linux:  # Darwin has no switch-to-configuration
-        runner.sh(host, "sudo /run/current-system/bin/switch-to-configuration boot")
+        host.run("sudo", "/run/current-system/bin/switch-to-configuration", "boot")
 
 
-def cmd_sync(args: argparse.Namespace, runner: Runner) -> None:
+def cmd_sync(args: argparse.Namespace) -> None:
     host = resolve_host(args.target, None, args.user)
     if host.local:
         die("sync is remote-only")
-    runner.local("git", "-C", str(FLAKE), "fetch", host.name)
-    runner.local("git", "-C", str(FLAKE), "merge", f"{host.name}/dev")
-    runner.local("git", "-C", str(FLAKE), "push", host.name)
+    git = ["git", "-C", str(FLAKE)]
+    subprocess.run([*git, "fetch", host.name], check=True)
+    subprocess.run([*git, "merge", f"{host.name}/dev"], check=True)
+    subprocess.run([*git, "push", host.name], check=True)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -275,8 +251,6 @@ def build_parser() -> argparse.ArgumentParser:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument("-n", "--dry-run", action="store_true",
-                   help="print each step instead of running it")
     sub = p.add_subparsers(dest="command", required=True)
 
     def add_target(sp: argparse.ArgumentParser, required: bool = False) -> None:
@@ -316,9 +290,8 @@ def main(argv: list[str]) -> int:
     for flag in ("attr", "no_hm", "hm_only", "build_on_host"):
         if not hasattr(args, flag):
             setattr(args, flag, False if flag != "attr" else None)
-    runner = Runner(args.dry_run)
     try:
-        args.func(args, runner)
+        args.func(args)
     except subprocess.CalledProcessError as e:
         return e.returncode or 1
     except KeyboardInterrupt:
