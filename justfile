@@ -3,8 +3,8 @@ update:
     lock-images --json lib/images.json --write
     bump-kernel --flake . --json lib/pins.json --lts-kernel --write
 
-# Rebuild + activate a host. No target = this machine; a remote target pushes
-# the repo and builds on the host. Flags: --no-hm, --hm-only, -n/--dry-run.
+# Rebuild + activate a host (by flake attr). No target = this machine. Flags:
+# --only sys|hm, --build-on-host. Deploy mode (build local, copy) is the default.
 upgrade *args:
     hostctl upgrade {{args}}
 
@@ -20,6 +20,10 @@ clean *args:
 # Fetch a host's repo, merge its dev branch, and push back.
 sync *args:
     hostctl sync {{args}}
+
+# Point a git remote (named by the host's flake attr) at the host.
+remote *args:
+    hostctl remote {{args}}
 
 # Push a repo dashboard YAML to HA live via the websocket API (no restart). Needs
 # HASS_TOKEN or ~/.config/ha/token (URL defaults to https://hass.iot). The seed
