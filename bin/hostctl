@@ -17,7 +17,7 @@ attr; SSH_HOSTS maps each attr to the ssh host it's reached at.
                                (alias: `deploy`)
     hostctl clean   [target]   collect old generations + prune boot entries
     hostctl sync    <host>     git fetch/merge/push the host's checkout
-    hostctl remote  <host>     point a git remote (named by attr) at the host
+    hostctl remote-add <host>  point a git remote (named by attr) at the host
 
 NixOS and nix-darwin hosts are handled uniformly: each target's kind and system
 are read from the flake, so the rebuild command and boot-entry prune follow the
@@ -276,7 +276,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
     subprocess.run([*git, "push", remote], check=True)
 
 
-def cmd_remote(args: argparse.Namespace) -> None:
+def cmd_remote_add(args: argparse.Namespace) -> None:
     """Point a git remote (named by the flake attr) at the host's checkout,
     resolving the ssh host through SSH_HOSTS. Idempotent: updates if it exists."""
     attr = args.target
@@ -340,9 +340,9 @@ def build_parser() -> argparse.ArgumentParser:
     sy.add_argument("target", help="host to sync (flake attr)")
     sy.set_defaults(func=cmd_sync)
 
-    rm = sub.add_parser("remote", help="point a git remote (named by attr) at a host")
+    rm = sub.add_parser("remote-add", help="point a git remote (named by attr) at a host")
     rm.add_argument("target", help="host (flake attr)")
-    rm.set_defaults(func=cmd_remote)
+    rm.set_defaults(func=cmd_remote_add)
 
     return p
 

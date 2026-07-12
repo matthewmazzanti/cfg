@@ -22,8 +22,8 @@ sync *args:
     hostctl sync {{args}}
 
 # Point a git remote (named by the host's flake attr) at the host.
-remote *args:
-    hostctl remote {{args}}
+remote-add *args:
+    hostctl remote-add {{args}}
 
 # Push a repo dashboard YAML to HA live via the websocket API (no restart). Needs
 # HASS_TOKEN or ~/.config/ha/token (URL defaults to https://hass.iot). The seed
