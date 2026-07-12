@@ -141,10 +141,6 @@ class Host:
         return f"{self.user}@{self.attr}"
 
     @property
-    def rebuild(self) -> str:
-        return "darwin-rebuild" if self.darwin else "nixos-rebuild"
-
-    @property
     def config_output(self) -> str:
         return "darwinConfigurations" if self.darwin else "nixosConfigurations"
 
@@ -170,6 +166,14 @@ class Host:
         log(f"{self.name}: {line}")
         cmd = ["bash", "-c", line] if self.local else ["ssh", "-t", self.name, line]
         subprocess.run(cmd, check=True)
+
+    def capture(self, *argv: str) -> str:
+        """Like run() but return stdout (stderr still streams); no tty. For
+        non-interactive commands whose output we need, e.g. a built store path."""
+        line = " ".join(argv)
+        log(f"{self.name}: {line}")
+        cmd = ["bash", "-c", line] if self.local else ["ssh", self.name, line]
+        return subprocess.run(cmd, text=True, stdout=subprocess.PIPE, check=True).stdout.strip()
 
 
 def is_local(target: str) -> bool:
@@ -227,46 +231,57 @@ def builds_locally(host: Host, build_on_host: bool) -> bool:
     return host.local or (not build_on_host and host.system == LOCAL_SYSTEM)
 
 
-def build_local(here: list[tuple[Host, set[str]]]) -> None:
-    """Build every locally-buildable host's closure in one nix pass, then copy
-    each remote's outputs over (the local host activates from the store directly)."""
-    jobs = []  # (attr, installable)
+def build_local(here: list[tuple[Host, set[str]]]) -> dict[str, dict[str, str]]:
+    """Build every locally-buildable host's closure in one nix pass, copy each
+    remote's outputs over, and return each host's built paths keyed by part."""
+    jobs = []  # (attr, part, installable)
     for host, parts in here:
         if "sys" in parts:
-            jobs.append((host.attr, host.toplevel(FLAKE)))
+            jobs.append((host.attr, "sys", host.toplevel(FLAKE)))
         if "hm" in parts:
-            jobs.append((host.attr, host.hm_pkg(FLAKE)))
+            jobs.append((host.attr, "hm", host.hm_pkg(FLAKE)))
     if not jobs:
-        return
+        return {}
 
     log(f"building {len(here)} host(s) locally")
-    built = nix_build_json([inst for _, inst in jobs])
-    outs: dict[str, list[str]] = {}  # attr -> its built store paths
-    for (attr, _), entry in zip(jobs, built):
-        outs.setdefault(attr, []).extend(entry["outputs"].values())
+    built = nix_build_json([inst for _, _, inst in jobs])
+    if len(built) != len(jobs):  # positional mapping below needs 1:1 (distinct installables)
+        die(f"nix build returned {len(built)} results for {len(jobs)} installables")
+    paths: dict[str, dict[str, str]] = {}  # attr -> {part: out path}
+    for (attr, part, _), entry in zip(jobs, built):
+        paths.setdefault(attr, {})[part] = entry["outputs"]["out"]
 
     for host, _ in here:
         if not host.local:  # local host activates straight from the store
             log(f"copying closure to {host.name}")
-            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *outs[host.attr]], check=True)
+            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths[host.attr].values()], check=True)
+    return paths
 
 
-def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
-    """Have the host build its own closure (--build-on-host or a cross-system target)."""
+def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> dict[str, str]:
+    """Have the host build its own closure (--build-on-host or a cross-system
+    target); return the built paths (in the host's store) keyed by part."""
     if not build_on_host and host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
+    paths = {}  # part -> out path
     if "sys" in parts:
-        host.run("nix", "build", "-L", "--no-link", host.toplevel(host.flake))
+        paths["sys"] = host.capture("nix", "build", "-L", "--print-out-paths", "--no-link", host.toplevel(host.flake))
     if "hm" in parts:
-        host.run("nix", "build", "-L", "--no-link", host.hm_pkg(host.flake))
+        paths["hm"] = host.capture("nix", "build", "-L", "--print-out-paths", "--no-link", host.hm_pkg(host.flake))
+    return paths
 
 
-def switch_host(host: Host, parts: set[str]) -> None:
-    """Activate the built closure(s) -- a cache hit after the build phase."""
+def switch_host(host: Host, parts: set[str], paths: dict[str, str]) -> None:
+    """Activate the pre-built store paths directly -- no re-eval, no rebuild.
+    nixos-rebuild --store-path / darwin-rebuild activate / hm's activate all
+    take an already-built path and run the proper guarded activation."""
     if "sys" in parts:
-        host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
+        if host.darwin:
+            host.run("sudo", f"{paths['sys']}/sw/bin/darwin-rebuild", "activate")
+        else:
+            host.run("sudo", "nixos-rebuild", "switch", "--store-path", paths["sys"])
     if "hm" in parts:
-        host.run("home-manager", "switch", "--flake", host.flake, "-L")
+        host.run(f"{paths['hm']}/activate")
 
 
 def git_url(attr: str) -> str:
@@ -285,9 +300,15 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     # plan every host before touching any, so a bad target fails the batch early.
     # parts = what was asked for, minus home-manager on hosts with no standalone
     # config (empty, i.e. skipped, only for --only hm against such a host).
+    # dedup by attr (targets can alias, e.g. localhost == hostname) so build_local's
+    # installables stay distinct -- its output mapping relies on that.
     plan = []
+    seen: set[str] = set()
     for target in targets:
         host = Host.resolve(target, args.user)
+        if host.attr in seen:
+            continue
+        seen.add(host.attr)
         parts = {args.only} if args.only else {"sys", "hm"}
         if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
             parts.discard("hm")
@@ -307,12 +328,12 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     for host, parts in plan:
         bucket = here if builds_locally(host, args.build_on_host) else there
         bucket.append((host, parts))
-    build_local(here)
+    built = build_local(here)  # attr -> {part: store path}
     for host, parts in there:
-        build_remote(host, parts, build_on_host=args.build_on_host)
+        built[host.attr] = build_remote(host, parts, build_on_host=args.build_on_host)
 
     for host, parts in plan:
-        switch_host(host, parts)
+        switch_host(host, parts, built[host.attr])
 
 
 def clean_host(host: Host) -> None:
