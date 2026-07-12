@@ -2,9 +2,10 @@
 """hostctl -- build, deploy, and maintain the hosts in this config.
 
 One target axis (this machine, or a remote over ssh) crossed with a few
-lifecycle verbs. The target is an optional argument that defaults to the local
-host, so `hostctl clean` and `hostctl clean desktop.lan` are the same code path
-with an ssh hop auto-inserted for the remote.
+lifecycle verbs. A target is a flake config name (e.g. `desktop`) and defaults
+to this machine, so `hostctl clean` and `hostctl clean desktop` are the same
+code path with an ssh hop auto-inserted for the remote. SSH_HOSTS maps each attr
+to the ssh/git network handle it's reached by.
 
     hostctl upgrade [target]   rebuild + activate a host. For a remote this
                                defaults to "deploy mode" -- build the closure
@@ -39,6 +40,16 @@ from pathlib import Path
 from typing import NoReturn, Self
 
 REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
+
+# Flake attr -> the host's network handle (its ssh target and git remote). Attrs
+# not listed are assumed reachable under their own name.
+SSH_HOSTS = {
+    "desktop": "desktop.lan",
+    "framework": "framework.lan",
+    "ha": "ha.iot",
+    "print": "print.lan",
+    "server": "server.lan",
+}
 
 
 def flake_dir() -> Path:
@@ -79,24 +90,27 @@ def log(msg: str) -> None:
 
 @dataclass
 class Host:
-    """A deploy target. `local` says whether we run here or ssh to `name`;
-    kind/system are read from the flake by Host.resolve()."""
+    """A deploy target named by its flake `attr`; `name` is the network handle
+    (ssh host + git remote) it maps to. `local` runs here vs over ssh; kind and
+    system are read from the flake by Host.resolve()."""
 
-    name: str  # ssh + git-remote name (this machine's hostname when local)
-    attr: str  # flake attr / config name
+    name: str  # network handle: ssh host + git remote (hostname when local)
+    attr: str  # flake config name -- what you type
     user: str  # home-manager user, for the <user>@<attr> config
     local: bool  # run commands here rather than over ssh
     kind: str = ""  # "nixos" | "darwin"
     system: str = ""  # e.g. "x86_64-linux"
 
     @classmethod
-    def resolve(cls, target: str, attr: str | None, user: str) -> Self:
-        """Parse a target into a Host, reading its kind + system from the flake."""
+    def resolve(cls, target: str, user: str) -> Self:
+        """Resolve a target (a flake config name, empty for this machine) into a
+        Host, mapping it to a network handle and reading its kind + system."""
         short = socket.gethostname().split(".")[0]
         local = is_local(target)
+        attr = short if local else target
         host = cls(
-            name=short if local else target,
-            attr=attr or (short if local else target.rsplit(".", 1)[0]),
+            name=short if local else SSH_HOSTS.get(attr, attr),
+            attr=attr,
             user=user,
             local=local,
         )
@@ -223,12 +237,12 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     if not is_local(args.target) and working_tree_dirty():
         die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
-    host = Host.resolve(args.target, args.attr, args.user)
+    host = Host.resolve(args.target, args.user)
     parts = {args.only} if args.only else {"sys", "hm"}
     # home-manager only applies to hosts that define a standalone config
     if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
         if args.only == "hm":
-            die(f"{host.name} has no home-manager configuration ({host.hm_key})")
+            die(f"{host.attr} has no home-manager configuration ({host.hm_key})")
         parts.discard("hm")
 
     if not host.local:
@@ -242,7 +256,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
 
 def cmd_clean(args: argparse.Namespace) -> None:
-    host = Host.resolve(args.target, args.attr, args.user)
+    host = Host.resolve(args.target, args.user)
     host.run("nix-collect-garbage", "--delete-old")
     host.run("sudo", "nix-collect-garbage", "--delete-old")
     if host.is_linux:  # Darwin has no switch-to-configuration
@@ -250,8 +264,8 @@ def cmd_clean(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    # target is a git remote name, not a flake host -- nothing to resolve.
-    remote = args.target
+    # target is a flake attr; map it to the git remote (== the host's handle).
+    remote = SSH_HOSTS.get(args.target, args.target)
     git = ["git", "-C", str(FLAKE)]
     subprocess.run([*git, "fetch", remote], check=True)
     subprocess.run([*git, "merge", f"{remote}/dev"], check=True)
@@ -286,10 +300,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_target(up)
     up.add_argument(
-        "--attr",
-        help="flake attr / config name " "(default: hostname, or host with domain stripped)"
-    )
-    up.add_argument(
         "--build-on-host",
         action="store_true",
         help="let the remote build from its checkout instead of " "shipping a prebuilt closure (no-op for the local host)"
@@ -306,11 +316,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="gc old generations + prune boot entries"
     )
     add_target(cl)
-    cl.add_argument("--attr", help=argparse.SUPPRESS)
     cl.set_defaults(func=cmd_clean)
 
     sy = sub.add_parser("sync", help="git fetch/merge/push a host's checkout")
-    sy.add_argument("target", help="git remote to sync")
+    sy.add_argument("target", help="host to sync (flake attr)")
     sy.set_defaults(func=cmd_sync)
 
     return p
