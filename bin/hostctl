@@ -36,7 +36,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NoReturn
+from typing import NoReturn, Self
 
 REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
 
@@ -79,18 +79,35 @@ def log(msg: str) -> None:
 
 @dataclass
 class Host:
-    """A deploy target. An empty name means the local machine. kind/system are
-    read from the flake by resolve_host(), not assumed from local-vs-remote."""
+    """A deploy target. `local` says whether we run here or ssh to `name`;
+    kind/system are read from the flake by Host.resolve()."""
 
-    name: str  # ssh + git-remote name; "" for local
+    name: str  # ssh + git-remote name (this machine's hostname when local)
     attr: str  # flake attr / config name
     user: str  # home-manager user, for the <user>@<attr> config
+    local: bool  # run commands here rather than over ssh
     kind: str = ""  # "nixos" | "darwin"
     system: str = ""  # e.g. "x86_64-linux"
 
-    @property
-    def local(self) -> bool:
-        return self.name == ""
+    @classmethod
+    def resolve(cls, target: str, attr: str | None, user: str) -> Self:
+        """Parse a target into a Host, reading its kind + system from the flake."""
+        short = socket.gethostname().split(".")[0]
+        local = is_local(target)
+        host = cls(
+            name=short if local else target,
+            attr=attr or (short if local else target.rsplit(".", 1)[0]),
+            user=user,
+            local=local,
+        )
+        for kind, output in (("nixos", "nixosConfigurations"), ("darwin", "darwinConfigurations")):
+            try:
+                host.system = nix_eval_raw(f"{FLAKE}#{output}.{host.attr}.pkgs.system")
+            except subprocess.CalledProcessError:
+                continue
+            host.kind = kind
+            return host
+        die(f"no nixos/darwin configuration '{host.attr}' in {FLAKE}")
 
     @property
     def darwin(self) -> bool:
@@ -120,7 +137,7 @@ class Host:
     def run(self, *argv: str) -> None:
         """Do something on this host: run argv directly when it's the local
         machine, else over ssh. Raises on a non-zero exit."""
-        log(f"{self.name or 'local'}: {' '.join(argv)}")
+        log(f"{self.name}: {' '.join(argv)}")
         cmd = list(argv) if self.local else ["ssh", "-t", self.name, *argv]
         subprocess.run(cmd, check=True)
 
@@ -129,22 +146,6 @@ def is_local(target: str) -> bool:
     """Whether a target names this machine rather than a remote."""
     short = socket.gethostname().split(".")[0]
     return target in ("", "local", "localhost", short, socket.gethostname())
-
-
-def resolve_host(target: str, attr: str | None, user: str) -> Host:
-    """Parse a target into a Host, reading its kind + system from the flake."""
-    short = socket.gethostname().split(".")[0]
-    local = is_local(target)
-    resolved_attr = attr or (short if local else target.rsplit(".", 1)[0])
-    host = Host(name="" if local else target, attr=resolved_attr, user=user)
-    for kind, output in (("nixos", "nixosConfigurations"), ("darwin", "darwinConfigurations")):
-        try:
-            host.system = nix_eval_raw(f"{FLAKE}#{output}.{host.attr}.pkgs.system")
-        except subprocess.CalledProcessError:
-            continue
-        host.kind = kind
-        return host
-    die(f"no nixos/darwin configuration '{host.attr}' in {FLAKE}")
 
 
 def flake_has(output: str, name: str) -> bool:
@@ -211,7 +212,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     if not is_local(args.target) and working_tree_dirty():
         die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
-    host = resolve_host(args.target, args.attr, args.user)
+    host = Host.resolve(args.target, args.attr, args.user)
     do_system = not args.hm_only
     do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
 
@@ -239,7 +240,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
 
 def cmd_clean(args: argparse.Namespace) -> None:
-    host = resolve_host(args.target, args.attr, args.user)
+    host = Host.resolve(args.target, args.attr, args.user)
     host.run("nix-collect-garbage", "--delete-old")
     host.run("sudo", "nix-collect-garbage", "--delete-old")
     if host.is_linux:  # Darwin has no switch-to-configuration
