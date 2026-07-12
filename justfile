@@ -8,8 +8,8 @@ update:
 upgrade *args:
     hostctl upgrade {{args}}
 
-# Build locally, copy the closure to a host, then activate from its checkout
-# (the remote reuses the copied paths, no recompile). Remote-only.
+# Alias for `upgrade`. Deploy mode -- build locally, copy the closure, no remote
+# recompile -- is upgrade's default for a remote target.
 deploy *args:
     hostctl deploy {{args}}
 

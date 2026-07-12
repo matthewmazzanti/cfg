@@ -45,7 +45,7 @@ eras. GPU arch changed, CPU didn't. See investigation doc taxonomy 2.4.
 Session procedure
 -----------------
 1. Pre-flight (only after config changes):
-     just upgrade-remote desktop.lan      # or rebuild on the machine
+     just deploy desktop                  # or `just deploy desktop --build-on-host`
      Reboot IF kernel params/microcode changed; re-login IF groups changed.
      Check:  cat /sys/module/zfs/parameters/zfs_arc_max   -> 8589934592
              sysctl vm.swappiness                          -> 10
