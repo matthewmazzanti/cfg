@@ -196,24 +196,6 @@ def working_tree_dirty() -> bool:
     ).returncode != 0
 
 
-def build_closure(host: Host, do_hm: bool) -> list[str]:
-    """Build the system (and optional HM) closure locally; the paths to copy."""
-    log(f"building {host.attr} ({host.system}) locally")
-    paths = nix_build_paths(host.toplevel)
-    if not paths:
-        die("system build produced no paths")
-
-    if do_hm:
-        hm = nix_build_paths(
-            f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage'
-        )
-        if not hm:
-            die("home-manager build failed")
-        paths += hm
-
-    return paths
-
-
 def stage_remote(host: Host, do_hm: bool, *, build_on_host: bool) -> None:
     """Build the host's closure locally and copy it over, so its rebuild reuses
     the store paths instead of recompiling. Skipped -- the host builds from its
@@ -224,7 +206,17 @@ def stage_remote(host: Host, do_hm: bool, *, build_on_host: bool) -> None:
     if host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
         return
-    paths = build_closure(host, do_hm)
+
+    log(f"building {host.attr} ({host.system}) locally")
+    paths = nix_build_paths(host.toplevel)
+    if not paths:
+        die("system build produced no paths")
+    if do_hm:
+        hm = nix_build_paths(f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage')
+        if not hm:
+            die("home-manager build failed")
+        paths += hm
+
     log(f"copying closure to {host.name}")
     subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
 
