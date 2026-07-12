@@ -30,6 +30,7 @@ Stdlib only, matching bin/bump-kernel and bin/lock-images.
 
 import argparse
 import getpass
+import json
 import os
 import platform
 import shlex
@@ -200,13 +201,14 @@ def nix_eval_raw(installable: str) -> str:
     ).stdout.strip()
 
 
-def nix_build_paths(installable: str) -> list[str]:
-    """Build an installable and return its output store paths (one per line)."""
+def nix_build_json(installables: list[str]) -> list[dict]:
+    """Build installables in one pass; return nix's per-installable JSON result,
+    aligned with the input order. stdout carries the JSON; stderr (progress) streams."""
     out = subprocess.run(
-        ["nix", "build", "--no-link", "--print-out-paths", installable],
-        text=True, capture_output=True, check=True,
+        ["nix", "build", "--no-link", "--json", *installables],
+        text=True, stdout=subprocess.PIPE, check=True,
     ).stdout
-    return out.split()
+    return json.loads(out)
 
 
 def working_tree_dirty() -> bool:
@@ -219,30 +221,39 @@ def working_tree_dirty() -> bool:
     ).returncode != 0
 
 
-def builds_here(host: Host, build_on_host: bool) -> bool:
-    """Whether we build this host's closure locally and copy it, vs the host
-    building from its own checkout (--build-on-host, a cross-system target, or
-    the local machine)."""
-    return not host.local and not build_on_host and host.system == LOCAL_SYSTEM
+def builds_locally(host: Host, build_on_host: bool) -> bool:
+    """Whether this host's closure is built on the machine we run from: the local
+    host, or a same-system remote not forced onto itself with --build-on-host."""
+    return host.local or (not build_on_host and host.system == LOCAL_SYSTEM)
 
 
-def build_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
-    """Realize the host's closure(s) so the switch phase only activates: build
-    locally and copy them over when we can, else have the host build from its
-    own checkout."""
-    if builds_here(host, build_on_host):
-        paths: list[str] = []
+def build_local(here: list[tuple[Host, set[str]]]) -> None:
+    """Build every locally-buildable host's closure in one nix pass, then copy
+    each remote's outputs over (the local host activates from the store directly)."""
+    jobs = []  # installables, in host order (sys before hm)
+    for host, parts in here:
         if "sys" in parts:
-            log(f"building {host.attr} ({host.system}) locally")
-            paths += nix_build_paths(host.toplevel(FLAKE))
+            jobs.append(host.toplevel(FLAKE))
         if "hm" in parts:
-            log(f"building home-manager for {host.hm_key}")
-            paths += nix_build_paths(host.hm_pkg(FLAKE))
-        log(f"copying closure to {host.name}")
-        subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
+            jobs.append(host.hm_pkg(FLAKE))
+    if not jobs:
         return
 
-    if not host.local and not build_on_host:  # forced onto the host by a system mismatch
+    log(f"building {len(here)} host(s) locally")
+    built = nix_build_json(jobs)
+    i = 0
+    for host, parts in here:
+        n = ("sys" in parts) + ("hm" in parts)  # this host's slice of `built`
+        outs = [p for entry in built[i:i + n] for p in entry["outputs"].values()]
+        i += n
+        if not host.local:  # local host activates straight from the store
+            log(f"copying closure to {host.name}")
+            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *outs], check=True)
+
+
+def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
+    """Have the host build its own closure (--build-on-host or a cross-system target)."""
+    if not build_on_host and host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
     if "sys" in parts:
         host.run("nix", "build", "--no-link", host.toplevel(host.flake))
@@ -251,7 +262,7 @@ def build_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
 
 
 def switch_host(host: Host, parts: set[str]) -> None:
-    """Activate the built closure(s) -- a cache hit after build_host."""
+    """Activate the built closure(s) -- a cache hit after the build phase."""
     if "sys" in parts:
         host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
     if "hm" in parts:
@@ -286,12 +297,18 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         plan.append((host, parts))
 
     # staged like sync: push all, build all, switch all -- so a build failure
-    # stops the batch before any host is switched.
+    # stops the batch before any host is switched. Everything buildable here goes
+    # in one nix pass; the rest fan out to build on their own hosts.
     for host, _ in plan:
         if not host.local:
             subprocess.run(["git", "-C", FLAKE, "push", git_url(host.attr), "HEAD"], check=True)
-    for host, parts in plan:
-        build_host(host, parts, build_on_host=args.build_on_host)
+
+    here = [(h, p) for h, p in plan if builds_locally(h, args.build_on_host)]
+    there = [(h, p) for h, p in plan if not builds_locally(h, args.build_on_host)]
+    build_local(here)
+    for host, parts in there:
+        build_remote(host, parts, build_on_host=args.build_on_host)
+
     for host, parts in plan:
         switch_host(host, parts)
 
