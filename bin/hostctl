@@ -80,7 +80,7 @@ def log(msg: str) -> None:
 @dataclass
 class Host:
     """A deploy target. An empty name means the local machine. kind/system are
-    filled in by classify() from the flake, not assumed from local-vs-remote."""
+    read from the flake by resolve_host(), not assumed from local-vs-remote."""
 
     name: str  # ssh + git-remote name; "" for local
     attr: str  # flake attr / config name
@@ -125,20 +125,18 @@ class Host:
         subprocess.run(cmd, check=True)
 
 
-def resolve_host(target: str, attr: str | None, user: str) -> Host:
+def is_local(target: str) -> bool:
+    """Whether a target names this machine rather than a remote."""
     short = socket.gethostname().split(".")[0]
-    is_local = target in ("", "local", "localhost", short, socket.gethostname())
-    if attr:
-        resolved_attr = attr
-    elif is_local:
-        resolved_attr = short
-    else:
-        resolved_attr = target.rsplit(".", 1)[0]  # desktop.lan -> desktop
-    return Host(name="" if is_local else target, attr=resolved_attr, user=user)
+    return target in ("", "local", "localhost", short, socket.gethostname())
 
 
-def classify(host: Host) -> Host:
-    """Fill in kind + system by locating the host's config output in the flake."""
+def resolve_host(target: str, attr: str | None, user: str) -> Host:
+    """Parse a target into a Host, reading its kind + system from the flake."""
+    short = socket.gethostname().split(".")[0]
+    local = is_local(target)
+    resolved_attr = attr or (short if local else target.rsplit(".", 1)[0])
+    host = Host(name="" if local else target, attr=resolved_attr, user=user)
     for kind, output in (("nixos", "nixosConfigurations"), ("darwin", "darwinConfigurations")):
         try:
             host.system = nix_eval_raw(f"{FLAKE}#{output}.{host.attr}.pkgs.system")
@@ -210,11 +208,10 @@ def build_closure(host: Host, do_hm: bool) -> list[str]:
 
 
 def cmd_upgrade(args: argparse.Namespace) -> None:
-    host = resolve_host(args.target, args.attr, args.user)
-    if not host.local and working_tree_dirty():
-        die(f"refusing to deploy to {host.name}: uncommitted changes in {FLAKE} "
+    if not is_local(args.target) and working_tree_dirty():
+        die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
-    host = classify(host)
+    host = resolve_host(args.target, args.attr, args.user)
     do_system = not args.hm_only
     do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
 
@@ -242,7 +239,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
 
 def cmd_clean(args: argparse.Namespace) -> None:
-    host = classify(resolve_host(args.target, args.attr, args.user))
+    host = resolve_host(args.target, args.attr, args.user)
     host.run("nix-collect-garbage", "--delete-old")
     host.run("sudo", "nix-collect-garbage", "--delete-old")
     if host.is_linux:  # Darwin has no switch-to-configuration
@@ -267,25 +264,50 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     def add_target(sp: argparse.ArgumentParser) -> None:
-        sp.add_argument("target", nargs="?", default="",
-                        help="host (default: this machine)")
-        sp.add_argument("--user", default=os.environ.get("USER") or getpass.getuser(),
-                        help="home-manager user (default: $USER)")
+        sp.add_argument(
+            "target",
+            nargs="?",
+            default="",
+            help="host (default: this machine)"
+        )
+        sp.add_argument(
+            "--user",
+            default=os.environ.get("USER") or getpass.getuser(),
+            help="home-manager user (default: $USER)"
+        )
 
-    up = sub.add_parser("upgrade", aliases=["deploy"],
-                        help="rebuild + activate a host (deploy mode by default)")
+    up = sub.add_parser(
+        "upgrade",
+        aliases=["deploy"],
+        help="rebuild + activate a host (deploy mode by default)"
+    )
     add_target(up)
-    up.add_argument("--attr", help="flake attr / config name "
-                    "(default: hostname, or host with domain stripped)")
-    up.add_argument("--build-on-host", action="store_true",
-                    help="let the remote build from its checkout instead of "
-                    "shipping a prebuilt closure (no-op for the local host)")
+    up.add_argument(
+        "--attr",
+        help="flake attr / config name " "(default: hostname, or host with domain stripped)"
+    )
+    up.add_argument(
+        "--build-on-host",
+        action="store_true",
+        help="let the remote build from its checkout instead of " "shipping a prebuilt closure (no-op for the local host)"
+    )
     hm = up.add_mutually_exclusive_group()
-    hm.add_argument("--no-hm", action="store_true", help="skip home-manager")
-    hm.add_argument("--hm-only", action="store_true", help="skip the system rebuild")
+    hm.add_argument(
+        "--no-hm",
+        action="store_true",
+        help="skip home-manager"
+    )
+    hm.add_argument(
+        "--hm-only",
+        action="store_true",
+        help="skip the system rebuild"
+    )
     up.set_defaults(func=cmd_upgrade)
 
-    cl = sub.add_parser("clean", help="gc old generations + prune boot entries")
+    cl = sub.add_parser(
+        "clean",
+        help="gc old generations + prune boot entries"
+    )
     add_target(cl)
     cl.add_argument("--attr", help=argparse.SUPPRESS)
     cl.set_defaults(func=cmd_clean)
