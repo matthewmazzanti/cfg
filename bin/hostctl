@@ -15,8 +15,8 @@ to the ssh host it's reached at (used for ssh, nix copy, and git URLs).
                                machine's; otherwise (or with --build-on-host)
                                the host builds from its own checkout.
                                (alias: `deploy`)
-    hostctl clean   [target]   collect old generations + prune boot entries
-    hostctl sync    <host>     git fetch/merge/push the host's checkout
+    hostctl clean   [host...]  collect old generations + prune boot entries
+    hostctl sync    <host...>  git fetch/merge/push each host's checkout (layered)
 
 NixOS and nix-darwin hosts are handled uniformly: each target's kind and system
 are read from the flake, so the rebuild command and boot-entry prune follow the
@@ -104,9 +104,10 @@ class Host:
     system: str = ""  # e.g. "x86_64-linux"
 
     @classmethod
-    def resolve(cls, target: str, user: str) -> Self:
+    def resolve(cls, target: str, user: str | None = None) -> Self:
         """Resolve a target (a flake config name, empty for this machine) into a
         Host, mapping it to a network handle and reading its kind + system."""
+        user = user or os.environ.get("USER") or getpass.getuser()
         short = socket.gethostname().split(".")[0]
         local = is_local(target)
         attr = short if local else target
@@ -263,22 +264,35 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         host.run("home-manager", "switch", "--flake", host.flake, "-L")
 
 
-def cmd_clean(args: argparse.Namespace) -> None:
-    host = Host.resolve(args.target, args.user)
+def clean_host(host: Host) -> None:
+    """GC old generations on a host, then prune stale boot entries (Linux only)."""
     host.run("nix-collect-garbage", "--delete-old")
     host.run("sudo", "nix-collect-garbage", "--delete-old")
     if host.is_linux:  # Darwin has no switch-to-configuration
         host.run("sudo", "/run/current-system/bin/switch-to-configuration", "boot")
 
 
+def cmd_clean(args: argparse.Namespace) -> None:
+    # sequential: each host's `sudo nix-collect-garbage` prompts on its own tty.
+    for target in args.targets or [""]:
+        clean_host(Host.resolve(target))
+
+
 def cmd_sync(args: argparse.Namespace) -> None:
-    # pull the host's dev into the current branch, then push it back -- no named
-    # remote, so fetch lands in FETCH_HEAD and we push HEAD to its same-named branch.
-    url = git_url(args.target)
+    # Layered across hosts so a failure stops before the next phase mutates a host:
+    # fetch every host's dev (each into its own ref -- FETCH_HEAD holds only one),
+    # merge them all into the current branch, then push the result back to each.
     git = ["git", "-C", str(FLAKE)]
-    subprocess.run([*git, "fetch", url, "dev"], check=True)
-    subprocess.run([*git, "merge", "FETCH_HEAD"], check=True)
-    subprocess.run([*git, "push", url, "HEAD"], check=True)
+    hosts = [(attr, git_url(attr)) for attr in args.targets]
+    for attr, url in hosts:
+        log(f"{attr}: fetch dev")
+        subprocess.run([*git, "fetch", url, f"+dev:refs/hostctl/{attr}"], check=True)
+    for attr, _ in hosts:
+        log(f"{attr}: merge")
+        subprocess.run([*git, "merge", f"refs/hostctl/{attr}"], check=True)
+    for attr, url in hosts:
+        log(f"{attr}: push HEAD")
+        subprocess.run([*git, "push", url, "HEAD"], check=True)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -289,25 +303,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = p.add_subparsers(dest="command", required=True)
 
-    def add_target(sp: argparse.ArgumentParser) -> None:
-        sp.add_argument(
-            "target",
-            nargs="?",
-            default="",
-            help="host (default: this machine)"
-        )
-        sp.add_argument(
-            "--user",
-            default=os.environ.get("USER") or getpass.getuser(),
-            help="home-manager user (default: $USER)"
-        )
-
     up = sub.add_parser(
         "upgrade",
         aliases=["deploy"],
         help="rebuild + activate a host (deploy mode by default)"
     )
-    add_target(up)
+    up.add_argument("target", nargs="?", default="", help="host (default: this machine)")
+    up.add_argument(
+        "--user",
+        default=os.environ.get("USER") or getpass.getuser(),
+        help="home-manager user (default: $USER)"
+    )
     up.add_argument(
         "--build-on-host",
         action="store_true",
@@ -320,15 +326,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     up.set_defaults(func=cmd_upgrade)
 
-    cl = sub.add_parser(
-        "clean",
-        help="gc old generations + prune boot entries"
-    )
-    add_target(cl)
+    cl = sub.add_parser("clean", help="gc old generations + prune boot entries")
+    cl.add_argument("targets", nargs="*", help="hosts (default: this machine)")
     cl.set_defaults(func=cmd_clean)
 
-    sy = sub.add_parser("sync", help="git fetch/merge/push a host's checkout")
-    sy.add_argument("target", help="host to sync (flake attr)")
+    sy = sub.add_parser("sync", help="git fetch/merge/push hosts' checkouts")
+    sy.add_argument("targets", nargs="+", help="hosts to sync (flake attrs)")
     sy.set_defaults(func=cmd_sync)
 
     return p
