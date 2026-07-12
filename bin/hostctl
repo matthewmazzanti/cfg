@@ -147,12 +147,12 @@ class Host:
     def config_output(self) -> str:
         return "darwinConfigurations" if self.darwin else "nixosConfigurations"
 
-    def toplevel(self, flake: str) -> str:
+    def toplevel(self, flake: str | Path) -> str:
         """The system-closure installable under a flake ref (config.system.build.
         toplevel resolves for both NixOS and nix-darwin)."""
         return f"{flake}#{self.config_output}.{self.attr}.config.system.build.toplevel"
 
-    def hm_pkg(self, flake: str) -> str:
+    def hm_pkg(self, flake: str | Path) -> str:
         """The home-manager activationPackage installable under a flake ref."""
         return f'{flake}#homeConfigurations."{self.hm_key}".activationPackage'
 
@@ -214,7 +214,7 @@ def working_tree_dirty() -> bool:
     remote (which builds from your pushed commits) wouldn't see. Untracked files
     are ignored; the flake eval doesn't see them either."""
     return subprocess.run(
-        ["git", "-C", str(FLAKE), "diff", "--quiet", "HEAD"],
+        ["git", "-C", FLAKE, "diff", "--quiet", "HEAD"],
         capture_output=True,
     ).returncode != 0
 
@@ -234,10 +234,10 @@ def build_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
         paths: list[str] = []
         if "sys" in parts:
             log(f"building {host.attr} ({host.system}) locally")
-            paths += nix_build_paths(host.toplevel(str(FLAKE)))
+            paths += nix_build_paths(host.toplevel(FLAKE))
         if "hm" in parts:
             log(f"building home-manager for {host.hm_key}")
-            paths += nix_build_paths(host.hm_pkg(str(FLAKE)))
+            paths += nix_build_paths(host.hm_pkg(FLAKE))
         log(f"copying closure to {host.name}")
         subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
         return
@@ -264,16 +264,6 @@ def git_url(attr: str) -> str:
     return f"{SSH_HOSTS.get(attr, attr)}:{REMOTE_FLAKE.removeprefix('~/')}"
 
 
-def host_parts(host: Host, only: str | None) -> set[str]:
-    """The parts to activate on this host: the requested set, minus home-manager
-    when the host has no standalone config (so it comes back empty for --only hm
-    against such a host)."""
-    parts = {only} if only else {"sys", "hm"}
-    if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
-        parts.discard("hm")
-    return parts
-
-
 def cmd_upgrade(args: argparse.Namespace) -> None:
     targets = args.targets or [""]
     # one shared working tree, so the dirty guard is a single up-front check.
@@ -282,10 +272,14 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
             "-- the remote builds from your pushed commits; commit or stash first")
 
     # plan every host before touching any, so a bad target fails the batch early.
+    # parts = what was asked for, minus home-manager on hosts with no standalone
+    # config (empty, i.e. skipped, only for --only hm against such a host).
     plan = []
     for target in targets:
         host = Host.resolve(target, args.user)
-        parts = host_parts(host, args.only)
+        parts = {args.only} if args.only else {"sys", "hm"}
+        if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
+            parts.discard("hm")
         if not parts:
             log(f"{host.attr}: no home-manager config, skipping")
             continue
@@ -295,7 +289,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     # stops the batch before any host is switched.
     for host, _ in plan:
         if not host.local:
-            subprocess.run(["git", "-C", str(FLAKE), "push", git_url(host.attr), "HEAD"], check=True)
+            subprocess.run(["git", "-C", FLAKE, "push", git_url(host.attr), "HEAD"], check=True)
     for host, parts in plan:
         build_host(host, parts, build_on_host=args.build_on_host)
     for host, parts in plan:
@@ -322,7 +316,7 @@ def cmd_sync(args: argparse.Namespace) -> None:
     # Layered across hosts so a failure stops before the next phase mutates a host:
     # fetch every host's dev (each into its own ref -- FETCH_HEAD holds only one),
     # merge them all into the current branch, then push the result back to each.
-    git = ["git", "-C", str(FLAKE)]
+    git = ["git", "-C", FLAKE]
     hosts = [(attr, git_url(attr)) for attr in args.targets]
     for attr, url in hosts:
         log(f"{attr}: fetch dev")
