@@ -215,23 +215,18 @@ def build_closure(host: Host, do_hm: bool) -> list[str]:
 
 
 def stage_remote(host: Host, do_hm: bool, *, build_on_host: bool) -> None:
-    """Put the build on the remote before it activates: ship a locally-built
-    closure when we can, else just push and let the host build from its checkout.
-    Building here needs the target's system to match ours -- we can't produce
-    another platform's closure without remote builders or emulation."""
+    """Build the host's closure locally and copy it over, so its rebuild reuses
+    the store paths instead of recompiling. Skipped -- the host builds from its
+    own checkout -- with --build-on-host or when the target's system differs from
+    ours (we can't produce another platform's closure without remote builders)."""
     if build_on_host:
-        build_here = False
-    elif host.system != LOCAL_SYSTEM:
+        return
+    if host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
-        build_here = False
-    else:
-        build_here = True
-
-    if build_here:
-        paths = build_closure(host, do_hm)
-        log(f"copying closure to {host.name}")
-        subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
-    subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
+        return
+    paths = build_closure(host, do_hm)
+    log(f"copying closure to {host.name}")
+    subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
 
 
 def cmd_upgrade(args: argparse.Namespace) -> None:
@@ -243,6 +238,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
     if not host.local:
         stage_remote(host, do_hm, build_on_host=args.build_on_host)
+        subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
 
     if not args.hm_only:
         host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
