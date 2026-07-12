@@ -236,13 +236,12 @@ def cmd_clean(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    host = resolve_host(args.target, None, args.user)
-    if host.local:
-        die("sync is remote-only")
+    # target is a git remote name, not a flake host -- nothing to resolve.
+    remote = args.target
     git = ["git", "-C", str(FLAKE)]
-    subprocess.run([*git, "fetch", host.name], check=True)
-    subprocess.run([*git, "merge", f"{host.name}/dev"], check=True)
-    subprocess.run([*git, "push", host.name], check=True)
+    subprocess.run([*git, "fetch", remote], check=True)
+    subprocess.run([*git, "merge", f"{remote}/dev"], check=True)
+    subprocess.run([*git, "push", remote], check=True)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -253,8 +252,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = p.add_subparsers(dest="command", required=True)
 
-    def add_target(sp: argparse.ArgumentParser, required: bool = False) -> None:
-        sp.add_argument("target", nargs=None if required else "?", default="",
+    def add_target(sp: argparse.ArgumentParser) -> None:
+        sp.add_argument("target", nargs="?", default="",
                         help="host (default: this machine)")
         sp.add_argument("--user", default=os.environ.get("USER") or getpass.getuser(),
                         help="home-manager user (default: $USER)")
@@ -278,7 +277,7 @@ def build_parser() -> argparse.ArgumentParser:
     cl.set_defaults(func=cmd_clean)
 
     sy = sub.add_parser("sync", help="git fetch/merge/push a host's checkout")
-    add_target(sy, required=True)
+    sy.add_argument("target", help="git remote to sync")
     sy.set_defaults(func=cmd_sync)
 
     return p
