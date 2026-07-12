@@ -32,6 +32,7 @@ import argparse
 import getpass
 import os
 import platform
+import shlex
 import socket
 import subprocess
 import sys
@@ -158,10 +159,11 @@ class Host:
         return str(FLAKE) if self.local else REMOTE_FLAKE
 
     def run(self, *argv: str) -> None:
-        """Do something on this host: run argv directly when it's the local
-        machine, else over ssh. Raises on a non-zero exit."""
-        log(f"{self.name}: {' '.join(argv)}")
-        cmd = list(argv) if self.local else ["ssh", "-t", self.name, *argv]
+        """Run a shell command on this host: bash -c locally, else over ssh. Args
+        are joined into one command line, so quote any that contain spaces."""
+        line = " ".join(argv)
+        log(f"{self.name}: {line}")
+        cmd = ["bash", "-c", line] if self.local else ["ssh", "-t", self.name, line]
         subprocess.run(cmd, check=True)
 
 
@@ -265,11 +267,13 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
 
 def clean_host(host: Host) -> None:
-    """GC old generations on a host, then prune stale boot entries (Linux only)."""
-    host.run("nix-collect-garbage", "--delete-old")
-    host.run("sudo", "nix-collect-garbage", "--delete-old")
+    """GC old generations on a host, then prune stale boot entries (Linux only).
+    The root steps share one sudo, so the host prompts for a password once."""
+    host.run("nix-collect-garbage", "--delete-old")  # user profile
+    root = "nix-collect-garbage --delete-old"  # system profile
     if host.is_linux:  # Darwin has no switch-to-configuration
-        host.run("sudo", "/run/current-system/bin/switch-to-configuration", "boot")
+        root += " && /run/current-system/bin/switch-to-configuration boot"
+    host.run("sudo", "sh", "-c", shlex.quote(root))
 
 
 def cmd_clean(args: argparse.Namespace) -> None:
