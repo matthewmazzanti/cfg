@@ -328,6 +328,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     # in one nix pass; the rest fan out to build on their own hosts.
     for host, _ in plan:
         if not host.local:
+            log(f"pushing to {host.name}")
             subprocess.run(["git", "-C", FLAKE, "push", git_url(host.attr), "HEAD"], check=True)
 
     here, there = [], []
