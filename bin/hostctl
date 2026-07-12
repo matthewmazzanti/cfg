@@ -205,7 +205,7 @@ def nix_build_json(installables: list[str]) -> list[dict]:
     """Build installables in one pass; return nix's per-installable JSON result,
     aligned with the input order. stdout carries the JSON; stderr (progress) streams."""
     out = subprocess.run(
-        ["nix", "build", "--no-link", "--json", *installables],
+        ["nix", "build", "-L", "--no-link", "--json", *installables],
         text=True, stdout=subprocess.PIPE, check=True,
     ).stdout
     return json.loads(out)
@@ -256,9 +256,9 @@ def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
     if not build_on_host and host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
     if "sys" in parts:
-        host.run("nix", "build", "--no-link", host.toplevel(host.flake))
+        host.run("nix", "build", "-L", "--no-link", host.toplevel(host.flake))
     if "hm" in parts:
-        host.run("nix", "build", "--no-link", host.hm_pkg(host.flake))
+        host.run("nix", "build", "-L", "--no-link", host.hm_pkg(host.flake))
 
 
 def switch_host(host: Host, parts: set[str]) -> None:
