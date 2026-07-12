@@ -174,7 +174,7 @@ class Host:
 def is_local(target: str) -> bool:
     """Whether a target names this machine rather than a remote."""
     short = socket.gethostname().split(".")[0]
-    return target in ("", "local", "localhost", short, socket.gethostname())
+    return target in ("local", "localhost", short, socket.gethostname())
 
 
 def flake_has(output: str, name: str) -> bool:
@@ -265,7 +265,7 @@ def git_url(attr: str) -> str:
 
 
 def cmd_upgrade(args: argparse.Namespace) -> None:
-    targets = args.targets or [""]
+    targets = args.targets or ["local"]
     # one shared working tree, so the dirty guard is a single up-front check.
     if any(not is_local(t) for t in targets) and working_tree_dirty():
         die(f"refusing to deploy: uncommitted changes in {FLAKE} "
@@ -308,7 +308,7 @@ def clean_host(host: Host) -> None:
 
 def cmd_clean(args: argparse.Namespace) -> None:
     # sequential: each host's `sudo nix-collect-garbage` prompts on its own tty.
-    for target in args.targets or [""]:
+    for target in args.targets or ["local"]:
         clean_host(Host.resolve(target))
 
 
