@@ -134,6 +134,12 @@ class Host:
         # config.system.build.toplevel resolves for both NixOS and nix-darwin.
         return f"{FLAKE}#{self.config_output}.{self.attr}.config.system.build.toplevel"
 
+    @property
+    def flake(self) -> str:
+        """The flake to activate from: our checkout locally, the host's own
+        ~/src/nix/cfg over ssh."""
+        return str(FLAKE) if self.local else REMOTE_FLAKE
+
     def run(self, *argv: str) -> None:
         """Do something on this host: run argv directly when it's the local
         machine, else over ssh. Raises on a non-zero exit."""
@@ -208,35 +214,40 @@ def build_closure(host: Host, do_hm: bool) -> list[str]:
     return paths
 
 
+def stage_remote(host: Host, do_hm: bool, *, build_on_host: bool) -> None:
+    """Put the build on the remote before it activates: ship a locally-built
+    closure when we can, else just push and let the host build from its checkout.
+    Building here needs the target's system to match ours -- we can't produce
+    another platform's closure without remote builders or emulation."""
+    if build_on_host:
+        build_here = False
+    elif host.system != LOCAL_SYSTEM:
+        log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
+        build_here = False
+    else:
+        build_here = True
+
+    if build_here:
+        paths = build_closure(host, do_hm)
+        log(f"copying closure to {host.name}")
+        subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
+    subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
+
+
 def cmd_upgrade(args: argparse.Namespace) -> None:
     if not is_local(args.target) and working_tree_dirty():
         die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
     host = Host.resolve(args.target, args.attr, args.user)
-    do_system = not args.hm_only
     do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
 
-    # Remote preface: ship a locally-built closure, or just push and let the host
-    # build. Building here needs the target's system to match ours -- we can't
-    # produce another platform's closure without remote builders or emulation.
     if not host.local:
-        build_here = not args.build_on_host and host.system == LOCAL_SYSTEM
-        if not args.build_on_host and not build_here:
-            log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; "
-                f"building on {host.name} instead")
-        if build_here:
-            paths = build_closure(host, do_hm)
-            log(f"copying closure to {host.name}")
-            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
-        subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
+        stage_remote(host, do_hm, build_on_host=args.build_on_host)
 
-    # Activation is one path for local and remote -- Host.run inserts the ssh hop
-    # when needed; only the flake location and rebuild command vary by host.
-    flake = str(FLAKE) if host.local else REMOTE_FLAKE
-    if do_system:
-        host.run("sudo", host.rebuild, "switch", "--flake", flake, "-L")
+    if not args.hm_only:
+        host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
     if do_hm:
-        host.run("home-manager", "switch", "--flake", flake, "-L")
+        host.run("home-manager", "switch", "--flake", host.flake, "-L")
 
 
 def cmd_clean(args: argparse.Namespace) -> None:
