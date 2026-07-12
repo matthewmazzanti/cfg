@@ -279,7 +279,11 @@ def switch_host(host: Host, parts: set[str], paths: dict[str, str]) -> None:
         if host.darwin:
             host.run("sudo", f"{paths['sys']}/sw/bin/darwin-rebuild", "activate")
         else:
-            host.run("sudo", "nixos-rebuild", "switch", "--store-path", paths["sys"])
+            # --no-reexec: with --store-path there's no --flake, so nixos-rebuild's
+            # self-update would fall back to <nixpkgs/nixos> (classic channels),
+            # which a flake host lacks -- and it's pointless here anyway, since we
+            # only orchestrate the toplevel's own switch-to-configuration.
+            host.run("sudo", "nixos-rebuild", "switch", "--no-reexec", "--store-path", paths["sys"])
     if "hm" in parts:
         host.run(f"{paths['hm']}/activate")
 
