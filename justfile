@@ -3,28 +3,23 @@ update:
     lock-images --json lib/images.json --write
     bump-kernel --flake . --json lib/pins.json --lts-kernel --write
 
-upgrade: upgrade-system upgrade-home
+# Rebuild + activate a host. No target = this machine; a remote target pushes
+# the repo and builds on the host. Flags: --no-hm, --hm-only, -n/--dry-run.
+upgrade *args:
+    hostctl upgrade {{args}}
 
-upgrade-system:
-    #!/usr/bin/env bash
-    case "$(uname)" in
-        Linux)
-            sudo nixos-rebuild switch --flake ~/src/nix/cfg -L;;
-        Darwin)
-            sudo darwin-rebuild switch --flake ~/src/nix/cfg -L;;
-    esac
+# Build locally, copy the closure to a host, then activate from its checkout
+# (the remote reuses the copied paths, no recompile). Remote-only.
+deploy *args:
+    hostctl deploy {{args}}
 
+# GC old generations + prune boot entries. No target = this machine.
+clean *args:
+    hostctl clean {{args}}
 
-upgrade-home:
-    home-manager switch --flake ~/src/nix/cfg -L
-
-# Per-host operations over ssh: `just remote sync|clean|upgrade <host>`.
-mod remote
-
-clean:
-    nix-collect-garbage --delete-old
-    sudo nix-collect-garbage --delete-old
-    sudo /run/current-system/bin/switch-to-configuration boot
+# Fetch a host's repo, merge its dev branch, and push back.
+sync *args:
+    hostctl sync {{args}}
 
 # Push a repo dashboard YAML to HA live via the websocket API (no restart). Needs
 # HASS_TOKEN or ~/.config/ha/token (URL defaults to https://hass.iot). The seed
