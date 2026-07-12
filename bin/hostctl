@@ -1,201 +1,330 @@
-#!/usr/bin/env bash
-# hostctl -- build, deploy, and maintain the hosts in this config.
-#
-# One target axis (this machine, or a remote over ssh) crossed with a few
-# lifecycle verbs. The target is an optional argument that defaults to the local
-# host, so `hostctl clean` and `hostctl clean desktop.lan` are the same code path
-# with an ssh hop auto-inserted for the remote.
-#
-#   hostctl upgrade [target]   rebuild + activate in place; a remote target
-#                              pushes the repo and builds on the host
-#   hostctl deploy  <host>     build locally, copy the closure over, then
-#                              activate from the host's checkout (remote-only;
-#                              the remote reuses the copied paths, no recompile)
-#   hostctl clean   [target]   collect old generations + prune boot entries
-#   hostctl sync    <host>     git fetch/merge/push the host's checkout
-#
-# Options:
-#   --attr NAME    flake attr / config name (default: target's hostname, or the
-#                  host with its domain stripped -- desktop.lan -> desktop)
-#   --user NAME    home-manager user for the <user>@<attr> config (default: $USER)
-#   --no-hm        skip home-manager (system only)
-#   --hm-only      skip the system rebuild (home-manager only)
-#   -n, --dry-run  print each step instead of running it
-#   -h, --help     this help
-#
-# The local flake is the git checkout you invoke from (falling back to
-# ~/src/nix/cfg); the remote always rebuilds from its own ~/src/nix/cfg.
-set -euo pipefail
+#!/usr/bin/env python3
+"""hostctl -- build, deploy, and maintain the hosts in this config.
 
-FLAKE_DIR="$(git rev-parse --show-toplevel 2>/dev/null || printf '%s' "$HOME/src/nix/cfg")"
-# Deliberately unexpanded here: the ~ is sent verbatim and expanded by the
-# remote shell, so it points at the remote user's home, not ours.
-# shellcheck disable=SC2088
-REMOTE_FLAKE='~/src/nix/cfg'
-USER_NAME="${USER:-$(id -un)}"
-ATTR=
-NO_HM=false
-HM_ONLY=false
-DRY_RUN=false
+One target axis (this machine, or a remote over ssh) crossed with a few
+lifecycle verbs. The target is an optional argument that defaults to the local
+host, so `hostctl clean` and `hostctl clean desktop.lan` are the same code path
+with an ssh hop auto-inserted for the remote.
 
-die()  { printf 'hostctl: %s\n' "$*" >&2; exit 1; }
-log()  { printf '\033[1;34m::\033[0m %s\n' "$*" >&2; }
-usage() { sed -n '2,/^set -euo/{/^set -euo/!s/^# \{0,1\}//p}' "$0"; }
+    hostctl upgrade [target]   rebuild + activate a host. For a remote this
+                               defaults to "deploy mode" -- build the closure
+                               locally, copy it over, then activate from the
+                               host's checkout (no remote recompile). Deploy
+                               mode needs the target's system to match this
+                               machine's; otherwise (or with --build-on-host)
+                               the host builds from its own checkout.
+                               (alias: `deploy`)
+    hostctl clean   [target]   collect old generations + prune boot entries
+    hostctl sync    <host>     git fetch/merge/push the host's checkout
 
-short_host() { hostname -s 2>/dev/null || hostname; }
+NixOS and nix-darwin hosts are handled uniformly: each target's kind and system
+are read from the flake, so the rebuild command and boot-entry prune follow the
+host, not an assumption about local-vs-remote.
 
-# A target names the local host when it is empty, "local[host]", or our hostname.
-is_local() {
-  case "${1:-}" in
-    ''|local|localhost) return 0 ;;
-  esac
-  [ "$1" = "$(short_host)" ] || [ "$1" = "$(hostname)" ]
-}
+The local flake is the git checkout you invoke from (falling back to
+~/src/nix/cfg); the remote always rebuilds from its own ~/src/nix/cfg.
 
-# Linux gate for the boot-entry prune (Darwin has no switch-to-configuration).
-target_is_linux() {
-  if is_local "$1"; then [ "$(uname)" = Linux ]; else return 0; fi
-}
+Stdlib only, matching bin/bump-kernel and bin/lock-images.
+"""
 
-# The flake attr / config name for a target.
-resolve_attr() {
-  if [ -n "$ATTR" ]; then printf '%s' "$ATTR"
-  elif is_local "$1"; then short_host
-  else printf '%s' "${1%.*}"; fi
-}
+import argparse
+import getpass
+import os
+import platform
+import shlex
+import socket
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import NoReturn
 
-# True iff the flake defines output attr `$1.$2` (checks names only, cheap).
-flake_has() {
-  nix eval "$FLAKE_DIR#$1" --apply "builtins.hasAttr \"$2\"" 2>/dev/null | grep -qx true
-}
+REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
 
-# Run a local command (array form), honoring --dry-run.
-run() {
-  if $DRY_RUN; then printf '  + %s\n' "$*" >&2; return 0; fi
-  "$@"
-}
 
-# Run a shell command string here or on a remote host (the auto-remoting hop).
-sh_on() {
-  local target="$1" cmd="$2"
-  if is_local "$target"; then
-    log "local: $cmd"
-    $DRY_RUN || bash -c "$cmd"
-  else
-    log "$target: $cmd"
-    $DRY_RUN || ssh -t "$target" "$cmd"
-  fi
-}
+def flake_dir() -> Path:
+    """The checkout we operate on: the enclosing git repo, else ~/src/nix/cfg."""
+    try:
+        top = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True, capture_output=True, check=True,
+        ).stdout.strip()
+        return Path(top)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return Path.home() / "src/nix/cfg"
 
-cmd_clean() {
-  local t="$1"
-  sh_on "$t" 'nix-collect-garbage --delete-old'
-  sh_on "$t" 'sudo nix-collect-garbage --delete-old'
-  if target_is_linux "$t"; then
-    sh_on "$t" 'sudo /run/current-system/bin/switch-to-configuration boot'
-  fi
-}
 
-cmd_sync() {
-  local t="$1"
-  [ -n "$t" ] || die "sync requires a host"
-  if is_local "$t"; then die "sync is remote-only"; fi
-  run git -C "$FLAKE_DIR" fetch "$t"
-  run git -C "$FLAKE_DIR" merge "$t/dev"
-  run git -C "$FLAKE_DIR" push "$t"
-}
+FLAKE = flake_dir()
 
-cmd_upgrade() {
-  local t="$1" attr; attr="$(resolve_attr "$t")"
-  local do_system=true do_hm=true
-  if $NO_HM; then do_hm=false; fi
-  if $HM_ONLY; then do_system=false; fi
-  # Only touch home-manager for hosts that actually define a standalone config.
-  if $do_hm && ! flake_has homeConfigurations "$USER_NAME@$attr"; then do_hm=false; fi
 
-  if is_local "$t"; then
-    if $do_system; then
-      local rebuild=nixos-rebuild
-      if [ "$(uname)" = Darwin ]; then rebuild=darwin-rebuild; fi
-      sh_on "" "sudo $rebuild switch --flake $FLAKE_DIR -L"
-    fi
-    if $do_hm; then sh_on "" "home-manager switch --flake $FLAKE_DIR -L"; fi
-  else
-    run git -C "$FLAKE_DIR" push "$t"
-    if $do_system; then sh_on "$t" "sudo nixos-rebuild switch --flake $REMOTE_FLAKE -L"; fi
-    if $do_hm; then sh_on "$t" "home-manager switch --flake $REMOTE_FLAKE -L"; fi
-  fi
-}
+def local_system() -> str:
+    """This machine's nix system string, e.g. x86_64-linux -- the builder we
+    can produce closures for without remote builders or emulation."""
+    arch = {"amd64": "x86_64", "arm64": "aarch64"}
+    machine = platform.machine().lower()
+    kernel = "darwin" if platform.system() == "Darwin" else "linux"
+    return f"{arch.get(machine, machine)}-{kernel}"
 
-cmd_deploy() {
-  local t="$1"
-  [ -n "$t" ] || die "deploy requires a host"
-  if is_local "$t"; then die "deploy is remote-only; use 'upgrade' for this machine"; fi
 
-  local attr; attr="$(resolve_attr "$t")"
-  flake_has nixosConfigurations "$attr" || die "no nixosConfigurations.$attr in $FLAKE_DIR"
+LOCAL_SYSTEM = local_system()
 
-  local hmkey="$USER_NAME@$attr" do_hm=false
-  if ! $NO_HM && flake_has homeConfigurations "$hmkey"; then do_hm=true; fi
 
-  # Collect the store paths to ship. nix build prints one per line; readarray
-  # keeps them as separate, quoted elements. Append the HM activationPackage at
-  # an offset, guarding that the append added paths so an HM failure aborts.
-  local paths=()
-  if $DRY_RUN; then
-    paths=("<toplevel+closure for $attr>")
-    if $do_hm; then paths+=("<home-manager for $hmkey>"); fi
-  else
-    log "building $attr locally"
-    readarray -t paths < <(nix build --no-link --print-out-paths \
-      "$FLAKE_DIR#nixosConfigurations.$attr.config.system.build.toplevel")
-    [ "${#paths[@]}" -gt 0 ] || die "system build produced no paths"
-    if $do_hm; then
-      local before=${#paths[@]}
-      readarray -t -O "$before" paths < <(nix build --no-link --print-out-paths \
-        "$FLAKE_DIR#homeConfigurations.\"$hmkey\".activationPackage")
-      [ "${#paths[@]}" -gt "$before" ] || die "home-manager build failed"
-    fi
-  fi
+def die(msg: str) -> NoReturn:
+    print(f"hostctl: {msg}", file=sys.stderr)
+    sys.exit(1)
 
-  log "copying closure to $t"
-  run nix copy --to "ssh://$t" "${paths[@]}"
-  run git -C "$FLAKE_DIR" push "$t"
-  sh_on "$t" "sudo nixos-rebuild switch --flake $REMOTE_FLAKE -L"
-  if $do_hm; then sh_on "$t" "home-manager switch --flake $REMOTE_FLAKE -L"; fi
-}
 
-main() {
-  local cmd='' target='' have_target=false
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      --attr)    ATTR="$2"; shift 2 ;;
-      --attr=*)  ATTR="${1#*=}"; shift ;;
-      --user)    USER_NAME="$2"; shift 2 ;;
-      --user=*)  USER_NAME="${1#*=}"; shift ;;
-      --no-hm)   NO_HM=true; shift ;;
-      --hm-only) HM_ONLY=true; shift ;;
-      -n|--dry-run) DRY_RUN=true; shift ;;
-      -h|--help) usage; exit 0 ;;
-      -*) die "unknown option: $1 (see --help)" ;;
-      *)
-        if [ -z "$cmd" ]; then cmd="$1"
-        elif ! $have_target; then target="$1"; have_target=true
-        else die "unexpected argument: $1"; fi
-        shift ;;
-    esac
-  done
+def log(msg: str) -> None:
+    print(f"\033[1;34m::\033[0m {msg}", file=sys.stderr)
 
-  if $NO_HM && $HM_ONLY; then die "--no-hm and --hm-only are mutually exclusive"; fi
 
-  case "$cmd" in
-    upgrade) cmd_upgrade "$target" ;;
-    deploy)  cmd_deploy  "$target" ;;
-    clean)   cmd_clean   "$target" ;;
-    sync)    cmd_sync    "$target" ;;
-    ''|help) usage ;;
-    *) die "unknown command: $cmd (see --help)" ;;
-  esac
-}
+@dataclass
+class Host:
+    """A deploy target. An empty name means the local machine. kind/system are
+    filled in by classify() from the flake, not assumed from local-vs-remote."""
 
-main "$@"
+    name: str  # ssh + git-remote name; "" for local
+    attr: str  # flake attr / config name
+    user: str  # home-manager user, for the <user>@<attr> config
+    kind: str = ""  # "nixos" | "darwin"
+    system: str = ""  # e.g. "x86_64-linux"
+
+    @property
+    def local(self) -> bool:
+        return self.name == ""
+
+    @property
+    def darwin(self) -> bool:
+        return self.kind == "darwin"
+
+    @property
+    def is_linux(self) -> bool:
+        return self.system.endswith("linux")
+
+    @property
+    def hm_key(self) -> str:
+        return f"{self.user}@{self.attr}"
+
+    @property
+    def rebuild(self) -> str:
+        return "darwin-rebuild" if self.darwin else "nixos-rebuild"
+
+    @property
+    def config_output(self) -> str:
+        return "darwinConfigurations" if self.darwin else "nixosConfigurations"
+
+    @property
+    def toplevel(self) -> str:
+        # config.system.build.toplevel resolves for both NixOS and nix-darwin.
+        return f"{FLAKE}#{self.config_output}.{self.attr}.config.system.build.toplevel"
+
+
+def resolve_host(target: str, attr: str | None, user: str) -> Host:
+    short = socket.gethostname().split(".")[0]
+    is_local = target in ("", "local", "localhost", short, socket.gethostname())
+    if attr:
+        resolved_attr = attr
+    elif is_local:
+        resolved_attr = short
+    else:
+        resolved_attr = target.rsplit(".", 1)[0]  # desktop.lan -> desktop
+    return Host(name="" if is_local else target, attr=resolved_attr, user=user)
+
+
+def classify(host: Host) -> Host:
+    """Fill in kind + system by locating the host's config output in the flake."""
+    for kind, output in (("nixos", "nixosConfigurations"), ("darwin", "darwinConfigurations")):
+        try:
+            host.system = nix_eval_raw(f"{FLAKE}#{output}.{host.attr}.pkgs.system")
+        except subprocess.CalledProcessError:
+            continue
+        host.kind = kind
+        return host
+    die(f"no nixos/darwin configuration '{host.attr}' in {FLAKE}")
+
+
+class Runner:
+    """Executes (or, in dry-run, prints) local and remote commands."""
+
+    def __init__(self, dry_run: bool) -> None:
+        self.dry_run = dry_run
+
+    def local(self, *argv: str) -> None:
+        """Run a local command from argv (no shell)."""
+        if self.dry_run:
+            print("  + " + " ".join(shlex.quote(a) for a in argv), file=sys.stderr)
+            return
+        subprocess.run(list(argv), check=True)
+
+    def sh(self, host: Host, cmd: str) -> None:
+        """Run a shell command string here or on the remote (the ssh hop)."""
+        where = "local" if host.local else host.name
+        log(f"{where}: {cmd}")
+        if self.dry_run:
+            return
+        if host.local:
+            subprocess.run(["bash", "-c", cmd], check=True)
+        else:
+            subprocess.run(["ssh", "-t", host.name, cmd], check=True)
+
+
+def flake_has(output: str, name: str) -> bool:
+    """True iff the flake defines output attr `output.name` (names only, cheap)."""
+    res = subprocess.run(
+        [
+            "nix",
+            "eval",
+            f"{FLAKE}#{output}",
+            "--apply",
+            f'builtins.hasAttr "{name}"',
+        ],
+        text=True, capture_output=True,
+    )
+    return res.returncode == 0 and res.stdout.strip() == "true"
+
+
+def nix_eval_raw(installable: str) -> str:
+    """Evaluate an installable to a raw string (raises if the attr is absent)."""
+    return subprocess.run(
+        ["nix", "eval", "--raw", installable],
+        text=True, capture_output=True, check=True,
+    ).stdout.strip()
+
+
+def nix_build_paths(installable: str) -> list[str]:
+    """Build an installable and return its output store paths (one per line)."""
+    out = subprocess.run(
+        ["nix", "build", "--no-link", "--print-out-paths", installable],
+        text=True, capture_output=True, check=True,
+    ).stdout
+    return out.split()
+
+
+def build_closure(host: Host, do_hm: bool, runner: Runner) -> list[str]:
+    """Build the system (and optional HM) closure locally; the paths to copy."""
+    if runner.dry_run:
+        paths = [f"<{host.attr} system closure>"]
+        if do_hm:
+            paths.append(f"<home-manager for {host.hm_key}>")
+        return paths
+
+    log(f"building {host.attr} ({host.system}) locally")
+    paths = nix_build_paths(host.toplevel)
+    if not paths:
+        die("system build produced no paths")
+
+    if do_hm:
+        hm = nix_build_paths(
+            f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage'
+        )
+        if not hm:
+            die("home-manager build failed")
+        paths += hm
+
+    return paths
+
+
+def cmd_upgrade(args: argparse.Namespace, runner: Runner) -> None:
+    host = classify(resolve_host(args.target, args.attr, args.user))
+    do_system = not args.hm_only
+    do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
+
+    # Remote preface: ship a locally-built closure, or just push and let the host
+    # build. Building here needs the target's system to match ours -- we can't
+    # produce another platform's closure without remote builders or emulation.
+    if not host.local:
+        build_here = not args.build_on_host and host.system == LOCAL_SYSTEM
+        if not args.build_on_host and not build_here:
+            log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; "
+                f"building on {host.name} instead")
+        if build_here:
+            paths = build_closure(host, do_hm, runner)
+            log(f"copying closure to {host.name}")
+            runner.local("nix", "copy", "--to", f"ssh://{host.name}", *paths)
+        runner.local("git", "-C", str(FLAKE), "push", host.name)
+
+    # Activation is identical for local and remote -- Runner.sh inserts the ssh
+    # hop when needed; only the flake location and rebuild command vary by host.
+    flake = FLAKE if host.local else REMOTE_FLAKE
+    if do_system:
+        runner.sh(host, f"sudo {host.rebuild} switch --flake {flake} -L")
+    if do_hm:
+        runner.sh(host, f"home-manager switch --flake {flake} -L")
+
+
+def cmd_clean(args: argparse.Namespace, runner: Runner) -> None:
+    host = classify(resolve_host(args.target, args.attr, args.user))
+    runner.sh(host, "nix-collect-garbage --delete-old")
+    runner.sh(host, "sudo nix-collect-garbage --delete-old")
+    if host.is_linux:  # Darwin has no switch-to-configuration
+        runner.sh(host, "sudo /run/current-system/bin/switch-to-configuration boot")
+
+
+def cmd_sync(args: argparse.Namespace, runner: Runner) -> None:
+    host = resolve_host(args.target, None, args.user)
+    if host.local:
+        die("sync is remote-only")
+    runner.local("git", "-C", str(FLAKE), "fetch", host.name)
+    runner.local("git", "-C", str(FLAKE), "merge", f"{host.name}/dev")
+    runner.local("git", "-C", str(FLAKE), "push", host.name)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="hostctl",
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument("-n", "--dry-run", action="store_true",
+                   help="print each step instead of running it")
+    sub = p.add_subparsers(dest="command", required=True)
+
+    def add_target(sp: argparse.ArgumentParser, required: bool = False) -> None:
+        sp.add_argument("target", nargs=None if required else "?", default="",
+                        help="host (default: this machine)")
+        sp.add_argument("--user", default=os.environ.get("USER") or getpass.getuser(),
+                        help="home-manager user (default: $USER)")
+
+    up = sub.add_parser("upgrade", aliases=["deploy"],
+                        help="rebuild + activate a host (deploy mode by default)")
+    add_target(up)
+    up.add_argument("--attr", help="flake attr / config name "
+                    "(default: hostname, or host with domain stripped)")
+    up.add_argument("--build-on-host", action="store_true",
+                    help="let the remote build from its checkout instead of "
+                    "shipping a prebuilt closure (no-op for the local host)")
+    hm = up.add_mutually_exclusive_group()
+    hm.add_argument("--no-hm", action="store_true", help="skip home-manager")
+    hm.add_argument("--hm-only", action="store_true", help="skip the system rebuild")
+    up.set_defaults(func=cmd_upgrade)
+
+    cl = sub.add_parser("clean", help="gc old generations + prune boot entries")
+    add_target(cl)
+    cl.add_argument("--attr", help=argparse.SUPPRESS)
+    cl.set_defaults(func=cmd_clean)
+
+    sy = sub.add_parser("sync", help="git fetch/merge/push a host's checkout")
+    add_target(sy, required=True)
+    sy.set_defaults(func=cmd_sync)
+
+    return p
+
+
+def main(argv: list[str]) -> int:
+    args = build_parser().parse_args(argv)
+    # `clean`/`sync` don't take the upgrade-only flags; default them.
+    for flag in ("attr", "no_hm", "hm_only", "build_on_host"):
+        if not hasattr(args, flag):
+            setattr(args, flag, False if flag != "attr" else None)
+    runner = Runner(args.dry_run)
+    try:
+        args.func(args, runner)
+    except subprocess.CalledProcessError as e:
+        return e.returncode or 1
+    except KeyboardInterrupt:
+        return 130
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
