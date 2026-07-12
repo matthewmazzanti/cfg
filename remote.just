@@ -18,14 +18,29 @@ clean system:
 deploy system attr=file_stem(system) user=env_var('USER'):
     #!/usr/bin/env bash
     set -euo pipefail
+    # True iff the flake defines output attr `$1.$2` (checks names only, cheap).
+    has() { nix eval ".#$1" --apply "builtins.hasAttr \"$2\"" 2>/dev/null | grep -qx true; }
+
+    has nixosConfigurations "{{attr}}" \
+        || { echo "error: no nixosConfigurations.{{attr}} in this flake" >&2; exit 1; }
+
     paths=$(nix build --no-link --print-out-paths \
         ".#nixosConfigurations.{{attr}}.config.system.build.toplevel")
-    hm=$(nix build --no-link --print-out-paths \
-        ".#homeConfigurations.\"{{user}}@{{attr}}\".activationPackage" 2>/dev/null || true)
+
+    # Standalone home-manager only exists for some hosts; build+activate it only
+    # when the flake actually defines it, so a real HM failure still aborts.
+    hm=""
+    if has homeConfigurations '{{user}}@{{attr}}'; then
+        hm=$(nix build --no-link --print-out-paths \
+            ".#homeConfigurations.\"{{user}}@{{attr}}\".activationPackage")
+    fi
+
     nix copy --to "ssh://{{system}}" $paths $hm
     git push {{system}}
     ssh -t {{system}} 'sudo nixos-rebuild switch --flake ~/src/nix/cfg -L'
-    ssh -t {{system}} 'home-manager switch --flake ~/src/nix/cfg -L' || true
+    if [ -n "$hm" ]; then
+        ssh -t {{system}} 'home-manager switch --flake ~/src/nix/cfg -L'
+    fi
 
 # Push local repo and rebuild system + home on a host (remote does the build).
 upgrade system:
