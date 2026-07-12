@@ -196,26 +196,24 @@ def working_tree_dirty() -> bool:
     ).returncode != 0
 
 
-def stage_remote(host: Host, do_hm: bool, *, build_on_host: bool) -> None:
-    """Build the host's closure locally and copy it over, so its rebuild reuses
-    the store paths instead of recompiling. Skipped -- the host builds from its
-    own checkout -- with --build-on-host or when the target's system differs from
-    ours (we can't produce another platform's closure without remote builders)."""
+def stage_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
+    """Build the requested parts' closures locally and copy them over, so the
+    host's rebuild reuses the store paths instead of recompiling. Skipped -- the
+    host builds from its own checkout -- with --build-on-host or when the target's
+    system differs from ours (no cross-platform build without remote builders)."""
     if build_on_host:
         return
     if host.system != LOCAL_SYSTEM:
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
         return
 
-    log(f"building {host.attr} ({host.system}) locally")
-    paths = nix_build_paths(host.toplevel)
-    if not paths:
-        die("system build produced no paths")
-    if do_hm:
-        hm = nix_build_paths(f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage')
-        if not hm:
-            die("home-manager build failed")
-        paths += hm
+    paths: list[str] = []
+    if "sys" in parts:
+        log(f"building {host.attr} ({host.system}) locally")
+        paths += nix_build_paths(host.toplevel)
+    if "hm" in parts:
+        log(f"building home-manager for {host.hm_key}")
+        paths += nix_build_paths(f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage')
 
     log(f"copying closure to {host.name}")
     subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
@@ -226,15 +224,20 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
     host = Host.resolve(args.target, args.attr, args.user)
-    do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
+    parts = {args.only} if args.only else {"sys", "hm"}
+    # home-manager only applies to hosts that define a standalone config
+    if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
+        if args.only == "hm":
+            die(f"{host.name} has no home-manager configuration ({host.hm_key})")
+        parts.discard("hm")
 
     if not host.local:
-        stage_remote(host, do_hm, build_on_host=args.build_on_host)
+        stage_remote(host, parts, build_on_host=args.build_on_host)
         subprocess.run(["git", "-C", str(FLAKE), "push", host.name], check=True)
 
-    if not args.hm_only:
+    if "sys" in parts:
         host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
-    if do_hm:
+    if "hm" in parts:
         host.run("home-manager", "switch", "--flake", host.flake, "-L")
 
 
@@ -291,16 +294,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="let the remote build from its checkout instead of " "shipping a prebuilt closure (no-op for the local host)"
     )
-    hm = up.add_mutually_exclusive_group()
-    hm.add_argument(
-        "--no-hm",
-        action="store_true",
-        help="skip home-manager"
-    )
-    hm.add_argument(
-        "--hm-only",
-        action="store_true",
-        help="skip the system rebuild"
+    up.add_argument(
+        "--only",
+        choices=("sys", "hm"),
+        help="activate only this part (default: system + home-manager)"
     )
     up.set_defaults(func=cmd_upgrade)
 
@@ -321,10 +318,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
-    # `clean`/`sync` don't take the upgrade-only flags; default them.
-    for flag in ("attr", "no_hm", "hm_only", "build_on_host"):
-        if not hasattr(args, flag):
-            setattr(args, flag, False if flag != "attr" else None)
     try:
         args.func(args)
     except subprocess.CalledProcessError as e:
