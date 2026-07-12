@@ -44,6 +44,8 @@ REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
 # Flake attr -> the host's network handle (its ssh target and git remote). Attrs
 # not listed are assumed reachable under their own name.
 SSH_HOSTS = {
+    "beta": "beta.lan",
+    "delta": "delta.lan",
     "desktop": "desktop.lan",
     "framework": "framework.lan",
     "ha": "ha.iot",
