@@ -272,10 +272,11 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         die(f"refusing to deploy: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
     # plan every host before touching any, so a bad target fails the batch early.
-    plan = [
-        (host, host_parts(host, args.only),)
-        for host in (Host.resolve(t, args.user) for t in targets)
-    ]
+    plan = []
+    for target in targets:
+        host = Host.resolve(target, args.user)
+        plan.append((host, host_parts(host, args.only)))
+
     for host, parts in plan:
         if not parts:
             log(f"{host.attr}: no home-manager config, skipping")
