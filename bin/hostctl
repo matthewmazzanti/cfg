@@ -230,25 +230,25 @@ def builds_locally(host: Host, build_on_host: bool) -> bool:
 def build_local(here: list[tuple[Host, set[str]]]) -> None:
     """Build every locally-buildable host's closure in one nix pass, then copy
     each remote's outputs over (the local host activates from the store directly)."""
-    jobs = []  # installables, in host order (sys before hm)
+    jobs = []  # (attr, installable)
     for host, parts in here:
         if "sys" in parts:
-            jobs.append(host.toplevel(FLAKE))
+            jobs.append((host.attr, host.toplevel(FLAKE)))
         if "hm" in parts:
-            jobs.append(host.hm_pkg(FLAKE))
+            jobs.append((host.attr, host.hm_pkg(FLAKE)))
     if not jobs:
         return
 
     log(f"building {len(here)} host(s) locally")
-    built = nix_build_json(jobs)
-    i = 0
-    for host, parts in here:
-        n = ("sys" in parts) + ("hm" in parts)  # this host's slice of `built`
-        outs = [p for entry in built[i:i + n] for p in entry["outputs"].values()]
-        i += n
+    built = nix_build_json([inst for _, inst in jobs])
+    outs: dict[str, list[str]] = {}  # attr -> its built store paths
+    for (attr, _), entry in zip(jobs, built):
+        outs.setdefault(attr, []).extend(entry["outputs"].values())
+
+    for host, _ in here:
         if not host.local:  # local host activates straight from the store
             log(f"copying closure to {host.name}")
-            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *outs], check=True)
+            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *outs[host.attr]], check=True)
 
 
 def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
