@@ -7,7 +7,7 @@ to this machine, so `hostctl clean` and `hostctl clean desktop` are the same
 code path with an ssh hop auto-inserted for the remote. SSH_HOSTS maps each attr
 to the ssh host it's reached at (used for ssh, nix copy, and git URLs).
 
-    hostctl upgrade [target]   rebuild + activate a host. For a remote this
+    hostctl upgrade [host...]  rebuild + activate hosts. For a remote this
                                defaults to "deploy mode" -- build the closure
                                locally, copy it over, then activate from the
                                host's checkout (no remote recompile). Deploy
@@ -244,26 +244,43 @@ def git_url(attr: str) -> str:
     return f"{SSH_HOSTS.get(attr, attr)}:{REMOTE_FLAKE.removeprefix('~/')}"
 
 
-def cmd_upgrade(args: argparse.Namespace) -> None:
-    if not is_local(args.target) and working_tree_dirty():
-        die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
-            "-- the remote builds from your pushed commits; commit or stash first")
-    host = Host.resolve(args.target, args.user)
-    parts = {args.only} if args.only else {"sys", "hm"}
-    # home-manager only applies to hosts that define a standalone config
+def host_parts(host: Host, only: str | None) -> set[str]:
+    """The parts to activate on this host: the requested set, minus home-manager
+    when the host has no standalone config (so it comes back empty for --only hm
+    against such a host)."""
+    parts = {only} if only else {"sys", "hm"}
     if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
-        if args.only == "hm":
-            die(f"{host.attr} has no home-manager configuration ({host.hm_key})")
         parts.discard("hm")
+    return parts
 
+
+def upgrade_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
+    """Stage the closure to a remote (if any), push, then activate the parts."""
     if not host.local:
-        stage_remote(host, parts, build_on_host=args.build_on_host)
+        stage_remote(host, parts, build_on_host=build_on_host)
         subprocess.run(["git", "-C", str(FLAKE), "push", git_url(host.attr), "HEAD"], check=True)
-
     if "sys" in parts:
         host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
     if "hm" in parts:
         host.run("home-manager", "switch", "--flake", host.flake, "-L")
+
+
+def cmd_upgrade(args: argparse.Namespace) -> None:
+    targets = args.targets or [""]
+    # one shared working tree, so the dirty guard is a single up-front check.
+    if any(not is_local(t) for t in targets) and working_tree_dirty():
+        die(f"refusing to deploy: uncommitted changes in {FLAKE} "
+            "-- the remote builds from your pushed commits; commit or stash first")
+    # plan every host before touching any, so a bad target fails the batch early.
+    plan = [
+        (host, host_parts(host, args.only),)
+        for host in (Host.resolve(t, args.user) for t in targets)
+    ]
+    for host, parts in plan:
+        if not parts:
+            log(f"{host.attr}: no home-manager config, skipping")
+            continue
+        upgrade_host(host, parts, build_on_host=args.build_on_host)
 
 
 def clean_host(host: Host) -> None:
@@ -312,7 +329,7 @@ def build_parser() -> argparse.ArgumentParser:
         aliases=["deploy"],
         help="rebuild + activate a host (deploy mode by default)"
     )
-    up.add_argument("target", nargs="?", default="", help="host (default: this machine)")
+    up.add_argument("targets", nargs="*", help="hosts (default: this machine)")
     up.add_argument(
         "--user",
         default=os.environ.get("USER") or getpass.getuser(),
