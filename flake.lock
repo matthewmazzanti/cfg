@@ -280,8 +280,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
         "quadlet-nix": "quadlet-nix",
-        "switchbot-ble": "switchbot-ble",
-        "vim-easyclip": "vim-easyclip"
+        "switchbot-ble": "switchbot-ble"
       }
     },
     "rust-overlay": {
@@ -339,23 +338,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "vim-easyclip": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1745569427,
-        "narHash": "sha256-oecTlBo/DzgCmcnsLp5VXfuLVMbzLNR8uWhY+J62os8=",
-        "owner": "svermeulen",
-        "repo": "vim-easyclip",
-        "rev": "4601faae051bec8ced37b452b32defca62a633f3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "svermeulen",
-        "ref": "master",
-        "repo": "vim-easyclip",
         "type": "github"
       }
     }

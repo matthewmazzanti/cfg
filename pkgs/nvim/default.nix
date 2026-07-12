@@ -36,6 +36,11 @@
     ] ++ optionals isLinux [
       inotify-tools
     ]
+    # render-markdown's LaTeX math converter (its default `latex2text`); paired
+    # with the `latex` treesitter grammar in `grammars` below.
+    ++ optionals opts.plugins [
+      python3Packages.pylatexenc
+    ]
     ++ optionals (opts.plugins && opts.lsp) (
       optionals opts.langs.c [ccls]
       ++ optionals opts.langs.go [gopls]
@@ -148,6 +153,7 @@
     javascript
     json
     json5
+    latex # math rendering in render-markdown ($$...$$ / $...$)
     lua
     nix
     nu

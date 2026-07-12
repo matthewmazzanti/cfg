@@ -418,6 +418,12 @@ local function buf_name(buf)
   local bt = vim.bo[buf].buftype
   local name = vim.api.nvim_buf_get_name(buf)
 
+  -- checkhealth is a nofile buffer named "health://", whose tail is empty -- so
+  -- key off its filetype rather than the buftype/name the branches below use.
+  if vim.bo[buf].filetype == "checkhealth" then
+    return "[Health]"
+  end
+
   if bt == "help" then
     return "help: " .. vim.fn.fnamemodify(name, ":t")
   elseif bt == "terminal" then

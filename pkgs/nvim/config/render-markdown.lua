@@ -22,6 +22,9 @@ local palette = require("gruvbox").palette
 vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = palette.dark0_soft })
 vim.api.nvim_set_hl(0, "RenderMarkdownCodeLanguage", { fg = palette.gray, bg = palette.dark0_soft })
 
+-- Rendered LaTeX math (the latex2text Unicode output)
+vim.api.nvim_set_hl(0, "RenderMarkdownMath", { fg = palette.aqua })
+
 -- Override heading backgrounds (defaults use Diff* which looks odd)
 vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { link = "GruvboxRedSign" })
 vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { link = "GruvboxOrangeSign" })
@@ -41,5 +44,13 @@ require("render-markdown").setup({
   code = {
     border = "thick",
     highlight_language = "RenderMarkdownCodeLanguage",
+  },
+  -- LaTeX math: the `latex` treesitter grammar spots $$...$$ / $...$ blocks,
+  -- latex2text (from pylatexenc, on the wrapper's PATH) renders them to Unicode.
+  latex = {
+    enabled = true,
+    converter = "latex2text",
+    highlight = "RenderMarkdownMath",
+    position = "center",
   },
 })

@@ -3,19 +3,6 @@
   system,
   inputs,
 }: let
-  nvimOverlay = pkgs.extend (self: super: {
-    vimPlugins =
-      super.vimPlugins
-      // {
-        vim-easyclip = super.vimUtils.buildVimPlugin {
-          pname = "vim-easyclip";
-          version = toString inputs.vim-easyclip.lastModified;
-          src = inputs.vim-easyclip;
-          dependencies = with super.vimPlugins; [vim-repeat];
-        };
-      };
-  });
-
   neovimOptions = {
     plugins = true;
     lsp = true;
@@ -36,11 +23,11 @@
   };
 
 in {
-  "nvim/root" = nvimOverlay.callPackage ./nvim {};
-  "nvim/dev" = nvimOverlay.callPackage ./nvim {
+  "nvim/root" = pkgs.callPackage ./nvim {};
+  "nvim/dev" = pkgs.callPackage ./nvim {
     options = neovimOptions;
   };
-  "nvim/nix" = nvimOverlay.callPackage ./nvim {
+  "nvim/nix" = pkgs.callPackage ./nvim {
     options = {
       plugins = true;
       lsp = true;

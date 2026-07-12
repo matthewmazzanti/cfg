@@ -22,10 +22,6 @@
     nix-direnv.url = "github:nix-community/nix-direnv/master";
     nix-direnv.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Neovim plugins
-    vim-easyclip.url = "github:svermeulen/vim-easyclip/master";
-    vim-easyclip.flake = false;
-
     # Home assistant plugins
     switchbot-ble.url = "github:matthewmazzanti/switchbot_ble";
     switchbot-ble.flake = false;
