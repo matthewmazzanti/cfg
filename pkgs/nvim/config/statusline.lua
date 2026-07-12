@@ -52,6 +52,12 @@ local function palette()
   }
 end
 
+-- The Linux virtual console has no bold font: it renders bold as the bright
+-- palette (fg index +8), which turns the mode/location block's black foreground
+-- into gray. So drop bold under TERM linux* and keep it on real terminals. TERM
+-- is fixed for the session, so pick once here (as `marks` does below).
+local mode_bold = not (vim.env.TERM or ""):match("^linux")
+
 -- lualine section -> our groups:
 --   a (mode) / z (location): accent bg, black fg, bold
 --   b (branch, diagnostics): white on lightgray
@@ -59,13 +65,13 @@ end
 local function setup_highlights()
   local p = palette()
   local set = vim.api.nvim_set_hl
-  set(0, "StModeNormal", { fg = p.black, bg = p.gray, bold = true })
-  set(0, "StModeInsert", { fg = p.black, bg = p.blue, bold = true })
-  set(0, "StModeVisual", { fg = p.black, bg = p.yellow, bold = true })
-  set(0, "StModeReplace", { fg = p.black, bg = p.red, bold = true })
-  set(0, "StModeCommand", { fg = p.black, bg = p.green, bold = true })
+  set(0, "StModeNormal", { fg = p.black, bg = p.gray, bold = mode_bold })
+  set(0, "StModeInsert", { fg = p.black, bg = p.blue, bold = mode_bold })
+  set(0, "StModeVisual", { fg = p.black, bg = p.yellow, bold = mode_bold })
+  set(0, "StModeReplace", { fg = p.black, bg = p.red, bold = mode_bold })
+  set(0, "StModeCommand", { fg = p.black, bg = p.green, bold = mode_bold })
   -- lualine has no terminal theme key, so it falls terminal back to normal.
-  set(0, "StModeTerminal", { fg = p.black, bg = p.gray, bold = true })
+  set(0, "StModeTerminal", { fg = p.black, bg = p.gray, bold = mode_bold })
 
   set(0, "StSection", { fg = p.white, bg = p.lightgray }) -- b: branch + diagnostics base
   set(0, "StFile", { fg = p.gray, bg = p.darkgray }) -- c/x: filename + filetype
@@ -470,7 +476,7 @@ local function setup()
   -- keep that accent in step.
   vim.api.nvim_create_autocmd("ModeChanged", {
     callback = function()
-      vim.cmd("redrawtabline")
+      vim.cmd.redrawtabline()
     end,
   })
 end
