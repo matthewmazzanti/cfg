@@ -181,6 +181,16 @@ def nix_build_paths(installable: str) -> list[str]:
     return out.split()
 
 
+def working_tree_dirty() -> bool:
+    """True if tracked files differ from HEAD -- i.e. uncommitted changes that a
+    remote (which builds from your pushed commits) wouldn't see. Untracked files
+    are ignored; the flake eval doesn't see them either."""
+    return subprocess.run(
+        ["git", "-C", str(FLAKE), "diff", "--quiet", "HEAD"],
+        capture_output=True,
+    ).returncode != 0
+
+
 def build_closure(host: Host, do_hm: bool) -> list[str]:
     """Build the system (and optional HM) closure locally; the paths to copy."""
     log(f"building {host.attr} ({host.system}) locally")
@@ -200,7 +210,11 @@ def build_closure(host: Host, do_hm: bool) -> list[str]:
 
 
 def cmd_upgrade(args: argparse.Namespace) -> None:
-    host = classify(resolve_host(args.target, args.attr, args.user))
+    host = resolve_host(args.target, args.attr, args.user)
+    if not host.local and working_tree_dirty():
+        die(f"refusing to deploy to {host.name}: uncommitted changes in {FLAKE} "
+            "-- the remote builds from your pushed commits; commit or stash first")
+    host = classify(host)
     do_system = not args.hm_only
     do_hm = not args.no_hm and flake_has("homeConfigurations", host.hm_key)
 
