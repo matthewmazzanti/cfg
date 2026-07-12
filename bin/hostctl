@@ -4,8 +4,8 @@
 One target axis (this machine, or a remote over ssh) crossed with a few
 lifecycle verbs. A target is a flake config name (e.g. `desktop`) and defaults
 to this machine, so `hostctl clean` and `hostctl clean desktop` are the same
-code path with an ssh hop auto-inserted for the remote. Git remotes are named by
-attr; SSH_HOSTS maps each attr to the ssh host it's reached at.
+code path with an ssh hop auto-inserted for the remote. SSH_HOSTS maps each attr
+to the ssh host it's reached at (used for ssh, nix copy, and git URLs).
 
     hostctl upgrade [target]   rebuild + activate a host. For a remote this
                                defaults to "deploy mode" -- build the closure
@@ -17,7 +17,6 @@ attr; SSH_HOSTS maps each attr to the ssh host it's reached at.
                                (alias: `deploy`)
     hostctl clean   [target]   collect old generations + prune boot entries
     hostctl sync    <host>     git fetch/merge/push the host's checkout
-    hostctl remote-add <host>  point a git remote (named by attr) at the host
 
 NixOS and nix-darwin hosts are handled uniformly: each target's kind and system
 are read from the flake, so the rebuild command and boot-entry prune follow the
@@ -42,9 +41,8 @@ from typing import NoReturn, Self
 
 REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
 
-# Flake attr -> the host's ssh/DNS name, for activation and nix copy. Git remotes
-# are named by attr (rename them locally to match), so git uses the attr directly;
-# this map only bridges attr -> reachable host. Attrs absent fall back to the attr.
+# Flake attr -> the host's ssh/DNS name. Used for ssh, nix copy, and the git URL
+# (git_url), so no named git remotes are needed. Attrs absent fall back to the attr.
 SSH_HOSTS = {
     "beta": "beta.lan",
     "delta": "delta.lan",
@@ -94,12 +92,12 @@ def log(msg: str) -> None:
 
 @dataclass
 class Host:
-    """A deploy target named by its flake `attr` (also its git remote); `name`
-    is the ssh host it maps to. `local` runs here vs over ssh; kind and system
+    """A deploy target named by its flake `attr`; `name` is the ssh host it maps
+    to (also the git URL host). `local` runs here vs over ssh; kind and system
     are read from the flake by Host.resolve()."""
 
-    name: str  # ssh host / network address (hostname when local)
-    attr: str  # flake config name + git remote -- what you type
+    name: str  # ssh host / git URL host / network address (hostname when local)
+    attr: str  # flake config name -- what you type
     user: str  # home-manager user, for the <user>@<attr> config
     local: bool  # run commands here rather than over ssh
     kind: str = ""  # "nixos" | "darwin"
@@ -237,6 +235,12 @@ def stage_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
     subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
 
 
+def git_url(attr: str) -> str:
+    """The host's repo reachable over ssh (e.g. desktop.lan:src/nix/cfg), built
+    from SSH_HOSTS -- so no named git remote has to be registered."""
+    return f"{SSH_HOSTS.get(attr, attr)}:{REMOTE_FLAKE.removeprefix('~/')}"
+
+
 def cmd_upgrade(args: argparse.Namespace) -> None:
     if not is_local(args.target) and working_tree_dirty():
         die(f"refusing to deploy to {args.target}: uncommitted changes in {FLAKE} "
@@ -251,7 +255,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
 
     if not host.local:
         stage_remote(host, parts, build_on_host=args.build_on_host)
-        subprocess.run(["git", "-C", str(FLAKE), "push", host.attr], check=True)
+        subprocess.run(["git", "-C", str(FLAKE), "push", git_url(host.attr), "HEAD"], check=True)
 
     if "sys" in parts:
         host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
@@ -268,26 +272,13 @@ def cmd_clean(args: argparse.Namespace) -> None:
 
 
 def cmd_sync(args: argparse.Namespace) -> None:
-    # the git remote is named by the flake attr, so the target is used directly.
-    remote = args.target
+    # pull the host's dev into the current branch, then push it back -- no named
+    # remote, so fetch lands in FETCH_HEAD and we push HEAD to its same-named branch.
+    url = git_url(args.target)
     git = ["git", "-C", str(FLAKE)]
-    subprocess.run([*git, "fetch", remote], check=True)
-    subprocess.run([*git, "merge", f"{remote}/dev"], check=True)
-    subprocess.run([*git, "push", remote], check=True)
-
-
-def cmd_remote_add(args: argparse.Namespace) -> None:
-    """Point a git remote (named by the flake attr) at the host's checkout,
-    resolving the ssh host through SSH_HOSTS. Idempotent: updates if it exists."""
-    attr = args.target
-    url = f"{SSH_HOSTS.get(attr, attr)}:{REMOTE_FLAKE.removeprefix('~/')}"
-    have = subprocess.run(
-        ["git", "-C", str(FLAKE), "remote"],
-        text=True, capture_output=True, check=True,
-    ).stdout.split()
-    verb = "set-url" if attr in have else "add"
-    log(f"git remote {verb} {attr} {url}")
-    subprocess.run(["git", "-C", str(FLAKE), "remote", verb, attr, url], check=True)
+    subprocess.run([*git, "fetch", url, "dev"], check=True)
+    subprocess.run([*git, "merge", "FETCH_HEAD"], check=True)
+    subprocess.run([*git, "push", url, "HEAD"], check=True)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -339,10 +330,6 @@ def build_parser() -> argparse.ArgumentParser:
     sy = sub.add_parser("sync", help="git fetch/merge/push a host's checkout")
     sy.add_argument("target", help="host to sync (flake attr)")
     sy.set_defaults(func=cmd_sync)
-
-    rm = sub.add_parser("remote-add", help="point a git remote (named by attr) at a host")
-    rm.add_argument("target", help="host (flake attr)")
-    rm.set_defaults(func=cmd_remote_add)
 
     return p
 
