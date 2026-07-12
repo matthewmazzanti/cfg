@@ -303,8 +303,10 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         if not host.local:
             subprocess.run(["git", "-C", FLAKE, "push", git_url(host.attr), "HEAD"], check=True)
 
-    here = [(h, p) for h, p in plan if builds_locally(h, args.build_on_host)]
-    there = [(h, p) for h, p in plan if not builds_locally(h, args.build_on_host)]
+    here, there = [], []
+    for host, parts in plan:
+        bucket = here if builds_locally(host, args.build_on_host) else there
+        bucket.append((host, parts))
     build_local(here)
     for host, parts in there:
         build_remote(host, parts, build_on_host=args.build_on_host)
