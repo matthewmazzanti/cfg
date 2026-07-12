@@ -147,10 +147,14 @@ class Host:
     def config_output(self) -> str:
         return "darwinConfigurations" if self.darwin else "nixosConfigurations"
 
-    @property
-    def toplevel(self) -> str:
-        # config.system.build.toplevel resolves for both NixOS and nix-darwin.
-        return f"{FLAKE}#{self.config_output}.{self.attr}.config.system.build.toplevel"
+    def toplevel(self, flake: str) -> str:
+        """The system-closure installable under a flake ref (config.system.build.
+        toplevel resolves for both NixOS and nix-darwin)."""
+        return f"{flake}#{self.config_output}.{self.attr}.config.system.build.toplevel"
+
+    def hm_pkg(self, flake: str) -> str:
+        """The home-manager activationPackage installable under a flake ref."""
+        return f'{flake}#homeConfigurations."{self.hm_key}".activationPackage'
 
     @property
     def flake(self) -> str:
@@ -215,27 +219,43 @@ def working_tree_dirty() -> bool:
     ).returncode != 0
 
 
-def stage_remote(host: Host, parts: set[str], *, build_on_host: bool) -> None:
-    """Build the requested parts' closures locally and copy them over, so the
-    host's rebuild reuses the store paths instead of recompiling. Skipped -- the
-    host builds from its own checkout -- with --build-on-host or when the target's
-    system differs from ours (no cross-platform build without remote builders)."""
-    if build_on_host:
+def builds_here(host: Host, build_on_host: bool) -> bool:
+    """Whether we build this host's closure locally and copy it, vs the host
+    building from its own checkout (--build-on-host, a cross-system target, or
+    the local machine)."""
+    return not host.local and not build_on_host and host.system == LOCAL_SYSTEM
+
+
+def build_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
+    """Realize the host's closure(s) so the switch phase only activates: build
+    locally and copy them over when we can, else have the host build from its
+    own checkout."""
+    if builds_here(host, build_on_host):
+        paths: list[str] = []
+        if "sys" in parts:
+            log(f"building {host.attr} ({host.system}) locally")
+            paths += nix_build_paths(host.toplevel(str(FLAKE)))
+        if "hm" in parts:
+            log(f"building home-manager for {host.hm_key}")
+            paths += nix_build_paths(host.hm_pkg(str(FLAKE)))
+        log(f"copying closure to {host.name}")
+        subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
         return
-    if host.system != LOCAL_SYSTEM:
+
+    if not host.local and not build_on_host:  # forced onto the host by a system mismatch
         log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
-        return
-
-    paths: list[str] = []
     if "sys" in parts:
-        log(f"building {host.attr} ({host.system}) locally")
-        paths += nix_build_paths(host.toplevel)
+        host.run("nix", "build", "--no-link", host.toplevel(host.flake))
     if "hm" in parts:
-        log(f"building home-manager for {host.hm_key}")
-        paths += nix_build_paths(f'{FLAKE}#homeConfigurations."{host.hm_key}".activationPackage')
+        host.run("nix", "build", "--no-link", host.hm_pkg(host.flake))
 
-    log(f"copying closure to {host.name}")
-    subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths], check=True)
+
+def switch_host(host: Host, parts: set[str]) -> None:
+    """Activate the built closure(s) -- a cache hit after build_host."""
+    if "sys" in parts:
+        host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
+    if "hm" in parts:
+        host.run("home-manager", "switch", "--flake", host.flake, "-L")
 
 
 def git_url(attr: str) -> str:
@@ -254,34 +274,32 @@ def host_parts(host: Host, only: str | None) -> set[str]:
     return parts
 
 
-def upgrade_host(host: Host, parts: set[str], *, build_on_host: bool) -> None:
-    """Stage the closure to a remote (if any), push, then activate the parts."""
-    if not host.local:
-        stage_remote(host, parts, build_on_host=build_on_host)
-        subprocess.run(["git", "-C", str(FLAKE), "push", git_url(host.attr), "HEAD"], check=True)
-    if "sys" in parts:
-        host.run("sudo", host.rebuild, "switch", "--flake", host.flake, "-L")
-    if "hm" in parts:
-        host.run("home-manager", "switch", "--flake", host.flake, "-L")
-
-
 def cmd_upgrade(args: argparse.Namespace) -> None:
     targets = args.targets or [""]
     # one shared working tree, so the dirty guard is a single up-front check.
     if any(not is_local(t) for t in targets) and working_tree_dirty():
         die(f"refusing to deploy: uncommitted changes in {FLAKE} "
             "-- the remote builds from your pushed commits; commit or stash first")
+
     # plan every host before touching any, so a bad target fails the batch early.
     plan = []
     for target in targets:
         host = Host.resolve(target, args.user)
-        plan.append((host, host_parts(host, args.only)))
-
-    for host, parts in plan:
+        parts = host_parts(host, args.only)
         if not parts:
             log(f"{host.attr}: no home-manager config, skipping")
             continue
-        upgrade_host(host, parts, build_on_host=args.build_on_host)
+        plan.append((host, parts))
+
+    # staged like sync: push all, build all, switch all -- so a build failure
+    # stops the batch before any host is switched.
+    for host, _ in plan:
+        if not host.local:
+            subprocess.run(["git", "-C", str(FLAKE), "push", git_url(host.attr), "HEAD"], check=True)
+    for host, parts in plan:
+        build_host(host, parts, build_on_host=args.build_on_host)
+    for host, parts in plan:
+        switch_host(host, parts)
 
 
 def clean_host(host: Host) -> None:
