@@ -1,10 +1,9 @@
 # Working on this Neovim config
 
-This is a **Nix-built** Neovim, not a dotfiles directory. Nothing here is read
-from disk at runtime — `default.nix` bakes the whole config into a store path,
-so **every change needs a rebuild** before you can see it. `README.md` catalogs
-the keybindings and features; this file is about how the build is wired and the
-gotchas that will otherwise cost you a debugging cycle.
+A wrapped Neovim (see `../CLAUDE.md` for the general wrapper/build model — config
+baked into a store path, git-tracked files only, rebuild to see any change).
+`README.md` catalogs the keybindings and features; this file is about how *this*
+build is wired and the gotchas that will otherwise cost you a debugging cycle.
 
 ## Layout and how it's wired
 
@@ -45,12 +44,8 @@ indentexpr are all from-scratch) — match that grain over reaching for a plugin
 nix build '.#"nvim/dev"' --no-link --print-out-paths
 ```
 
-- The "Git tree is dirty" warning is fine. Working-tree edits to **tracked**
-  files are included in the build.
-- **New files under `pkgs/` are invisible to the build until `git add`ed.** Nix
-  flakes copy only git-tracked files, so an untracked `plugin/foo.lua` or
-  `config/foo.lua` simply won't be in the store — `require` fails / the feature
-  no-ops with no error. Stage new files (uncommitted is fine) before building.
+Reminder (see `../CLAUDE.md`): a new `plugin/foo.lua` / `config/foo.lua` is
+invisible until `git add`ed — `require` fails / the feature no-ops with no error.
 
 Headless smoke test driving real keystrokes through the built binary:
 
