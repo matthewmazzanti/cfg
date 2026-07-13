@@ -6,6 +6,9 @@ callPackage ./wrapper.nix {
   inherit less;
   lesskey = builtins.readFile ./lesskey;
   wrapperArgs = [
+    "--set"
+    "LESSHISTFILE"
+    "-"
     "--add-flags"
     "--chop-long-lines"
     "--add-flags"
