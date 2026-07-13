@@ -54,11 +54,14 @@
   # symlink to getty@, so on-demand VTs are covered too.
   systemd.services."getty@".environment.TERM = "linux-16color";
 
-  # \n is the hostname, \l the tty (agetty issue escapes); nixos.label is the
-  # version string. Set /etc/issue directly rather than via getty.greetingLine,
-  # whose templating stitches in blank lines we don't want.
+  # \l is the tty (agetty issue escape); nixos.label is the version string.
+  # ''\e emits a literal ESC byte for ANSI color (agetty passes it through
+  # untouched — only backslash escapes like \l get interpreted). Hostname is
+  # dropped: the login prompt already shows it. Set /etc/issue directly rather
+  # than via getty.greetingLine, whose templating stitches in blank lines.
   environment.etc.issue.text = lib.mkForce ''
-    \n (\l) — NixOS ${config.system.nixos.label}
+    [1;34mNixOS[0m ${config.system.nixos.label} [2m(\l)[0m
+
   '';
 
   # Time zone.
