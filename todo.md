@@ -22,7 +22,7 @@
   - Lightweight nix -> file format helpers (generalize ghostty format.nix pattern)
 - [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
 - [x] Remove fake.nix things - only tmux/fake.nix existed; removed with the tmux wrapper
-- [ ] Re-add less config - wrapper still lives in pkgs/less but less/dev only reaches the beta host. Hook it into the hosts I actually use.
+- [x] Re-add less config - less/dev now ships to all NixOS hosts via base.nix systemPackages (deprioritized core less loses the collision). Beta (darwin) keeps its explicit entry.
 
 ## Neovim
 
