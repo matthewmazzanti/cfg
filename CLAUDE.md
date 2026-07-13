@@ -20,7 +20,7 @@ working inside them; they assume what's here.
 - **`sys/`** → `nixosConfigurations` / `darwinConfigurations` / `homeConfigurations`.
   One directory per host; `sys/default.nix` is the registry. See `sys/CLAUDE.md`.
 - **`pkgs/`** → `packages.<system>`. Custom-configured tools (nvim, zsh, less,
-  tmux, ghostty) built as store paths. See `pkgs/CLAUDE.md`.
+  ghostty) built as store paths. See `pkgs/CLAUDE.md`.
 - **`modules/nixos/`** → `nixosModules` (`base`, `impermanence`, `lanzaboote`,
   `zsh`). Reusable, host-agnostic building blocks that hosts `import`. Keep
   `base.nix` host-agnostic — host specifics belong in the host dir.

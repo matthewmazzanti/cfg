@@ -16,10 +16,10 @@ nix build '.#"zsh/dev"' --no-link --print-out-paths   # binary/config at $out
 ## The wrapped-config approach
 
 Most packages here follow the **same wrapper pattern** — learn it once and
-`less`, `tmux`, `zsh` all read the same way. It exists so config travels in the
+`less`, `zsh` all read the same way. It exists so config travels in the
 closure as a store path, not as a dotfile the tool hunts for in `$HOME`.
 
-The shape (see `less/wrapper.nix`, `tmux/wrapper.nix`, `zsh/wrapper.nix`):
+The shape (see `less/wrapper.nix`, `zsh/wrapper.nix`):
 
 1. A `wrapper.nix` exposes `lib.makeOverridable wrapper`. It `symlinkJoin`s the
    upstream package, then in `postBuild`:
@@ -27,7 +27,6 @@ The shape (see `less/wrapper.nix`, `tmux/wrapper.nix`, `zsh/wrapper.nix`):
    - `makeWrapper`s a fresh `bin/foo` that injects the config as a **flag or env
      var** pointing at a store path:
      - `less` → `--lesskey-src=${lesskeyDrv}` (+ default flags)
-     - `tmux` → `-f ${confDrv}`
      - `zsh` → `--set ZDOTDIR ${zdotdir}` (a derivation holding `.zshrc`/`.zshenv`)
 2. A `default.nix` (or `dev.nix`) supplies the tool + the config, read from disk
    with `builtins.readFile ./foo.conf`, and calls the wrapper.
@@ -37,7 +36,7 @@ Because the wrapper is `makeOverridable`, a consumer can
 
 **Two shapes exist — don't assume everything is a wrapped binary:**
 
-- **Wrapped binary** — `less`, `tmux`, `zsh`, `nvim`. Produces a runnable
+- **Wrapped binary** — `less`, `zsh`, `nvim`. Produces a runnable
   `$out/bin/<tool>` with config baked in.
 - **Generated config file** — `ghostty`. `ghostty/default.nix` produces a
   `writeText` config file (rendered from a Nix attrset via `ghostty/format.nix`,
@@ -61,6 +60,4 @@ Because the wrapper is `makeOverridable`, a consumer can
   is invisible to the build until `git add`ed — `require`/`source` silently
   fails or the setting no-ops. Stage new files (uncommitted is fine) before
   building. This is the single most common way a change "doesn't apply."
-- **`tmux/fake.nix`** is a standalone mini-flake for iterating on tmux alone
-  (`nix build .#dev` from inside `pkgs/tmux`), separate from the top-level flake.
 - `nvim` and `zsh` have their own `CLAUDE.md` — read those before editing them.

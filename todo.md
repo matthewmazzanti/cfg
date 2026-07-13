@@ -21,8 +21,8 @@
   - Support: neovim, zsh, ghostty, git, direnv, etc.
   - Lightweight nix -> file format helpers (generalize ghostty format.nix pattern)
 - [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
-- [ ] Remove fake.nix things
-- [ ] Re-add less/tmux configs - wrappers still live in pkgs/{less,tmux} but are orphaned (tmux never wired into pkgs/default.nix; less/dev only reaches the beta host). Hook them into the hosts I actually use.
+- [x] Remove fake.nix things - only tmux/fake.nix existed; removed with the tmux wrapper
+- [ ] Re-add less config - wrapper still lives in pkgs/less but less/dev only reaches the beta host. Hook it into the hosts I actually use.
 
 ## Neovim
 
