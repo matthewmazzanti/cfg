@@ -81,7 +81,6 @@ v         visual
 !         shell
 +         firstcmd
 H         help
-h         help
 V         version
 0         digit
 1         digit
@@ -93,6 +92,7 @@ V         version
 7         digit
 8         digit
 9         digit
+\e        quit
 q         quit
 Q         quit
 :q        quit
