@@ -1,4 +1,4 @@
-{ pkgs, modulesPath, flake, lib, ... }: {
+{ config, lib, pkgs, modulesPath, flake, ... }: {
   # Not entirely sure what this does, but it definitely does something
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -53,6 +53,13 @@
   # linux-16color for the whole VT session, before any shell runs. autovt@ is a
   # symlink to getty@, so on-demand VTs are covered too.
   systemd.services."getty@".environment.TERM = "linux-16color";
+
+  # \n is the hostname, \l the tty (agetty issue escapes); nixos.label is the
+  # version string. Set /etc/issue directly rather than via getty.greetingLine,
+  # whose templating stitches in blank lines we don't want.
+  environment.etc.issue.text = lib.mkForce ''
+    \n (\l) — NixOS ${config.system.nixos.label}
+  '';
 
   # Time zone.
   time.timeZone = "America/New_York";
