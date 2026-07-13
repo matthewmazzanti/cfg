@@ -4,14 +4,10 @@ update:
     bump-kernel --flake . --json lib/pins.json --lts-kernel --write
 
 # Rebuild + activate a host (by flake attr). No target = this machine. Flags:
-# --only sys|hm, --build-on-host. Deploy mode (build local, copy) is the default.
+# --only sys|hm, --build-on-host. Deploy mode -- build locally, copy the closure,
+# no remote recompile -- is the default for a remote target.
 upgrade *args:
     hostctl upgrade {{args}}
-
-# Alias for `upgrade`. Deploy mode -- build locally, copy the closure, no remote
-# recompile -- is upgrade's default for a remote target.
-deploy *args:
-    hostctl deploy {{args}}
 
 # GC old generations + prune boot entries. No target = this machine.
 clean *args:

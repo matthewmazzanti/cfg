@@ -55,8 +55,8 @@ If you're threading a package/module/input into a host, it comes through
 this machine**):
 
 ```sh
-just deploy <host>    # build locally, copy the closure, activate (default for remotes)
-just upgrade <host>   # same; --build-on-host to build on the target instead
+just upgrade <host>   # build locally, copy the closure, activate (default for remotes);
+                      # --build-on-host to build on the target instead
 just clean  <host>    # GC old generations + prune boot entries
 just update           # nix flake update + refresh images.json + bump kernel pins
 ```

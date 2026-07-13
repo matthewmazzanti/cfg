@@ -137,8 +137,8 @@
 
   # Let the admin push locally-built (unsigned) closures over `nix copy` -- a
   # trusted user's imports skip signature checking. mmazzanti is already wheel
-  # -> root here, so this grants no privilege they lack. Enables `just remote
-  # deploy`: build locally, copy the closure, then rebuild from the checkout.
+  # -> root here, so this grants no privilege they lack. Enables `just upgrade`
+  # deploy mode: build locally, copy the closure, then rebuild from the checkout.
   nix.settings.trusted-users = ["mmazzanti"];
 
   # State version for all systems
