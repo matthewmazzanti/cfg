@@ -72,6 +72,8 @@
     flake.packages.home-manager
     # Minimally configured nvim
     flake.packages."nvim/root"
+    # Configured pager (shadows the deprioritized core less)
+    flake.packages."less/dev"
 
     # Allow Ghostty to work
     ghostty.terminfo
