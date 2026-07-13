@@ -75,6 +75,10 @@ T         prev-tag
 -         toggle-option
 :t        toggle-option t
 s         toggle-option o
+#         toggle-option N
+S         toggle-option S
+i         toggle-option i
+L         undo-hilite
 _         display-option
 |         pipe
 v         visual
