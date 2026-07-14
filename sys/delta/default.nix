@@ -14,7 +14,7 @@
       tree
       jq
       yq-go
-      visidata
+      # visidata  # dropped: pulls in seaborn, which currently fails to build
       # Networking
       nmap
       httpie
