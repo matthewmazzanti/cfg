@@ -18,6 +18,9 @@
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
     "/var/lib/NetworkManager"
+    # scanservjs state: scanned files + device config, so they survive the
+    # boot-time root rollback (tmpfiles recreates the data dirs on top).
+    "/var/lib/scanservjs"
   ];
 
   # ZFS
@@ -53,24 +56,36 @@
   };
 
   # Root rolls back to blank every boot (impermanence), so a queue added via
-  # the CUPS web UI would not survive -- declare it instead. deviceUri + model
-  # come off the box after the first deploy; see the TODO below to fill them.
-  # hardware.printers = {
-  #   ensureDefaultPrinter = "Brother_HL-L2300D";
-  #   ensurePrinters = [{
-  #     name = "Brother_HL-L2300D";
-  #     deviceUri = "usb://Brother/HL-L2300D?serial=XXXXXXXX"; # from `lpinfo -v`
-  #     model = "drv:///brlaser.drv/br2300d.ppd";             # from `lpinfo -m`
-  #   }];
-  # };
+  # the CUPS web UI would not survive -- declare it instead. ensure-printers
+  # recreates it with lpadmin on every boot. deviceUri (serial) + model were
+  # read off the box with `lpinfo -v` / `lpinfo -m`.
+  hardware.printers = {
+    ensureDefaultPrinter = "Brother_HL-L2300D";
+    ensurePrinters = [
+      {
+        name = "Brother_HL-L2300D";
+        description = "Brother HL-L2300D";
+        deviceUri = "usb://Brother/HL-L2300D%20series?serial=U63878K2N151402";
+        model = "drv:///brlaser.drv/brl2300d.ppd";
+      }
+    ];
+  };
 
-  # ---- Scanning (SANE, detection pass) ------------------------------------
-  # Fujitsu ScanSnap iX1300 (USB). The standard sane-backends include the
-  # `fujitsu` (newer iX/ScanSnap) and `epjitsu` (older S1300-class, needs
-  # extracted firmware) drivers. This first pass only enables SANE so we can
-  # run `scanimage -L` on the box and learn whether the iX1300 is detected --
-  # then we pick a front-end (scanservjs web UI / saned / CLI) accordingly.
+  # ---- Scanning (SANE + scanservjs web UI) --------------------------------
+  # Fujitsu ScanSnap iX1300 (USB), driven by the stock `fujitsu` backend --
+  # `scanimage -L` sees it as `fujitsu:ScanSnap iX1300`, no firmware needed.
   hardware.sane.enable = true;
+
+  # scanservjs: browser-based scanning, the right fit for a headless box --
+  # scan from any device on the LAN, no client setup. Defaults to localhost;
+  # bind all interfaces so the LAN can reach it. No built-in auth, so this
+  # leans on the box living on a trusted network.
+  services.scanservjs = {
+    enable = true;
+    settings.host = "0.0.0.0";
+    settings.port = 8080;
+  };
+  networking.firewall.allowedTCPPorts = [8080];
 
   # Packages
   # environment.systemPackages = with pkgs; [ ];
