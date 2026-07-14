@@ -480,9 +480,15 @@ local function setup()
   -- The statusline redraws on mode change on its own, but the tabline doesn't --
   -- and the selected tab's color now tracks the mode -- so redraw it explicitly to
   -- keep that accent in step.
+  -- Defer to the next loop tick: a redrawtabline() called synchronously from
+  -- inside ModeChanged gets coalesced/dropped before it flushes on some
+  -- terminals (notably macOS), leaving the tab accent stale until the next
+  -- keystroke. Scheduling it lets the mode change settle first.
   vim.api.nvim_create_autocmd("ModeChanged", {
     callback = function()
-      vim.cmd.redrawtabline()
+      vim.schedule(function()
+        vim.cmd.redrawtabline()
+      end)
     end,
   })
 end
