@@ -64,6 +64,14 @@ just update           # nix flake update + refresh images.json + bump kernel pin
 `hostctl` builds git URLs from `SSH_HOSTS` — there are no named git remotes. See
 memory (`nix-cfg-deploy-hostctl`) and the module docstring in `bin/hostctl`.
 
+**This is a distributed config — never `rebase`, always `merge`.** Every host
+keeps its own git checkout (`just upgrade` pushes commits to it; `just sync`
+fetches each host's `dev` into `refs/hostctl/<host>` and merges it back).
+Rebasing rewrites hashes those checkouts still reference, so the next `sync`
+sees the old commits as divergent and drags reverted work back in as merge
+conflicts. Pull/integrate with `merge` only; reserve `rebase` for an explicit
+request on a branch no host has pulled.
+
 ## Cross-cutting gotchas
 
 - **Flakes only see git-tracked files.** A new `.nix`/`.lua`/`.zsh`/config file
