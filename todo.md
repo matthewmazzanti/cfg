@@ -53,9 +53,14 @@
 
 ## Print
 
-- [ ] Add scanning/CUPS setup to the `print` host
-  - Brother printer (model TBD)
-  - ScanSnap scanner
+- [x] CUPS setup on the `print` host - Brother HL-L2300D via brlaser, declarative
+  `ensurePrinters`, shared over the LAN with Avahi (mDNS/AirPrint)
+- [x] CLI scanning - ScanSnap iX1300 via the stock `fujitsu` backend
+  (`hardware.sane.enable`, `mmazzanti` in `scanner`); `scanimage` over SSH
+- [ ] Button-triggered auto-scan (load stack → press Scan → duplex batch → one PDF
+  in `/home/mmazzanti/scans`). Direction: follow/extend s1500d (raw-USB
+  `GET_HW_STATUS` poll → release → `scanimage`+`img2pdf`), upstream or a simpler
+  Python emulation. Design + findings: `docs/scanner-button-autoscan.md`
 
 ## Server
 
