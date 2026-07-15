@@ -42,6 +42,7 @@
     extraGroups = [ "networkmanager" ];
     packages = with pkgs; [
       flake.packages."nvim/dev"
+      flake.packages."scan/client" # `scan <name.pdf>`: scan on print, copy back
       mpv # Tui movie player
       todoist-electron # TODO list
       obsidian

@@ -97,6 +97,7 @@ in {
       flake.packages."less/dev"
       flake.packages."nvim/dev"
       flake.packages."zsh/dev"
+      flake.packages."scan/client" # `scan <name.pdf>`: scan on print, copy back
     ];
 
   homebrew = {

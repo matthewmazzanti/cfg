@@ -32,7 +32,11 @@
   users.users.mmazzanti = {
     # lp: manage CUPS queues.  scanner: access SANE devices.
     extraGroups = ["networkmanager" "podman" "dialout" "lp" "scanner"];
-    packages = [flake.packages."nvim/nix"];
+    packages = [
+      flake.packages."nvim/nix"
+      # `scan <name.pdf>`: ADF batch -> single PDF, on the scanner's USB host.
+      flake.packages."scan/host"
+    ];
   };
 
   # ---- Printing (CUPS) ----------------------------------------------------

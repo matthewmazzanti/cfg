@@ -44,4 +44,6 @@ in {
   };
   "less/dev" = pkgs.callPackage ./less {};
   "ghostty/config" = pkgs.callPackage ./ghostty { inherit system; };
+  "scan/host" = pkgs.callPackage ./scan { mode = "host"; };
+  "scan/client" = pkgs.callPackage ./scan { mode = "client"; };
 }
