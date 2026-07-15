@@ -18,15 +18,22 @@
   environment.persistence."/persist".directories = [
     "/etc/NetworkManager/system-connections"
     "/var/lib/NetworkManager"
-    # scanservjs state: scanned files + device config, so they survive the
-    # boot-time root rollback (tmpfiles recreates the data dirs on top).
-    "/var/lib/scanservjs"
   ];
 
   # ZFS
   networking.hostId = "d015a266";
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
+
+  # Packages
+  # environment.systemPackages = with pkgs; [ ];
+
+  # User config
+  users.users.mmazzanti = {
+    # lp: manage CUPS queues.  scanner: access SANE devices.
+    extraGroups = ["networkmanager" "podman" "dialout" "lp" "scanner"];
+    packages = [flake.packages."nvim/nix"];
+  };
 
   # ---- Printing (CUPS) ----------------------------------------------------
   # Brother HL-L2300D (mono laser, USB) shared to the LAN. brlaser is the
@@ -71,29 +78,10 @@
     ];
   };
 
-  # ---- Scanning (SANE + scanservjs web UI) --------------------------------
+  # ---- Scanning (SANE, CLI) -----------------------------------------------
   # Fujitsu ScanSnap iX1300 (USB), driven by the stock `fujitsu` backend --
   # `scanimage -L` sees it as `fujitsu:ScanSnap iX1300`, no firmware needed.
+  # CLI-only for now: scanimage over SSH. mmazzanti is in `scanner` (below)
+  # for device access. A web/network front-end can come later.
   hardware.sane.enable = true;
-
-  # scanservjs: browser-based scanning, the right fit for a headless box --
-  # scan from any device on the LAN, no client setup. Defaults to localhost;
-  # bind all interfaces so the LAN can reach it. No built-in auth, so this
-  # leans on the box living on a trusted network.
-  services.scanservjs = {
-    enable = true;
-    settings.host = "0.0.0.0";
-    settings.port = 8080;
-  };
-  networking.firewall.allowedTCPPorts = [8080];
-
-  # Packages
-  # environment.systemPackages = with pkgs; [ ];
-
-  # User config
-  users.users.mmazzanti = {
-    # lp: manage CUPS queues.  scanner: access SANE devices.
-    extraGroups = ["networkmanager" "podman" "dialout" "lp" "scanner"];
-    packages = [flake.packages."nvim/nix"];
-  };
 }
