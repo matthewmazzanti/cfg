@@ -212,7 +212,13 @@ function prompt_pwd() {
     # Render with colored separators:
     # - bright-yellow "/" between segments
     # - yellow text for segment names
+    #
+    # Absolute paths lose their leading "/" when split on "/" (the empty first
+    # field is dropped), so re-add it for anything not rewritten to "~".
     local out=""
+    if [[ $dir != '~'(|/*) ]]; then
+        out+="${prompt_fg[bright-yellow]}/"
+    fi
     for (( i = 1; i <= ${#segs}; i++ )); do
         if (( i > 1 )); then
             out+="${prompt_fg[bright-yellow]}/"
