@@ -12,13 +12,20 @@ they run anywhere without a dev shell. The exception is `lock-images`, a
 
 - **`hostctl`** — the deploy engine, and the biggest thing here. One target axis
   (this machine, or a remote over ssh) × lifecycle verbs (`upgrade`/`deploy`,
-  `clean`, `sync`). A target is a **flake config attr** (e.g. `desktop`) and
-  defaults to this machine, so `hostctl clean` and `hostctl clean desktop` are
-  the same code path with an ssh hop auto-inserted. **`SSH_HOSTS`** maps each
-  attr → the ssh host it's reached at, used for ssh, `nix copy`, and building git
-  URLs (there are no named git remotes). NixOS and darwin hosts are handled
-  uniformly — each target's kind/system is read from the flake. Read the module
-  docstring; it's the spec. See memory `nix-cfg-deploy-hostctl`.
+  `clean`, `sync`, `gc-roots`). A target is a **flake config attr** (e.g.
+  `desktop`) and defaults to this machine, so `hostctl clean` and `hostctl clean
+  desktop` are the same code path with an ssh hop auto-inserted. **`SSH_HOSTS`**
+  maps each attr → the ssh host it's reached at, used for ssh, `nix copy`, and
+  building git URLs (there are no named git remotes). NixOS and darwin hosts are
+  handled uniformly — each target's kind/system is read from the flake. Read the
+  module docstring; it's the spec. See memory `nix-cfg-deploy-hostctl`.
+  - **`gc-roots`** is the odd one out: local-only (this junk accumulates per
+    workstation, not on servers), takes no host target, and is dry-run unless
+    `--prune`. It unlinks the *targets* of auto gcroots matching `GC_ROOT_RULES`
+    (nix-direnv links, `nix build` results) that we own and are older than
+    `--older-than` days; the now-dangling `auto/<hash>` entries and freed store
+    are reclaimed by the next `clean`. Rules are locked in the cmd layer for now,
+    meant to become configurable. `GC_ROOT_RULES` is the seam.
 - **`bump-kernel`** — advances the kernel + zfs pins in `../lib/pins.json`,
   **forward-only** (never a downgrade). It evals `.#lib.zfsKernelMatrix` (a pure
   projection defined in `../lib/`) for the candidate pairs and applies the

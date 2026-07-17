@@ -17,6 +17,9 @@ to the ssh host it's reached at (used for ssh, nix copy, and git URLs).
                                (alias: `deploy`)
     hostctl clean   [host...]  collect old generations + prune boot entries
     hostctl sync    <host...>  git fetch/merge/push each host's checkout (layered)
+    hostctl gc-roots           unlink stale nix-direnv/result gc-roots we own on
+                               this machine (dry run without --prune; the dangling
+                               auto entries + store are reclaimed by a later clean)
 
 NixOS and nix-darwin hosts are handled uniformly: each target's kind and system
 are read from the flake, so the rebuild command and boot-entry prune follow the
@@ -33,10 +36,12 @@ import getpass
 import json
 import os
 import platform
+import re
 import shlex
 import socket
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NoReturn, Self
@@ -90,6 +95,14 @@ def die(msg: str) -> NoReturn:
 
 def log(msg: str) -> None:
     print(f"\033[1;34m::\033[0m {msg}", file=sys.stderr)
+
+
+def tilde(p: Path) -> str:
+    """Path with the current $HOME collapsed to ~ -- display only."""
+    try:
+        return f"~/{p.relative_to(Path.home())}"
+    except ValueError:
+        return str(p)
 
 
 @dataclass
@@ -376,6 +389,75 @@ def cmd_sync(args: argparse.Namespace) -> None:
         subprocess.run([*git, "push", url, "HEAD"], check=True)
 
 
+GCROOTS_AUTO = Path("/nix/var/nix/gcroots/auto")
+
+
+def scan_auto_roots(rules: list[re.Pattern], older_than: float) -> list[tuple[Path, float]]:
+    """(target, age-in-days) for live auto gcroots older than `older_than` days
+    whose target matches one of `rules` (target-regexes) and is owned by us. The
+    target symlink is what we unlink: doing so leaves its root-owned auto/<hash>
+    entry dangling, and nix-collect-garbage prunes the entry + reclaims the closure
+    on the next GC -- so no sudo, which is also why we only take targets we own. A
+    target matching no rule is skipped, so profile/home-manager/registry roots stay
+    untouched -- an age sweep can't reach a live system/HM generation. Already-
+    dangling roots are skipped: same GC path."""
+    now = time.time()
+    uid = os.getuid()
+    found: list[tuple[Path, float]] = []
+    if not GCROOTS_AUTO.is_dir():
+        return found
+    for entry in GCROOTS_AUTO.iterdir():
+        try:
+            target = Path(os.readlink(entry))
+        except OSError:
+            continue
+        if not os.path.exists(entry):  # dangling indirect root -- GC handles it
+            continue
+        if not any(rx.match(str(target)) for rx in rules):
+            continue  # profile / home-manager / registry / etc.
+        try:
+            if os.lstat(target).st_uid != uid:  # the symlink itself, not its store target
+                continue  # not ours to unlink -- leave roots we don't own
+        except OSError:
+            continue
+        age = (now - entry.lstat().st_mtime) / 86400
+        if age < older_than:
+            continue
+        found.append((target, age))
+    return found
+
+
+# The auto gcroots this command manages, as target-regexes: nix-direnv links and
+# `nix build` results. Locked here for now -- eventually these move to config
+# (flake data / a dotfile) so hosts can tune what's eligible. A target matching no
+# regex is skipped, keeping profile / home-manager / registry roots untouched.
+GC_ROOT_RULES = [
+    re.compile(r".*/\.direnv/"),
+    re.compile(r".*/result(?:-\d+)?$"),
+]
+
+
+def cmd_gc_roots(args: argparse.Namespace) -> None:
+    """List (or, with --prune, remove) stale gc-roots matching GC_ROOT_RULES on
+    this machine. Local-only: this junk accumulates per-workstation, not servers."""
+    found = scan_auto_roots(GC_ROOT_RULES, args.older_than)
+    if not found:
+        log(f"no gc-roots older than {args.older_than:g}d")
+        return
+
+    log(f"{len(found)} target(s) to unlink (older than {args.older_than:g}d):")
+    for target, age in sorted(found):
+        print(f"  {age:>5.0f}d  {tilde(target)}", file=sys.stderr)
+
+    if not args.prune:
+        log("dry run -- pass --prune to unlink these; `hostctl clean` then prunes the dangling roots and reclaims the store")
+        return
+
+    for target, _ in found:
+        target.unlink(missing_ok=True)  # drops the indirect root; its auto/<hash> entry now dangles
+    log(f"unlinked {len(found)} target(s); run `hostctl clean` to prune the dangling roots and reclaim the store")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="hostctl",
@@ -414,6 +496,14 @@ def build_parser() -> argparse.ArgumentParser:
     sy = sub.add_parser("sync", help="git fetch/merge/push hosts' checkouts")
     sy.add_argument("targets", nargs="+", help="hosts to sync (flake attrs)")
     sy.set_defaults(func=cmd_sync)
+
+    gc = sub.add_parser("gc-roots", help="list/prune stale direnv+result gc-roots (this machine)")
+    gc.add_argument(
+        "--older-than", type=float, default=30, metavar="DAYS",
+        help="only sites whose newest root is older than this (default: 30; 0 = all)"
+    )
+    gc.add_argument("--prune", action="store_true", help="remove the sites (default: dry run)")
+    gc.set_defaults(func=cmd_gc_roots)
 
     return p
 

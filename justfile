@@ -13,6 +13,12 @@ upgrade *args:
 clean *args:
     hostctl clean {{args}}
 
+# Unlink stale nix-direnv/result gc-roots on this machine (dry run by default).
+# Flags: --older-than DAYS (default 30), --prune. Run `just clean` afterwards to
+# reap the dangling roots and reclaim the store.
+gc-roots *args:
+    hostctl gc-roots {{args}}
+
 # Fetch a host's repo, merge its dev branch, and push back.
 sync *args:
     hostctl sync {{args}}
