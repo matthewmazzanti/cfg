@@ -117,7 +117,7 @@ fi
     local ls_args=(
         --color=auto
         --group-directories-first
-        --classify
+        --classify=auto
     )
     local gnu_ls_args=(
         "${ls_opts[@]}"
