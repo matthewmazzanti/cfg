@@ -23,16 +23,16 @@ bridge+macvlan design that no longer exists). The live layout, from
 - State is on dedicated ZFS datasets (`/var/lib/{nginx,hass,zwave}`);
   `/var/lib/containers` is persisted via impermanence.
 
-## Images and the hass custom build
+## Images
 
 Container images are pinned in `flake.lib.images` (`lib/images.json`, refreshed
 by `bin/lock-images` / `just update`) — referenced as `flake.lib.images.<name>`.
+All three containers (nginx, hass, zwave) pull their pinned image directly.
 
-**hass is not pulled directly.** `builds.hass` builds a local override image from
-an in-store `Containerfile` that injects a pinned git `pyatv` into the Apple TV
-integration manifest — a workaround for the tvOS 26.4 power-state regression.
-**Drop this override** (`builds.hass.buildConfig.file`) once a hass stable ships
-a pyatv with the fix; the commit ref and rationale are inline.
+> Historical note: hass used to run a local override image (`builds.hass`) that
+> injected a git `pyatv` into the Apple TV manifest, a workaround for the tvOS
+> 26.4 power-state regression. Dropped once hass stable shipped pyatv 0.18.0
+> (HA 2026.7.0), which carries the fix natively.
 
 ## Config files are mounted read-only from the store
 
