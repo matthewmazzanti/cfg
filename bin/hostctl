@@ -97,6 +97,19 @@ def log(msg: str) -> None:
     print(f"\033[1;34m::\033[0m {msg}", file=sys.stderr)
 
 
+def confirm(prompt: str) -> bool:
+    """Interactive yes/no gate; a bare Enter accepts (default yes). Returns True
+    on a non-tty stdin so piped/automated runs don't hang -- pass --yes to skip
+    the prompt entirely."""
+    if not sys.stdin.isatty():
+        return True
+    try:
+        reply = input(f"\033[1;34m::\033[0m {prompt} [Y/n] ").strip().lower()
+    except EOFError:
+        return False
+    return reply in ("", "y", "yes")
+
+
 def tilde(p: Path) -> str:
     """Path with the current $HOME collapsed to ~ -- display only."""
     try:
@@ -352,6 +365,15 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     for host, parts in there:
         built[host.attr] = build_remote(host, parts, build_on_host=args.build_on_host)
 
+    # Gate activation behind an explicit ack: the slow, sudo-free work (push,
+    # build, copy) is done, so from here the sudo prompt lands right after you
+    # confirm -- no auth going stale during a long build. --yes skips it.
+    if not args.yes:
+        summary = ", ".join(f"{h.attr} ({'+'.join(sorted(p))})" for h, p in plan)
+        if not confirm(f"activate {summary}?"):
+            log("aborted; nothing activated")
+            return
+
     for host, parts in plan:
         switch_host(host, parts, built[host.attr])
 
@@ -486,6 +508,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--only",
         choices=("sys", "hm"),
         help="activate only this part (default: system + home-manager)"
+    )
+    up.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="skip the pre-activation confirmation prompt"
     )
     up.set_defaults(func=cmd_upgrade)
 
