@@ -44,9 +44,15 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NoReturn, Self
+from typing import NoReturn, Self, cast
 
 REMOTE_FLAKE = "~/src/nix/cfg"  # literal; expanded by the remote shell
+
+# Where deploy-window gc-roots live on each activating host. A temp dir on
+# purpose: if hostctl dies before drop_gc_roots() runs, the leaked roots (and the
+# closures they pin) get reaped by the system's tmp cleaner, so a crash can't
+# permanently wedge a closure into the store.
+HOSTCTL_GCROOTS = "/tmp/hostctl-gcroots"
 
 # Flake attr -> the host's ssh/DNS name. Used for ssh, nix copy, and the git URL
 # (git_url), so no named git remotes are needed. Attrs absent fall back to the attr.
@@ -259,7 +265,11 @@ def builds_locally(host: Host, build_on_host: bool) -> bool:
 
 def build_local(here: list[tuple[Host, set[str]]]) -> dict[str, dict[str, str]]:
     """Build every locally-buildable host's closure in one nix pass, copy each
-    remote's outputs over, and return each host's built paths keyed by part."""
+    remote's outputs over, and return each host's built paths keyed by part. Every
+    closure is gc-rooted the instant it lands on a store: locally right after the
+    pass (all closures share one --no-link build, so a GC could reap one before
+    it's copied), then again on each remote right after its copy. So nothing sits
+    unrooted while the remaining closures copy -- a prime window for a stray GC."""
     jobs = []  # (attr, part, installable)
     for host, parts in here:
         if "sys" in parts:
@@ -273,27 +283,44 @@ def build_local(here: list[tuple[Host, set[str]]]) -> dict[str, dict[str, str]]:
     built = nix_build_json([inst for _, _, inst in jobs])
     if len(built) != len(jobs):  # positional mapping below needs 1:1 (distinct installables)
         die(f"nix build returned {len(built)} results for {len(jobs)} installables")
+
     paths: dict[str, dict[str, str]] = {}  # attr -> {part: out path}
     for (attr, part, _), entry in zip(jobs, built):
         paths.setdefault(attr, {})[part] = entry["outputs"]["out"]
 
+    # Root every closure in the local store first -- protects the local host's own
+    # closure through activation, and each remote's source copy until it ships.
+    for attr, parts in paths.items():
+        for part, path in parts.items():
+            subprocess.run(["nix", "build", path, "--out-link", f"{HOSTCTL_GCROOTS}/{attr}-{part}"], check=True)
+
+    # Ship each remote's closure and root it on the remote too, before the next
+    # copy, so the remote's own GC can't reap it. (The local host activates in
+    # place from the store root above -- no copy, no second root.)
     for host, _ in here:
-        if not host.local:  # local host activates straight from the store
-            log(f"copying closure to {host.name}")
-            subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths[host.attr].values()], check=True)
+        if host.local:
+            continue
+        log(f"copying closure to {host.name}")
+        subprocess.run(["nix", "copy", "--to", f"ssh://{host.name}", *paths[host.attr].values()], check=True)
+        for part, path in paths[host.attr].items():
+            host.run("nix", "build", path, "--out-link", f"{HOSTCTL_GCROOTS}/{host.attr}-{part}")
     return paths
 
 
-def build_remote(host: Host, parts: set[str], *, build_on_host: bool) -> dict[str, str]:
+def build_remote(host: Host, parts: set[str]) -> dict[str, str]:
     """Have the host build its own closure (--build-on-host or a cross-system
-    target); return the built paths (in the host's store) keyed by part."""
-    if not build_on_host and host.system != LOCAL_SYSTEM:
-        log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
+    target); return the built paths (in the host's store) keyed by part. The build
+    roots as it goes -- --out-link gc-roots each part in the same command that
+    builds it (atomic, no window), so the closure survives the confirm wait +
+    activation without a separate rooting step."""
+    def build(part: str, installable: str) -> str:
+        link = f"{HOSTCTL_GCROOTS}/{host.attr}-{part}"
+        return host.capture("nix", "build", "-L", "--print-out-paths", "--out-link", link, installable)
     paths = {}  # part -> out path
     if "sys" in parts:
-        paths["sys"] = host.capture("nix", "build", "-L", "--print-out-paths", "--no-link", host.toplevel(host.flake))
+        paths["sys"] = build("sys", host.toplevel(host.flake))
     if "hm" in parts:
-        paths["hm"] = host.capture("nix", "build", "-L", "--print-out-paths", "--no-link", host.hm_pkg(host.flake))
+        paths["hm"] = build("hm", host.hm_pkg(host.flake))
     return paths
 
 
@@ -314,6 +341,26 @@ def switch_host(host: Host, parts: set[str], paths: dict[str, str]) -> None:
             host.run("sudo", f"{sys_path}/sw/bin/nixos-rebuild", "switch", "--no-reexec", "--store-path", sys_path)
     if "hm" in parts:
         host.run(f"{paths['hm']}/activate")
+
+
+def drop_gc_roots(hosts: list[Host]) -> None:
+    """Tear down the deploy-window roots build_local/build_remote made: rm -rf
+    HOSTCTL_GCROOTS on the local machine (the local host's own closure plus every
+    remote's source copy) and on each remote we rooted on. The activated profile
+    generation now roots the closure; the dangling auto entries are reclaimed by
+    the next GC. rm -rf, so it also sweeps up roots leaked by an earlier crashed
+    run on that machine. Best-effort -- a leak is harmless (the tmp cleaner reaps
+    it) and a cleanup error never masks the real failure. Not concurrency-safe
+    against a second hostctl sharing the dir, but a multi-host upgrade is one
+    process."""
+    subprocess.run(["rm", "-rf", HOSTCTL_GCROOTS])  # local store roots
+    for host in hosts:
+        if host.local:
+            continue
+        try:
+            host.run("rm", "-rf", HOSTCTL_GCROOTS)  # that remote's store roots
+        except Exception:
+            pass
 
 
 def git_url(attr: str) -> str:
@@ -341,7 +388,7 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         if host.attr in seen:
             continue
         seen.add(host.attr)
-        parts = {args.only} if args.only else {"sys", "hm"}
+        parts = {cast(str, args.only)} if args.only else {"sys", "hm"}
         if "hm" in parts and not flake_has("homeConfigurations", host.hm_key):
             parts.discard("hm")
         if not parts:
@@ -361,21 +408,34 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
     for host, parts in plan:
         bucket = here if builds_locally(host, args.build_on_host) else there
         bucket.append((host, parts))
+
+    # build_local / build_remote gc-root each closure the moment it lands on its
+    # target, so every path is protected through the confirm wait + activation
+    # (both prime GC windows) with no gap while the other closures build/copy.
     built = build_local(here)  # attr -> {part: store path}
     for host, parts in there:
-        built[host.attr] = build_remote(host, parts, build_on_host=args.build_on_host)
+        if not args.build_on_host and host.system != LOCAL_SYSTEM:
+            log(f"can't build {host.system} on this {LOCAL_SYSTEM} host; building on {host.name}")
+        built[host.attr] = build_remote(host, parts)
 
-    # Gate activation behind an explicit ack: the slow, sudo-free work (push,
-    # build, copy) is done, so from here the sudo prompt lands right after you
-    # confirm -- no auth going stale during a long build. --yes skips it.
-    if not args.yes:
-        summary = ", ".join(f"{h.attr} ({'+'.join(sorted(p))})" for h, p in plan)
-        if not confirm(f"activate {summary}?"):
-            log("aborted; nothing activated")
-            return
+    # Everything from here can leave deploy-window roots behind, so drop them in a
+    # finally -- on success, on abort, and on a failed switch. Cleanup is best-
+    # effort (a leak is harmless and the tmp cleaner reaps it), so a drop error
+    # never masks the real failure.
+    try:
+        # Gate activation behind an explicit ack: the slow, sudo-free work (push,
+        # build, copy) is done, so from here the sudo prompt lands right after you
+        # confirm -- no auth going stale during a long build. --yes skips it.
+        if not args.yes:
+            summary = ", ".join(f"{h.attr} ({'+'.join(sorted(p))})" for h, p in plan)
+            if not confirm(f"activate {summary}?"):
+                log("aborted; nothing activated")
+                return
 
-    for host, parts in plan:
-        switch_host(host, parts, built[host.attr])
+        for host, parts in plan:
+            switch_host(host, parts, built[host.attr])
+    finally:
+        drop_gc_roots([host for host, _ in plan])
 
 
 def clean_host(host: Host) -> None:
