@@ -14,6 +14,8 @@
 
 ## Packages
 
+- [x] Remove fake.nix things - only tmux/fake.nix existed; removed with the tmux wrapper
+- [x] Re-add less config - less/dev now ships to all NixOS hosts via base.nix systemPackages (deprioritized core less loses the collision). Beta (darwin) keeps its explicit entry.
 - [ ] Formalize wrapping/config generation system
   - Wrappers to configure programs, not dropping files onto system
   - Nix -> config via composable libraries (nix/external scripts), not opaque modules
@@ -21,8 +23,6 @@
   - Support: neovim, zsh, ghostty, git, direnv, etc.
   - Lightweight nix -> file format helpers (generalize ghostty format.nix pattern)
 - [ ] Understand what https://github.com/nix-systems/nix-systems is doing (dependency of flake-utils)
-- [x] Remove fake.nix things - only tmux/fake.nix existed; removed with the tmux wrapper
-- [x] Re-add less config - less/dev now ships to all NixOS hosts via base.nix systemPackages (deprioritized core less loses the collision). Beta (darwin) keeps its explicit entry.
 
 ## Neovim
 
@@ -35,7 +35,7 @@
 - [x] Flesh out utils.marks handler API - shipped simple bindable verbs (`toggle`/`delete`/`delete_line`/`delete_buf`/`set_next`/`next`/`prev`) instead of the planned `{ buf, line, names }` selector; bound marks.nvim-style (`m{a-zA-Z}`/`m]`/`m[`/`m,`/`dm*`) in `config/marks.lua`.
 - [x] Add a CLAUDE.md for pkgs/nvim
 - [x] Add :LspStop/:LspStart/:LspRestart commands - the new vim.lsp.config/enable API ships none (nvim-lspconfig provides them only when its plugin loads). Buffer-scoped, async (no blocking wait), `!` force-kills; approach adapted from nvim-lspconfig's new-API commands.
-- [ ] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
+- [x] Re-add CCLS (C) + rust_analyzer (Rust), if used - expands the closure size, and forces frequent rebuilds under nixpkgs-unstable
 - [ ] Add a flake check that the new package is sane
 - [ ] Upstream a Neovim "mark moved" event (e.g. `MarkUpdate`) - `MarkSet` only fires on add/remove/re-set, not when a mark's line *drifts* from edits (insert/delete lines, `:sort`). utils.marks papers over that with `nvim_buf_attach`/`on_lines` edit-tracking gated to structural changes. A native event when a mark's position changes would let utils.marks (and similar) drop that machinery and just re-derive on notification.
 
